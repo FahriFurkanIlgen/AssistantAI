@@ -1,0 +1,22 @@
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
+from app.config import settings
+
+
+async def init_db(app):
+    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    app.state.mongo_client = client
+
+    from app.models.business import Business
+    from app.models.appointment import Appointment
+    from app.models.customer import Customer
+    from app.models.conversation import Conversation
+
+    await init_beanie(
+        database=client[settings.MONGODB_DB_NAME],
+        document_models=[Business, Appointment, Customer, Conversation],
+    )
+
+
+async def close_db(app):
+    app.state.mongo_client.close()
