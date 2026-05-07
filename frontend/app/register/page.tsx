@@ -72,138 +72,140 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 to-white px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Assistant<span className="text-brand-600">AI</span>
-          </h1>
-          <p className="text-gray-500 mt-2">İşletmenizi kaydedin</p>
-        </div>
+    <div className="min-h-screen bg-apple-gray flex flex-col items-center justify-center px-4 py-12">
+      {/* Brand */}
+      <Link href="/" className="font-display font-semibold text-[21px] text-apple-ink tracking-tight mb-10">
+        AssistantAI
+      </Link>
 
-        <div className="card">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                İşletme Adı *
-              </label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                placeholder="Örn: Black Ink Tattoo"
-                className="input-field"
-              />
-            </div>
+      <div className="w-full max-w-[420px] bg-white rounded-apple-lg border border-apple-border p-8">
+        <h1 className="font-display font-semibold text-[24px] text-apple-ink tracking-tight mb-1">
+          İşletmenizi Kaydedin
+        </h1>
+        <p className="text-[15px] text-apple-secondary mb-7">
+          Ücretsiz hesap oluşturun, hemen başlayın.
+        </p>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL Adresi *{" "}
-                <span className="text-gray-400 font-normal text-xs">
-                  (assistantai.com/chat/<strong>{form.slug || "..."}</strong>)
-                </span>
-              </label>
-              <input
-                name="slug"
-                value={form.slug}
-                onChange={handleChange}
-                required
-                placeholder="black-ink-tattoo"
-                pattern="[a-z0-9-]+"
-                className="input-field"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              İşletme Adı <span className="text-apple-blue">*</span>
+            </label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              placeholder="Örn: Black Ink Tattoo"
+              className="input-field"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sektör *
-              </label>
-              <select
-                name="sector"
-                value={form.sector}
-                onChange={handleChange}
-                className="input-field"
-              >
-                {SECTORS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              URL Adresi <span className="text-apple-blue">*</span>{" "}
+              <span className="text-apple-secondary font-normal">
+                (/chat/<strong>{form.slug || "..."}</strong>)
+              </span>
+            </label>
+            <input
+              name="slug"
+              value={form.slug}
+              onChange={handleChange}
+              required
+              placeholder="black-ink-tattoo"
+              pattern="[a-z0-9-]+"
+              className="input-field"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-posta *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Şifre *
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                minLength={8}
-                className="input-field"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Şehir
-                </label>
-                <input
-                  name="city"
-                  value={form.city}
-                  onChange={handleChange}
-                  placeholder="İstanbul"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefon
-                </label>
-                <input
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="+90 5xx..."
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-3 text-base mt-2"
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              Sektör <span className="text-apple-blue">*</span>
+            </label>
+            <select
+              name="sector"
+              value={form.sector}
+              onChange={handleChange}
+              className="input-field"
             >
-              {loading ? "Kaydediliyor..." : "Kayıt Ol"}
-            </button>
-          </form>
+              {SECTORS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              E-posta <span className="text-apple-blue">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              Şifre <span className="text-apple-blue">*</span>
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              minLength={8}
+              className="input-field"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+                Şehir
+              </label>
+              <input
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                placeholder="İstanbul"
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+                Telefon
+              </label>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="+90 5xx..."
+                className="input-field"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full py-3 text-[15px] mt-2"
+          >
+            {loading ? "Kaydediliyor..." : "Devam Et"}
+          </button>
+        </form>
+
+        <div className="apple-divider mt-6 pt-5">
+          <p className="text-center text-[13px] text-apple-secondary">
             Zaten hesabınız var mı?{" "}
-            <Link
-              href="/login"
-              className="text-brand-600 hover:underline font-medium"
-            >
+            <Link href="/login" className="text-apple-blueLink hover:underline font-medium">
               Giriş Yap
             </Link>
           </p>

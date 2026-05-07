@@ -5,9 +5,9 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 
 const NAV = [
-  { href: "/dashboard", label: "Genel Bakış", icon: "📊" },
-  { href: "/dashboard/appointments", label: "Randevular", icon: "📅" },
-  { href: "/dashboard/settings", label: "Ayarlar", icon: "⚙️" },
+  { href: "/dashboard", label: "Genel Bakış" },
+  { href: "/dashboard/appointments", label: "Randevular" },
+  { href: "/dashboard/settings", label: "Ayarlar" },
 ];
 
 export default function DashboardLayout({
@@ -42,32 +42,33 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-apple-gray">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-5 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">
-            Assistant<span className="text-brand-600">AI</span>
-          </h1>
+      <aside className="w-60 bg-white border-r border-apple-border flex flex-col shrink-0">
+        {/* Brand */}
+        <div className="px-6 py-5 border-b border-apple-border">
+          <span className="font-display font-semibold text-[17px] text-apple-ink tracking-tight">
+            AssistantAI
+          </span>
           {businessName && (
-            <p className="text-sm text-gray-500 mt-1 truncate">
+            <p className="text-[12px] text-apple-secondary mt-0.5 truncate">
               {businessName}
             </p>
           )}
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center px-3 py-2 rounded-lg text-[14px] font-medium transition-colors ${
                 pathname === item.href
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-apple-gray text-apple-ink"
+                  : "text-apple-secondary hover:bg-apple-gray hover:text-apple-ink"
               }`}
             >
-              <span>{item.icon}</span>
               {item.label}
             </Link>
           ))}
@@ -75,25 +76,26 @@ export default function DashboardLayout({
 
         {/* Chat link */}
         {slug && (
-          <div className="p-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 mb-2">Müşteri chat linkiniz:</p>
+          <div className="px-6 py-4 border-t border-apple-border">
+            <p className="text-[11px] text-apple-secondary mb-1.5">Müşteri linki</p>
             <a
               href={`/chat/${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-brand-600 hover:underline break-all"
+              className="text-[12px] text-apple-blueLink hover:underline break-all"
             >
               /chat/{slug}
             </a>
           </div>
         )}
 
-        <div className="p-4 border-t border-gray-200">
+        {/* Logout */}
+        <div className="px-6 py-4 border-t border-apple-border">
           <button
             onClick={logout}
-            className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+            className="text-[13px] text-apple-secondary hover:text-red-500 transition-colors"
           >
-            🚪 Çıkış Yap
+            Çıkış Yap
           </button>
         </div>
       </aside>

@@ -6,22 +6,57 @@
   * {
     box-sizing: border-box;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-white text-apple-ink;
+    font-family: "SF Pro Text", "SF Pro Icons", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "SF Pro Display", "SF Pro Icons", "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
+  /* Apple primary action button — blue pill */
   .btn-primary {
-    @apply bg-brand-600 hover:bg-brand-700 text-white font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center bg-apple-blue hover:bg-apple-blueLink text-white font-medium px-5 py-2.5 rounded-pill text-sm transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+    letter-spacing: -0.01em;
   }
+
+  /* Apple secondary — dark fill */
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg border border-gray-300 transition-colors;
+    @apply inline-flex items-center justify-center bg-apple-ink hover:bg-apple-utility text-white font-medium px-5 py-2.5 rounded-pill text-sm transition-colors duration-150;
+    letter-spacing: -0.01em;
   }
+
+  /* Ghost / outline variant */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center bg-transparent text-apple-blue hover:text-apple-blueLink font-medium text-sm transition-colors duration-150;
+  }
+
+  /* Apple-style input */
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm;
+    @apply w-full px-3.5 py-2.5 bg-white border border-apple-border2 rounded-xl text-apple-ink text-sm placeholder-apple-secondary transition-colors duration-150;
+    @apply focus:outline-none focus:border-apple-blue focus:ring-1 focus:ring-apple-blue/30;
+    letter-spacing: -0.01em;
   }
+
+  /* Apple card — light surface */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-apple border border-apple-border p-6;
+  }
+
+  /* Apple card — pale gray surface */
+  .card-gray {
+    @apply bg-apple-gray rounded-apple p-6;
+  }
+
+  /* Apple section divider */
+  .apple-divider {
+    @apply border-t border-apple-border;
   }
 }

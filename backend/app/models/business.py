@@ -57,6 +57,9 @@ class Business(Document):
     # Appointment duration default (minutes)
     default_appointment_duration: int = 60
 
+    # Social media
+    instagram_handle: Optional[str] = None  # e.g. "blackinktattoo" (without @)
+
     # Google Calendar
     google_calendar_id: Optional[str] = None
     google_refresh_token: Optional[str] = None

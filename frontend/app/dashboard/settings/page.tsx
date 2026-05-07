@@ -22,6 +22,7 @@ export default function SettingsPage() {
     phone: "",
     address: "",
     city: "",
+    instagram_handle: "",
   });
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function SettingsPage() {
         phone: p.phone || "",
         address: p.address || "",
         city: p.city || "",
+        instagram_handle: p.instagram_handle || "",
       });
     });
   }, []);
@@ -230,6 +232,40 @@ export default function SettingsPage() {
             onChange={(e) => setForm({ ...form, address: e.target.value })}
             className="input-field"
           />
+        </div>
+      </div>
+
+      {/* Instagram Portfolio */}
+      <div className="card mb-6 space-y-4">
+        <h3 className="font-semibold text-gray-900">📷 Instagram Portfolyo</h3>
+        <p className="text-sm text-gray-500">
+          Instagram hesabınız public olmalıdır. AI asistan, müşterilere stil sorarken bu hesaptaki örnekleri referans olarak gösterir.
+        </p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Instagram Kullanıcı Adı
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-sm font-medium">@</span>
+            <input
+              value={form.instagram_handle}
+              onChange={(e) =>
+                setForm({ ...form, instagram_handle: e.target.value.replace("@", "") })
+              }
+              placeholder="blackinktattoo"
+              className="input-field"
+            />
+          </div>
+          {form.instagram_handle && (
+            <a
+              href={`https://www.instagram.com/${form.instagram_handle}/`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs text-brand-600 hover:underline mt-1 inline-block"
+            >
+              instagram.com/{form.instagram_handle} ↗
+            </a>
+          )}
         </div>
       </div>
 

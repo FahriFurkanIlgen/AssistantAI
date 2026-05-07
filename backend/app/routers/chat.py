@@ -13,6 +13,7 @@ from app.models.business import Business
 from app.models.conversation import Conversation, Message
 from app.services.ai_service import AIService
 from app.services.appointment_service import AppointmentService
+from app.services.vision_service import is_instagram_url, extract_og_image, fetch_instagram_portfolio
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -21,6 +22,8 @@ class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
     language: Optional[str] = "tr"
+    image_base64: Optional[str] = None   # data:image/...;base64,... (file upload)
+    image_url: Optional[str] = None      # Instagram post URL or direct image URL
 
 
 class ChatResponse(BaseModel):
@@ -55,11 +58,22 @@ async def chat(business_slug: str, request: ChatRequest):
     appt_service = AppointmentService(business)
     ai_service = AIService(business, appt_service.execute_tool)
 
+    # Resolve image: Instagram link → extract og:image; base64 → use as-is
+    resolved_image: Optional[str] = None
+    if request.image_base64:
+        resolved_image = request.image_base64
+    elif request.image_url:
+        if is_instagram_url(request.image_url):
+            resolved_image = await extract_og_image(request.image_url)
+        else:
+            resolved_image = request.image_url
+
     # Process message
     reply = await ai_service.process_message(
         conversation=conversation,
         user_message=request.message,
         language=request.language or conversation.language,
+        image=resolved_image,
     )
 
     return ChatResponse(
@@ -86,4 +100,24 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
         "persona_name": business.ai_persona_name,
         "welcome_message": message,
         "sector": business.sector,
+        "instagram_handle": business.instagram_handle,
+    }
+
+
+@router.get("/{business_slug}/portfolio")
+async def get_portfolio(business_slug: str):
+    """Return Instagram portfolio posts for the business."""
+    business = await Business.find_one(Business.slug == business_slug, Business.is_active == True)
+    if not business:
+        raise HTTPException(status_code=404, detail="İşletme bulunamadı")
+
+    if not business.instagram_handle:
+        return {"instagram_handle": None, "posts": [], "instagram_url": None}
+
+    handle = business.instagram_handle.lstrip("@")
+    posts = await fetch_instagram_portfolio(handle)
+    return {
+        "instagram_handle": handle,
+        "instagram_url": f"https://www.instagram.com/{handle}/",
+        "posts": posts,
     }

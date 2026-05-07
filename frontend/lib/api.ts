@@ -72,12 +72,16 @@ export const api = {
     message: string,
     sessionId?: string,
     language?: string,
+    imageBase64?: string,
+    imageUrl?: string,
   ) =>
     (
       await axiosInstance.post(`/api/chat/${businessSlug}`, {
         message,
         session_id: sessionId,
         language: language || "tr",
+        image_base64: imageBase64,
+        image_url: imageUrl,
       })
     ).data,
 
@@ -87,6 +91,9 @@ export const api = {
         params: { lang },
       })
     ).data,
+
+  getPortfolio: async (businessSlug: string) =>
+    (await axiosInstance.get(`/api/chat/${businessSlug}/portfolio`)).data,
 
   // Google Calendar
   connectGoogle: async () =>

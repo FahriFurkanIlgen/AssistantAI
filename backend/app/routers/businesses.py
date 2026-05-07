@@ -22,6 +22,7 @@ class UpdateBusinessRequest(BaseModel):
     ai_welcome_message_en: Optional[str] = None
     custom_ai_instructions: Optional[str] = None
     default_appointment_duration: Optional[int] = None
+    instagram_handle: Optional[str] = None
     services: Optional[List[ServiceItem]] = None
     working_schedule: Optional[WorkingSchedule] = None
 
@@ -44,6 +45,7 @@ async def get_profile(current_business: Business = Depends(get_current_user)):
         "services": [s.model_dump() for s in current_business.services],
         "working_schedule": current_business.working_schedule.model_dump(),
         "default_appointment_duration": current_business.default_appointment_duration,
+        "instagram_handle": current_business.instagram_handle,
         "google_connected": current_business.google_refresh_token is not None,
     }
 

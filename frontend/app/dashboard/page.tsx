@@ -44,20 +44,17 @@ export default function DashboardPage() {
     {
       label: "Bugünkü Randevular",
       value: todayCount,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-apple-blue",
     },
     {
       label: "Yaklaşan Randevular",
       value: upcomingCount,
-      color: "text-green-600",
-      bg: "bg-green-50",
+      color: "text-apple-ink",
     },
     {
       label: "Google Takvim",
-      value: profile?.google_connected ? "Bağlı ✅" : "Bağlı Değil ❌",
-      color: profile?.google_connected ? "text-green-600" : "text-red-500",
-      bg: profile?.google_connected ? "bg-green-50" : "bg-red-50",
+      value: profile?.google_connected ? "Bağlı" : "Bağlı Değil",
+      color: profile?.google_connected ? "text-apple-blue" : "text-apple-secondary",
     },
   ];
 
@@ -68,57 +65,61 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   return (
-    <div className="p-8">
+    <div className="p-8 max-w-[900px]">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Hoş geldiniz{profile?.name ? `, ${profile.name}` : ""} 👋
+        <h2 className="font-display font-semibold text-[28px] text-apple-ink tracking-tight">
+          {profile?.name ? profile.name : "Dashboard"}
         </h2>
-        <p className="text-gray-500 mt-1">İşletmenizin özet görünümü</p>
+        <p className="text-[15px] text-apple-secondary mt-1">İşletmenizin özet görünümü</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {stats.map((s) => (
-          <div key={s.label} className={`card ${s.bg}`}>
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+          <div key={s.label} className="bg-white border border-apple-border rounded-apple p-6">
+            <p className="text-[13px] text-apple-secondary">{s.label}</p>
+            <p className={`text-[32px] font-display font-semibold mt-1 tracking-tight ${s.color}`}>
+              {s.value}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Upcoming appointments */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">Yaklaşan Randevular</h3>
+      <div className="bg-white border border-apple-border rounded-apple p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-display font-semibold text-[17px] text-apple-ink tracking-tight">
+            Yaklaşan Randevular
+          </h3>
           <Link
             href="/dashboard/appointments"
-            className="text-sm text-brand-600 hover:underline"
+            className="text-[13px] text-apple-blueLink hover:underline"
           >
-            Tümünü gör →
+            Tümünü gör
           </Link>
         </div>
         {nextAppts.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">
+          <p className="text-[14px] text-apple-secondary text-center py-10">
             Henüz yaklaşan randevu yok.
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-apple-border">
             {nextAppts.map((a) => (
               <div
                 key={a.id}
-                className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg border border-gray-100"
+                className="flex items-center justify-between py-3.5"
               >
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">
+                  <p className="font-medium text-apple-ink text-[14px]">
                     {a.customer_name}
                   </p>
-                  <p className="text-xs text-gray-500">{a.service_name}</p>
+                  <p className="text-[12px] text-apple-secondary mt-0.5">{a.service_name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-700">
+                  <p className="text-[13px] font-medium text-apple-ink">
                     {new Date(a.start_time).toLocaleDateString("tr-TR")}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-[12px] text-apple-secondary mt-0.5">
                     {new Date(a.start_time).toLocaleTimeString("tr-TR", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -131,15 +132,19 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Quick links */}
+      {/* Google Calendar warning */}
       {!profile?.google_connected && (
-        <div className="mt-5 card bg-amber-50 border-amber-200">
-          <p className="text-sm font-medium text-amber-800">
-            💡 Google Takvim bağlamadınız. Randevular takvime otomatik eklensin.{" "}
-            <Link href="/dashboard/settings" className="underline">
-              Şimdi Bağla →
-            </Link>
-          </p>
+        <div className="mt-4 bg-white border border-apple-border rounded-apple px-6 py-4 flex items-center gap-4">
+          <div className="w-8 h-8 bg-apple-gray rounded-full flex items-center justify-center text-[16px] shrink-0">
+            📅
+          </div>
+          <div className="flex-1">
+            <p className="text-[14px] text-apple-ink font-medium">Google Takvim bağlı değil</p>
+            <p className="text-[12px] text-apple-secondary">Randevular otomatik takvime eklensin.</p>
+          </div>
+          <Link href="/dashboard/settings" className="text-[13px] text-apple-blueLink hover:underline shrink-0">
+            Bağla
+          </Link>
         </div>
       )}
     </div>

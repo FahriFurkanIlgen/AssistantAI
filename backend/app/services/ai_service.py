@@ -198,6 +198,23 @@ class AIService:
             "Tarih/saat bilgisi alırken bu bilgiyi kullan."
         )
 
+        # Vision instruction
+        base_prompt += (
+            "\n\nEğer kullanıcı bir görsel paylaşırsa, görseli analiz et ve stil/model önerisi yap. "
+            "Dövme stüdyosu için: stil (geometrik, realism, minimalist, blackwork, watercolor vb.) ve uygun beden bölgesi öner. "
+            "Güzellik merkezi için: renk paleti, saç stili veya makyaj önerisi yap."
+        )
+
+        # Instagram portfolio context
+        if self.business.instagram_handle:
+            handle = self.business.instagram_handle.lstrip("@")
+            base_prompt += (
+                f"\n\nİşletmenin Instagram portfolyosu: @{handle} "
+                f"(https://www.instagram.com/{handle}/). "
+                "Müşteriler stil veya örnek sorduktan sonra bu hesabı ziyaret etmelerini öner. "
+                "Chat üzerinden portfolyo görsellerini de gösterebilirsin."
+            )
+
         return base_prompt
 
     async def process_message(
@@ -205,22 +222,33 @@ class AIService:
         conversation: Conversation,
         user_message: str,
         language: str = "tr",
+        image: Optional[str] = None,
     ) -> str:
         """Process a user message and return the assistant's response."""
-        # Add user message to history
+        # Add user message to history (plain text only for persistence)
         conversation.messages.append(
             Message(role="user", content=user_message)
         )
 
         # Build messages for OpenAI
         messages = [{"role": "system", "content": self._build_system_prompt(language)}]
-        for msg in conversation.messages:
+        for msg in conversation.messages[:-1]:
             entry: dict = {"role": msg.role, "content": msg.content}
             if msg.tool_call_id:
                 entry["tool_call_id"] = msg.tool_call_id
             if msg.tool_calls:
                 entry["tool_calls"] = msg.tool_calls
             messages.append(entry)
+
+        # Build the current user message — with optional vision content
+        if image:
+            user_content: list | str = [
+                {"type": "text", "text": user_message},
+                {"type": "image_url", "image_url": {"url": image, "detail": "auto"}},
+            ]
+        else:
+            user_content = user_message
+        messages.append({"role": "user", "content": user_content})
 
         # Agentic loop – keep calling until no more tool calls
         while True:

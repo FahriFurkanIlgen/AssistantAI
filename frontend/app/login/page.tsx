@@ -29,56 +29,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 to-white px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Assistant<span className="text-brand-600">AI</span>
-          </h1>
-          <p className="text-gray-500 mt-2">Hesabınıza giriş yapın</p>
-        </div>
+    <div className="min-h-screen bg-apple-gray flex flex-col items-center justify-center px-4">
+      {/* Brand */}
+      <Link href="/" className="font-display font-semibold text-[21px] text-apple-ink tracking-tight mb-10">
+        AssistantAI
+      </Link>
 
-        <div className="card">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-posta
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-                className="input-field"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Şifre
-              </label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-                className="input-field"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-3 text-base"
-            >
-              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-            </button>
-          </form>
+      <div className="w-full max-w-[380px] bg-white rounded-apple-lg border border-apple-border p-8">
+        <h1 className="font-display font-semibold text-[24px] text-apple-ink tracking-tight mb-1">
+          Giriş Yap
+        </h1>
+        <p className="text-[15px] text-apple-secondary mb-7">
+          Hesabınıza erişin
+        </p>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              E-posta
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+              placeholder="ornek@sirket.com"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
+              Şifre
+            </label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+              className="input-field"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full py-3 text-[15px] mt-2"
+          >
+            {loading ? "Giriş yapılıyor..." : "Devam Et"}
+          </button>
+        </form>
+
+        <div className="apple-divider mt-6 pt-5">
+          <p className="text-center text-[13px] text-apple-secondary">
             Hesabınız yok mu?{" "}
-            <Link
-              href="/register"
-              className="text-brand-600 hover:underline font-medium"
-            >
+            <Link href="/register" className="text-apple-blueLink hover:underline font-medium">
               Kayıt Ol
             </Link>
           </p>
