@@ -11,10 +11,12 @@ async def init_db(app):
     from app.models.appointment import Appointment
     from app.models.customer import Customer
     from app.models.conversation import Conversation
+    from app.models.otp_code import OtpCode
+    from app.models.staff_member import StaffMember
 
     await init_beanie(
         database=client[settings.MONGODB_DB_NAME],
-        document_models=[Business, Appointment, Customer, Conversation],
+        document_models=[Business, Appointment, Customer, Conversation, OtpCode, StaffMember],
     )
 
 

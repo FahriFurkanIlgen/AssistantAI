@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.core.database import init_db, close_db
-from app.routers import chat, auth, appointments, businesses, calendar
+from app.routers import chat, auth, appointments, businesses, calendar, staff
 
 
 @asynccontextmanager
@@ -35,6 +35,7 @@ app.include_router(chat.router)
 app.include_router(appointments.router)
 app.include_router(businesses.router)
 app.include_router(calendar.router)
+app.include_router(staff.router)
 
 
 @app.get("/health")

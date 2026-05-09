@@ -23,6 +23,10 @@ class Appointment(Document):
     # Status: pending | confirmed | cancelled | completed
     status: str = "confirmed"
 
+    # Assigned staff member (optional)
+    staff_id: Optional[str] = None
+    staff_name: Optional[str] = None
+
     # Google Calendar event ID
     google_event_id: Optional[str] = None
 

@@ -58,13 +58,14 @@ def exchange_code_for_tokens(code: str) -> dict:
     }
 
 
-def _build_credentials(business: Business) -> Optional[Credentials]:
-    if not business.google_refresh_token:
+def _build_credentials(holder) -> Optional[Credentials]:
+    """Build Google credentials from any object with google_refresh_token field."""
+    if not holder.google_refresh_token:
         return None
 
     creds = Credentials(
-        token=business.google_access_token,
-        refresh_token=business.google_refresh_token,
+        token=holder.google_access_token,
+        refresh_token=holder.google_refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=settings.GOOGLE_CLIENT_ID,
         client_secret=settings.GOOGLE_CLIENT_SECRET,
@@ -78,8 +79,9 @@ def _build_credentials(business: Business) -> Optional[Credentials]:
 
 
 class CalendarService:
-    def __init__(self, business: Business):
-        self.business = business
+    def __init__(self, holder):
+        """holder can be a Business or StaffMember — any object with Google Calendar fields."""
+        self.business = holder  # kept as 'business' attr for internal compatibility
         self._service = None
 
     def _get_service(self):
@@ -96,10 +98,10 @@ class CalendarService:
     def get_busy_slots(self, date: str) -> List[dict]:
         """Return busy time blocks for a given date (YYYY-MM-DD)."""
         service = self._get_service()
-        tz = pytz.UTC
+        tz_istanbul = pytz.timezone("Europe/Istanbul")
 
-        day_start = datetime.strptime(date, "%Y-%m-%d").replace(
-            hour=0, minute=0, second=0, tzinfo=tz
+        day_start = tz_istanbul.localize(
+            datetime.strptime(date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
         )
         day_end = day_start + timedelta(days=1)
 
@@ -156,11 +158,11 @@ class CalendarService:
         except Exception:
             busy = []
 
-        tz = pytz.UTC
+        tz_istanbul = pytz.timezone("Europe/Istanbul")
         busy_ranges = []
         for b in busy:
-            bs = datetime.fromisoformat(b["start"].replace("Z", "+00:00")).astimezone(tz)
-            be = datetime.fromisoformat(b["end"].replace("Z", "+00:00")).astimezone(tz)
+            bs = datetime.fromisoformat(b["start"].replace("Z", "+00:00")).astimezone(tz_istanbul)
+            be = datetime.fromisoformat(b["end"].replace("Z", "+00:00")).astimezone(tz_istanbul)
             busy_ranges.append((bs.replace(tzinfo=None), be.replace(tzinfo=None)))
 
         available = []
@@ -194,11 +196,11 @@ class CalendarService:
             "description": description or "",
             "start": {
                 "dateTime": start_dt.isoformat(),
-                "timeZone": "UTC",
+                "timeZone": "Europe/Istanbul",
             },
             "end": {
                 "dateTime": end_dt.isoformat(),
-                "timeZone": "UTC",
+                "timeZone": "Europe/Istanbul",
             },
             "reminders": {
                 "useDefault": False,

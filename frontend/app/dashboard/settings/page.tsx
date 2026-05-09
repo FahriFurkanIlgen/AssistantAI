@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
+import { QRCodeSVG } from "qrcode.react";
 
 const SECTORS = [
   { value: "tattoo", label: "🎨 Dövme Stüdyosu" },
@@ -239,7 +240,8 @@ export default function SettingsPage() {
       <div className="card mb-6 space-y-4">
         <h3 className="font-semibold text-gray-900">📷 Instagram Portfolyo</h3>
         <p className="text-sm text-gray-500">
-          Instagram hesabınız public olmalıdır. AI asistan, müşterilere stil sorarken bu hesaptaki örnekleri referans olarak gösterir.
+          Instagram hesabınız public olmalıdır. AI asistan, müşterilere stil
+          sorarken bu hesaptaki örnekleri referans olarak gösterir.
         </p>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -250,7 +252,10 @@ export default function SettingsPage() {
             <input
               value={form.instagram_handle}
               onChange={(e) =>
-                setForm({ ...form, instagram_handle: e.target.value.replace("@", "") })
+                setForm({
+                  ...form,
+                  instagram_handle: e.target.value.replace("@", ""),
+                })
               }
               placeholder="blackinktattoo"
               className="input-field"
@@ -269,7 +274,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Chat link */}
+      {/* Chat link + QR */}
       <div className="card mb-6 bg-brand-50 border-brand-200">
         <h3 className="font-semibold text-gray-900 mb-2">
           🔗 Müşteri Chat Linkiniz
@@ -281,6 +286,78 @@ export default function SettingsPage() {
           {typeof window !== "undefined" ? window.location.origin : ""}/chat/
           {profile.slug}
         </code>
+
+        {/* QR Code */}
+        {typeof window !== "undefined" &&
+          (() => {
+            const chatUrl = `${window.location.origin}/chat/${profile.slug}`;
+            return (
+              <div className="mt-5 flex flex-col items-center gap-3">
+                <QRCodeSVG
+                  id="chat-qr-code"
+                  value={chatUrl}
+                  size={160}
+                  bgColor="#ffffff"
+                  fgColor="#1d1d1f"
+                  level="M"
+                  style={{ borderRadius: 8, padding: 8, background: "#fff" }}
+                />
+                <p className="text-xs text-gray-500">
+                  QR kodu taratarak sohbete ulaşabilirler
+                </p>
+                <button
+                  onClick={() => {
+                    const svg = document.getElementById("chat-qr-code");
+                    if (!svg) return;
+                    const data = new XMLSerializer().serializeToString(svg);
+                    const canvas = document.createElement("canvas");
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext("2d");
+                    const img = new Image();
+                    img.onload = () => {
+                      ctx!.drawImage(img, 0, 0, 256, 256);
+                      const a = document.createElement("a");
+                      a.href = canvas.toDataURL("image/png");
+                      a.download = `qr-${profile.slug}.png`;
+                      a.click();
+                    };
+                    img.src =
+                      "data:image/svg+xml;base64," +
+                      btoa(unescape(encodeURIComponent(data)));
+                  }}
+                  className="text-xs text-brand-600 hover:underline"
+                >
+                  PNG olarak indir ↓
+                </button>
+              </div>
+            );
+          })()}
+      </div>
+
+      {/* OTP Email Info */}
+      <div className="card mb-6 border-yellow-200 bg-yellow-50">
+        <h3 className="font-semibold text-gray-900 mb-2">
+          ✉️ Randevu İptal OTP E-postası
+        </h3>
+        <p className="text-sm text-gray-600 mb-2">
+          Müşteriler chatbot üzerinden randevu iptali istediğinde, kayıtlı
+          e-postalarına 6 haneli doğrulama kodu gönderilir.
+        </p>
+        <p className="text-sm text-gray-500">
+          SMTP ayarları (host, kullanıcı adı, şifre) sunucudaki{" "}
+          <code className="font-mono bg-white px-1 rounded border">.env</code>{" "}
+          dosyasından yapılandırılır. Gmail kullanıyorsanız{" "}
+          <strong>App Password</strong> oluşturup{" "}
+          <code className="font-mono bg-white px-1 rounded border">
+            SMTP_USER
+          </code>{" "}
+          ve{" "}
+          <code className="font-mono bg-white px-1 rounded border">
+            SMTP_PASSWORD
+          </code>{" "}
+          alanlarına ekleyin.
+        </p>
       </div>
 
       <button

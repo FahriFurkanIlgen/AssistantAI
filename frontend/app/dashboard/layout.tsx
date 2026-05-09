@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 const NAV = [
   { href: "/dashboard", label: "Genel Bakış" },
   { href: "/dashboard/appointments", label: "Randevular" },
+  { href: "/dashboard/services", label: "Hizmetler" },
+  { href: "/dashboard/customers", label: "Müşteriler" },
   { href: "/dashboard/settings", label: "Ayarlar" },
 ];
 
@@ -77,7 +79,9 @@ export default function DashboardLayout({
         {/* Chat link */}
         {slug && (
           <div className="px-6 py-4 border-t border-apple-border">
-            <p className="text-[11px] text-apple-secondary mb-1.5">Müşteri linki</p>
+            <p className="text-[11px] text-apple-secondary mb-1.5">
+              Müşteri linki
+            </p>
             <a
               href={`/chat/${slug}`}
               target="_blank"

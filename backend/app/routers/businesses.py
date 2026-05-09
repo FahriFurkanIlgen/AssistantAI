@@ -75,4 +75,6 @@ async def get_public_profile(slug: str):
         "city": business.city,
         "services": [s.model_dump() for s in business.services],
         "ai_persona_name": business.ai_persona_name,
+        "working_schedule": business.working_schedule.model_dump() if business.working_schedule else None,
+        "instagram_handle": business.instagram_handle,
     }

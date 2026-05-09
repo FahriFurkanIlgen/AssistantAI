@@ -150,6 +150,14 @@ APPOINTMENT_TOOLS = [
                         "type": "string",
                         "description": "Any additional notes or special requests from the customer",
                     },
+                    "staff_id": {
+                        "type": "string",
+                        "description": "ID of the staff member to book with (optional, from get_staff_list)",
+                    },
+                    "staff_name": {
+                        "type": "string",
+                        "description": "Name of the staff member to book with (optional, for display)",
+                    },
                 },
                 "required": ["customer_name", "customer_phone", "service_name", "start_datetime"],
             },
@@ -160,6 +168,68 @@ APPOINTMENT_TOOLS = [
         "function": {
             "name": "get_services",
             "description": "Get the list of available services offered by the business.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "request_cancel_otp",
+            "description": (
+                "When a customer wants to cancel their appointment, look it up by phone number "
+                "and send a 6-digit OTP code to their email address. "
+                "Call this ONLY after confirming the customer's phone number."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "customer_phone": {
+                        "type": "string",
+                        "description": "Phone number of the customer whose appointment should be found",
+                    },
+                },
+                "required": ["customer_phone"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "confirm_cancel_appointment",
+            "description": (
+                "Verify the OTP code entered by the customer and cancel the appointment. "
+                "Call this after the customer provides the 6-digit code."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "appointment_id": {
+                        "type": "string",
+                        "description": "ID of the appointment to cancel (returned by request_cancel_otp)",
+                    },
+                    "otp_code": {
+                        "type": "string",
+                        "description": "6-digit OTP code entered by the customer",
+                    },
+                },
+                "required": ["appointment_id", "otp_code"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_staff_list",
+            "description": (
+                "Get the list of active staff members (employees) of the business, "
+                "along with the services each one offers. "
+                "Call this when the business has multiple staff members and the customer "
+                "needs to choose who to book with."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -203,6 +273,33 @@ class AIService:
             "\n\nEğer kullanıcı bir görsel paylaşırsa, görseli analiz et ve stil/model önerisi yap. "
             "Dövme stüdyosu için: stil (geometrik, realism, minimalist, blackwork, watercolor vb.) ve uygun beden bölgesi öner. "
             "Güzellik merkezi için: renk paleti, saç stili veya makyaj önerisi yap."
+        )
+
+        # Cancellation OTP flow instruction
+        base_prompt += (
+            "\n\nRANDEVU İPTAL AKIŞI: Müşteri randevusunu iptal etmek istediğinde:\n"
+            "1. Müşterinin telefon numarasını sor.\n"
+            "2. `request_cancel_otp` aracını çağır — sistem OTP kodunu müşterinin e-postasına gönderecek ve randevu bilgilerini döndürecek.\n"
+            "3. Müşteriden e-postasına gelen 6 haneli kodu girmesini iste.\n"
+            "4. `confirm_cancel_appointment` aracını çağır — kod doğruysa randevu iptal edilir.\n"
+            "E-posta adresi yoksa müşteriye bildirip işletmeyle iletişime geçmelerini söyle."
+        )
+
+        # Returning customer context
+        base_prompt += (
+            "\n\nTEKRAR MÜŞTERI: Müşteri sana telefon numarasını söylediğinde, randevu oluşturma sırasında "
+            "aynı numaranın daha önce kullanılıp kullanılmadığına bakabilirsin. Eğer daha önce randevu oluşturduysa, "
+            "adını zaten biliyorsundur — 'Tekrar hoş geldiniz [isim]!' şeklinde karşıla ve "
+            "yeniden isim sormana gerek yok."
+        )
+
+        # Staff selection context (async staff check happens at runtime via get_staff_list tool)
+        base_prompt += (
+            "\n\nPERSONEL SEÇİMİ: Eğer işletmenin birden fazla çalışanı varsa, "
+            "müşteri randevu almak istediğinde `get_staff_list` aracını çağırarak aktif personelleri listele. "
+            "Personel listesi boş değilse müşteriye hangi personelle randevu almak istediğini sor. "
+            "Müşteri tercih belirtmezse 'herhangi biri' seçeneğini sun ve staff_id olmadan randevu oluştur. "
+            "Personel seçildikten sonra `check_availability` aracını o personelin staff_id'si ile çağır."
         )
 
         # Instagram portfolio context

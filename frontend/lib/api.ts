@@ -63,8 +63,15 @@ export const api = {
     status?: string;
   }) => (await axiosInstance.get("/api/appointments/", { params })).data,
 
+  getAppointmentStats: async () =>
+    (await axiosInstance.get("/api/appointments/stats")).data,
+
   cancelAppointment: async (id: string) =>
     (await axiosInstance.delete(`/api/appointments/${id}`)).data,
+
+  updateAppointmentStatus: async (id: string, status: string) =>
+    (await axiosInstance.patch(`/api/appointments/${id}/status`, { status }))
+      .data,
 
   // Chat
   sendMessage: async (
@@ -95,12 +102,55 @@ export const api = {
   getPortfolio: async (businessSlug: string) =>
     (await axiosInstance.get(`/api/chat/${businessSlug}/portfolio`)).data,
 
+  getPublicBusiness: async (slug: string) =>
+    (await axiosInstance.get(`/api/business/public/${slug}`)).data,
+
   // Google Calendar
   connectGoogle: async () =>
     (await axiosInstance.get("/api/calendar/connect")).data,
 
   disconnectGoogle: async () =>
     (await axiosInstance.delete("/api/calendar/disconnect")).data,
+
+  // Staff
+  getStaff: async () =>
+    (await axiosInstance.get("/api/staff/")).data,
+
+  createStaff: async (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    bio?: string;
+    service_names?: string[];
+    working_schedule?: Record<string, unknown>;
+  }) => (await axiosInstance.post("/api/staff/", data)).data,
+
+  updateStaff: async (
+    id: string,
+    data: {
+      name?: string;
+      phone?: string;
+      bio?: string;
+      service_names?: string[];
+      is_active?: boolean;
+    },
+  ) => (await axiosInstance.patch(`/api/staff/${id}`, data)).data,
+
+  deactivateStaff: async (id: string) =>
+    (await axiosInstance.delete(`/api/staff/${id}`)).data,
+
+  updateStaffSchedule: async (id: string, schedule: Record<string, unknown>) =>
+    (await axiosInstance.patch(`/api/staff/${id}/schedule`, schedule)).data,
+
+  connectStaffGoogle: async (staffId: string) =>
+    (await axiosInstance.get(`/api/staff/${staffId}/calendar/connect`)).data,
+
+  disconnectStaffGoogle: async (staffId: string) =>
+    (await axiosInstance.delete(`/api/staff/${staffId}/calendar`)).data,
+
+  staffLogin: async (email: string, password: string) =>
+    (await axiosInstance.post("/api/auth/staff/login", { email, password })).data,
 };
 
 export default axiosInstance;

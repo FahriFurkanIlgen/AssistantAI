@@ -7,8 +7,9 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 from app.models.business import Business
+from app.models.staff_member import StaffMember
 from app.core.security import hash_password, verify_password
-from app.core.auth import create_access_token, get_current_user
+from app.core.auth import create_access_token, get_current_user, get_current_staff
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -31,6 +32,14 @@ class TokenResponse(BaseModel):
     slug: str
 
 
+class StaffTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    staff_id: str
+    staff_name: str
+    business_id: str
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(req: RegisterRequest):
     # Check unique email
@@ -51,7 +60,7 @@ async def register(req: RegisterRequest):
     )
     await business.insert()
 
-    token = create_access_token({"sub": str(business.id)})
+    token = create_access_token({"sub": str(business.id), "type": "business"})
     return TokenResponse(
         access_token=token,
         business_id=str(business.id),
@@ -70,7 +79,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = create_access_token({"sub": str(business.id)})
+    token = create_access_token({"sub": str(business.id), "type": "business"})
     return TokenResponse(
         access_token=token,
         business_id=str(business.id),
@@ -88,4 +97,49 @@ async def me(current_business: Business = Depends(get_current_user)):
         "email": current_business.email,
         "sector": current_business.sector,
         "google_connected": current_business.google_refresh_token is not None,
+    }
+
+
+# ── Staff auth endpoints ─────────────────────────────────────────────────────
+
+class StaffLoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+@router.post("/staff/login", response_model=StaffTokenResponse)
+async def staff_login(req: StaffLoginRequest):
+    staff = await StaffMember.find_one(StaffMember.email == req.email)
+    if not staff or not verify_password(req.password, staff.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="E-posta veya şifre hatalı",
+        )
+    if not staff.is_active:
+        raise HTTPException(status_code=403, detail="Hesabınız devre dışı bırakılmış")
+
+    token = create_access_token(
+        {"sub": str(staff.id), "type": "staff", "business_id": staff.business_id}
+    )
+    return StaffTokenResponse(
+        access_token=token,
+        staff_id=str(staff.id),
+        staff_name=staff.name,
+        business_id=staff.business_id,
+    )
+
+
+@router.get("/staff/me")
+async def staff_me(current_staff: StaffMember = Depends(get_current_staff)):
+    return {
+        "id": str(current_staff.id),
+        "name": current_staff.name,
+        "email": current_staff.email,
+        "phone": current_staff.phone,
+        "bio": current_staff.bio,
+        "business_id": current_staff.business_id,
+        "service_names": current_staff.service_names,
+        "working_schedule": current_staff.working_schedule.model_dump(),
+        "google_connected": current_staff.google_refresh_token is not None,
+        "is_active": current_staff.is_active,
     }
