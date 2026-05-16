@@ -36,7 +36,9 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = True
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""       # Gmail: App Password (16 chars, no spaces)
-    SMTP_F - JSON array veya virgulle ayrilmis string olarak verilebilir.
+    SMTP_FROM: str = ""           # e.g. yourapp@gmail.com
+
+    # CORS - JSON array veya virgulle ayrilmis string olarak verilebilir.
     # Ornek: ALLOWED_ORIGINS=https://foo.vercel.app,https://example.com
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
@@ -51,9 +53,7 @@ class Settings(BaseSettings):
             if v.startswith("["):
                 return json.loads(v)
             return [o.strip() for o in v.split(",") if o.strip()]
-        return v   "http://localhost:3000",
-        "http://localhost:3001",
-    ]
+        return v
 
     class Config:
         env_file = str(_ENV_FILE)
