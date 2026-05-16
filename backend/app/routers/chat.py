@@ -1,6 +1,7 @@
 """
 Chat Router - SSE streaming chat endpoint for the AI assistant.
 """
+import logging
 import uuid
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -9,11 +10,15 @@ from typing import Optional
 import json
 import asyncio
 
+from openai import AuthenticationError, APIError, RateLimitError
+
 from app.models.business import Business
 from app.models.conversation import Conversation, Message
 from app.services.ai_service import AIService
 from app.services.appointment_service import AppointmentService
 from app.services.vision_service import is_instagram_url, extract_og_image, fetch_instagram_portfolio
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -69,12 +74,37 @@ async def chat(business_slug: str, request: ChatRequest):
             resolved_image = request.image_url
 
     # Process message
-    reply = await ai_service.process_message(
-        conversation=conversation,
-        user_message=request.message,
-        language=request.language or conversation.language,
-        image=resolved_image,
-    )
+    try:
+        reply = await ai_service.process_message(
+            conversation=conversation,
+            user_message=request.message,
+            language=request.language or conversation.language,
+            image=resolved_image,
+        )
+    except AuthenticationError:
+        logger.error("OpenAI API key is invalid or missing")
+        raise HTTPException(
+            status_code=503,
+            detail="AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+        )
+    except RateLimitError:
+        logger.warning("OpenAI rate limit hit")
+        raise HTTPException(
+            status_code=429,
+            detail="Çok fazla istek. Lütfen birkaç saniye sonra tekrar deneyin.",
+        )
+    except APIError as e:
+        logger.error(f"OpenAI API error: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail="AI servisinde geçici bir sorun var. Lütfen tekrar deneyin.",
+        )
+    except Exception as e:
+        logger.exception(f"Unexpected error in chat: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Bir hata oluştu. Lütfen tekrar deneyin.",
+        )
 
     return ChatResponse(
         session_id=session_id,

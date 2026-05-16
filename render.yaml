@@ -1,0 +1,55 @@
+# Render.com Blueprint - Free tier deployment
+# https://render.com/docs/blueprint-spec
+#
+# Kullanım:
+#   1. Bu repo'yu GitHub'a push et
+#   2. https://dashboard.render.com/blueprints → "New Blueprint Instance"
+#   3. Repo'yu seç → Render bu dosyayı okuyup servisi oluşturur
+#   4. Dashboard → backend servisi → "Environment" sekmesinden gizli değişkenleri (sync:false olanlar) doldur
+
+services:
+  - type: web
+    name: assistantai-backend
+    runtime: python
+    plan: free                # 512 MB RAM, 15 dk inaktivite sonrası uyur
+    region: frankfurt         # EU - daha düşük latency
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true   # Render otomatik random güçlü key üretir
+      - key: MONGODB_URL
+        sync: false           # Atlas connection string - dashboard'dan gir
+      - key: MONGODB_DB_NAME
+        value: assistantai
+      - key: OPENAI_API_KEY
+        sync: false           # dashboard'dan gir
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini    # 10x daha ucuz; istersen gpt-4o yap
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false           # https://<bu-servis>.onrender.com/api/calendar/oauth/callback
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_TLS
+        value: "true"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false           # Gmail App Password
+      - key: SMTP_FROM
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false           # ["https://<senin-vercel-domain>.vercel.app"]

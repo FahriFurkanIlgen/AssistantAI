@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────
+   Relate design tokens (CSS variables)
+   ────────────────────────────────────────────────────────── */
+:root {
+  --color-canvas:   #fcfcfc;
+  --color-wash:     #f0f4fe;
+  --color-card:     #ffffff;
+  --color-ink:      #020520;
+  --color-graphite: #14141e;
+  --color-slate:    #374151;
+  --color-ash:      #696a72;
+  --color-fog:      #95959b;
+  --color-rule:     #cfcfcf;
+  --color-border:   #e8eaf0;
+  --color-signal:   #145aff;
+  --color-action:   #0f1f3d;
+
+  --shadow-card:    rgba(0, 0, 0, 0.10) 0px 0px 4px -2px;
+  --shadow-feature: rgba(0,0,0,0.082) 0px 0.36px 1.81px -1.42px,
+                    rgba(0,0,0,0.07)  0px 1.37px 6.87px -2.83px,
+                    rgba(0,0,0,0.016) 0px 6px 30px -4.25px;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -11,52 +34,130 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    @apply bg-white text-apple-ink;
-    font-family: "SF Pro Text", "SF Pro Icons", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: var(--color-canvas);
+    color: var(--color-graphite);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: 0.06px;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: "SF Pro Display", "SF Pro Icons", "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--color-graphite);
+    letter-spacing: -0.022em;
+  }
+  .text-display, h1.display {
+    letter-spacing: -0.027em;
   }
 }
 
 @layer components {
-  /* Apple primary action button — blue pill */
+  /* ── Primary filled CTA — blue gradient ─────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-apple-blue hover:bg-apple-blueLink text-white font-medium px-5 py-2.5 rounded-pill text-sm transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center text-white font-semibold
+           rounded-xl px-5 py-3 text-[14px] transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed shadow-relate-glow;
+    background-image: linear-gradient(rgb(59, 130, 246) 0%, rgb(20, 90, 255) 100%);
     letter-spacing: -0.01em;
   }
-
-  /* Apple secondary — dark fill */
-  .btn-secondary {
-    @apply inline-flex items-center justify-center bg-apple-ink hover:bg-apple-utility text-white font-medium px-5 py-2.5 rounded-pill text-sm transition-colors duration-150;
-    letter-spacing: -0.01em;
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.04);
+    box-shadow: rgba(20, 90, 255, 0.18) 0px 0px 50px -20px,
+                rgba(0, 0, 0, 0.10) 0px 1px 2px;
   }
 
-  /* Ghost / outline variant */
+  /* ── Outlined dark CTA ─────────────────────────────── */
+  .btn-secondary,
+  .btn-outline {
+    @apply inline-flex items-center justify-center font-medium
+           rounded-xl px-5 py-3 text-[14px] transition-colors duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--color-action);
+    border: 1px solid var(--color-action);
+    letter-spacing: -0.01em;
+  }
+  .btn-secondary:hover:not(:disabled),
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--color-action);
+    color: #ffffff;
+  }
+
+  /* ── Ghost link button ─────────────────────────────── */
   .btn-ghost {
-    @apply inline-flex items-center justify-center bg-transparent text-apple-blue hover:text-apple-blueLink font-medium text-sm transition-colors duration-150;
+    @apply inline-flex items-center justify-center font-medium text-[14px]
+           transition-colors duration-150 rounded-pill px-4 py-2;
+    color: var(--color-signal);
+  }
+  .btn-ghost:hover {
+    color: var(--color-action);
+    background-color: var(--color-wash);
   }
 
-  /* Apple-style input */
+  /* ── Text input ────────────────────────────────────── */
   .input-field {
-    @apply w-full px-3.5 py-2.5 bg-white border border-apple-border2 rounded-xl text-apple-ink text-sm placeholder-apple-secondary transition-colors duration-150;
-    @apply focus:outline-none focus:border-apple-blue focus:ring-1 focus:ring-apple-blue/30;
-    letter-spacing: -0.01em;
+    @apply w-full px-4 py-3 bg-white rounded-xl text-[14px]
+           transition-shadow duration-150;
+    border: 1px solid var(--color-rule);
+    color: var(--color-graphite);
+  }
+  .input-field::placeholder {
+    color: var(--color-fog);
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: #0099ff;
+    box-shadow: rgba(0, 153, 255, 0.25) 0px 0px 0px 3px;
   }
 
-  /* Apple card — light surface */
+  /* ── Compact card (radius 8, soft shadow) ──────────── */
   .card {
-    @apply bg-white rounded-apple border border-apple-border p-6;
+    @apply bg-white rounded-relate p-5;
+    box-shadow: var(--shadow-card);
   }
 
-  /* Apple card — pale gray surface */
+  /* ── Tinted section card ───────────────────────────── */
   .card-gray {
-    @apply bg-apple-gray rounded-apple p-6;
+    @apply rounded-relate p-5;
+    background-color: var(--color-wash);
   }
 
-  /* Apple section divider */
-  .apple-divider {
-    @apply border-t border-apple-border;
+  /* ── Large feature card ────────────────────────────── */
+  .card-feature {
+    @apply bg-white rounded-relate-lg p-10;
+    box-shadow: var(--shadow-feature);
+  }
+
+  /* ── Status badge ──────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center rounded-[4px] px-1.5 py-0.5
+           text-[12px] font-medium;
+  }
+  .badge-emerald { background-color: rgba(22, 202, 46, 0.10);  color: #16ca2e; }
+  .badge-coral   { background-color: rgba(242, 96, 82, 0.10);  color: #f26052; }
+  .badge-azure   { background-color: rgba(59, 130, 246, 0.10); color: #145aff; }
+  .badge-amber   { background-color: rgba(255, 166, 77, 0.10); color: #ffa64d; }
+
+  /* ── Hairline divider ──────────────────────────────── */
+  .apple-divider,
+  .divider {
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ── Mono numeric ──────────────────────────────────── */
+  .num-mono {
+    font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+  }
+
+  /* ── Hero radial wash ──────────────────────────────── */
+  .hero-wash {
+    background-image: radial-gradient(
+      60% 70% at 50% 30%,
+      rgba(182, 203, 253, 0.55) 0%,
+      rgba(240, 244, 254, 0.6) 45%,
+      rgba(252, 252, 252, 0) 80%
+    );
   }
 }

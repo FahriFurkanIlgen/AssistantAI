@@ -9,6 +9,7 @@ const NAV = [
   { href: "/dashboard/appointments", label: "Randevular" },
   { href: "/dashboard/services", label: "Hizmetler" },
   { href: "/dashboard/customers", label: "Müşteriler" },
+  { href: "/dashboard/staff", label: "Personel" },
   { href: "/dashboard/settings", label: "Ayarlar" },
 ];
 

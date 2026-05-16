@@ -113,8 +113,7 @@ export const api = {
     (await axiosInstance.delete("/api/calendar/disconnect")).data,
 
   // Staff
-  getStaff: async () =>
-    (await axiosInstance.get("/api/staff/")).data,
+  getStaff: async () => (await axiosInstance.get("/api/staff/")).data,
 
   createStaff: async (data: {
     name: string;

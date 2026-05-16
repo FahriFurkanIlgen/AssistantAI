@@ -29,13 +29,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-apple-gray flex flex-col items-center justify-center px-4">
+    <div className="relative min-h-screen bg-relate-canvas flex flex-col items-center justify-center px-4">
+      <div className="absolute inset-0 hero-wash pointer-events-none" aria-hidden />
       {/* Brand */}
-      <Link href="/" className="font-display font-semibold text-[21px] text-apple-ink tracking-tight mb-10">
+      <Link href="/" className="relative font-semibold text-[21px] text-relate-ink tracking-[-0.022em] mb-10">
         AssistantAI
       </Link>
 
-      <div className="w-full max-w-[380px] bg-white rounded-apple-lg border border-apple-border p-8">
+      <div className="relative w-full max-w-[380px] card-feature !p-8">
         <h1 className="font-display font-semibold text-[24px] text-apple-ink tracking-tight mb-1">
           Giriş Yap
         </h1>

@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/components/providers/QueryProvider";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "AssistantAI – Akıllı Randevu Sistemi",
@@ -16,21 +23,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="font-sans antialiased bg-gray-50 text-gray-900">
+      <body className={`${inter.className} antialiased bg-relate-canvas text-relate-graphite`}>
         <QueryProvider>
           {children}
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
-              style: { fontFamily: "Inter, sans-serif" },
             }}
           />
         </QueryProvider>

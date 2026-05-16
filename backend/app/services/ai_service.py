@@ -268,6 +268,38 @@ class AIService:
             "Tarih/saat bilgisi alırken bu bilgiyi kullan."
         )
 
+        # Append working schedule so bot can validate before asking personal info
+        ws = self.business.working_schedule
+        if ws:
+            day_names = {
+                "monday": "Pazartesi", "tuesday": "Salı", "wednesday": "Çarşamba",
+                "thursday": "Perşembe", "friday": "Cuma", "saturday": "Cumartesi", "sunday": "Pazar"
+            }
+            schedule_lines = []
+            for day_en, day_tr in day_names.items():
+                hours = getattr(ws, day_en, None)
+                if hours:
+                    if hours.is_open:
+                        schedule_lines.append(f"  {day_tr}: {hours.start}–{hours.end}")
+                    else:
+                        schedule_lines.append(f"  {day_tr}: KAPALI")
+            schedule_str = "\n".join(schedule_lines)
+            base_prompt += (
+                f"\n\nÇALIŞMA SAATLERİ:\n{schedule_str}\n"
+                "KURALLAR (çok önemli – sırayla uygula):\n"
+                "1) Müşterinin istediği tarih/saati önce yukarıdaki çalışma saatleri ile KENDİN karşılaştır. "
+                "İstenen gün KAPALI ise veya saat o günün start–end aralığının DIŞINDA ise, "
+                "kişisel bilgi SORMADAN 'O gün/saat müsait değiliz' diyerek reddet ve alternatif öner. "
+                "Yukarıdaki listede AÇIK olarak gösterilen bir gün ve aralıktaki bir saat için ASLA 'o gün kapalıyız/müsait değiliz' deme. "
+                "(Örn: Cuma 09:00–18:00 açıksa, 'Cuma sabah 10:00' talebine 'kapalıyız' demek YANLIŞTIR.)\n"
+                "2) İstenen tarih/saat çalışma saatleri içindeyse, müsaitlik için MUTLAKA `check_availability` aracını çağır. "
+                "Tool çağırmadan slot var/yok kararı verme.\n"
+                "3) `check_availability` boş döndüyse o saat dolu demektir; başka müsait slotları öner. "
+                "Çalışma saati içinde olduğu halde 'kapalıyız' deme.\n"
+                "4) Göreli tarih ifadelerini (\"yarın\", \"önümüzdeki hafta cuma\" vb.) yukarıda verilen bugünün tarihine göre hesapla "
+                "ve çalışma takvimine göre doğrula."
+            )
+
         # Vision instruction
         base_prompt += (
             "\n\nEğer kullanıcı bir görsel paylaşırsa, görseli analiz et ve stil/model önerisi yap. "

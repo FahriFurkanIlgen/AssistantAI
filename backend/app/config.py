@@ -1,6 +1,8 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List
 from pathlib import Path
+import json
 
 # .env her zaman backend/ klasöründen okunur, CWD'den bağımsız
 _ENV_FILE = Path(__file__).parent.parent / ".env"
@@ -24,7 +26,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
 
     # Google Calendar
-    GOOGLE_CLIENT_ID: str = "814011281114-m21cidd7s4ncbg6aienvhqqcabqp0di4.apps.googleusercontent.com"
+    GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/calendar/oauth/callback"
 
@@ -34,11 +36,22 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = True
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""       # Gmail: App Password (16 chars, no spaces)
-    SMTP_FROM: str = ""           # e.g. yourapp@gmail.com
-
-    # CORS
+    SMTP_F - JSON array veya virgulle ayrilmis string olarak verilebilir.
+    # Ornek: ALLOWED_ORIGINS=https://foo.vercel.app,https://example.com
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
+        "http://localhost:3001",
+    ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def _split_origins(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                return json.loads(v)
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v   "http://localhost:3000",
         "http://localhost:3001",
     ]
 

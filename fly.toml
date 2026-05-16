@@ -1,0 +1,35 @@
+# Fly.io deployment - alternatif (Render uyuma sorununa karşı)
+# Kurulum:
+#   1. iwr https://fly.io/install.ps1 -useb | iex   (Windows)
+#   2. fly auth signup
+#   3. cd backend; fly launch --copy-config --no-deploy --name assistantai-backend --region fra
+#   4. fly secrets set MONGODB_URL="..." OPENAI_API_KEY="sk-..." GOOGLE_CLIENT_SECRET="..." ...
+#   5. fly deploy
+#
+# Free tier: 3 küçük shared-cpu-1x makine, 256 MB RAM her biri, sürekli açık
+
+app = "assistantai-backend"
+primary_region = "fra"   # Frankfurt
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"      # boştayken durdur, free tier dostu
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[env]
+  PORT = "8000"
+  DEBUG = "false"
+  OPENAI_MODEL = "gpt-4o-mini"
+  MONGODB_DB_NAME = "assistantai"
+  SMTP_HOST = "smtp.gmail.com"
+  SMTP_PORT = "587"
+  SMTP_TLS = "true"

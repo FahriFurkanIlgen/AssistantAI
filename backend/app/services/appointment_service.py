@@ -1,7 +1,7 @@
 """
 Appointment Service - Handles all appointment CRUD and the AI tool executor.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from bson import ObjectId
 import random
@@ -173,7 +173,7 @@ class AppointmentService:
                     staff_name = staff_obj.name
 
             start_dt = datetime.fromisoformat(start_datetime_str)
-            end_dt = start_dt + __import__("datetime").timedelta(minutes=duration_minutes)
+            end_dt = start_dt + timedelta(minutes=duration_minutes)
 
             # Create Google Calendar event
             google_event_id = None
@@ -214,7 +214,7 @@ class AppointmentService:
 
             # Send confirmation email (fire-and-forget)
             if customer_email:
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_running_loop()
                 loop.run_in_executor(
                     None,
                     send_confirmation_email,
@@ -294,14 +294,14 @@ class AppointmentService:
         phone = customer_phone.strip()
 
         # Find the most recent confirmed appointment for this phone under this business
-        appt = await Appointment.find_one(
+        appts = await Appointment.find(
             {
                 "business_id": str(self.business.id),
                 "customer_phone": phone,
                 "status": {"$in": ["confirmed", "pending"]},
-            },
-            sort=[("start_time", -1)],
-        )
+            }
+        ).sort("-start_time").to_list()
+        appt = appts[0] if appts else None
 
         if not appt:
             return {
@@ -326,9 +326,12 @@ class AppointmentService:
         code = f"{random.randint(100000, 999999)}"
 
         # Invalidate any existing OTPs for this appointment
-        await OtpCode.find(
+        existing_otps = await OtpCode.find(
             {"appointment_id": str(appt.id), "used": False}
-        ).update({"$set": {"used": True}})
+        ).to_list()
+        for existing_otp in existing_otps:
+            existing_otp.used = True
+            await existing_otp.save()
 
         otp = OtpCode.generate(
             appointment_id=str(appt.id),
@@ -344,7 +347,7 @@ class AppointmentService:
 
         # Send email in background (don't block chat response)
         try:
-            await asyncio.get_event_loop().run_in_executor(
+            await asyncio.get_running_loop().run_in_executor(
                 None,
                 lambda: send_cancel_otp_email(
                     to_email=appt.customer_email,
