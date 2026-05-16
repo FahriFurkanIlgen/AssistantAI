@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="assistantAI">
+  <path d="M256 56 L460 416 L52 416 Z"
+        fill="#22c55e" stroke="#22c55e"
+        stroke-width="52" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M240 188 L320 344 L172 344 Z"
+        fill="#ffffff" stroke="#ffffff"
+        stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="368" cy="340" r="44" fill="#ffffff"/>
+</svg>
+
+</svg>

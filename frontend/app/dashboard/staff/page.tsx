@@ -183,7 +183,7 @@ function StaffCard({
   };
 
   return (
-    <div className={`bg-white rounded-apple-lg border border-apple-border p-5 ${!staff.is_active ? "opacity-60" : ""}`}>
+    <div className={`card ${!staff.is_active ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-4">
         {/* Avatar + info */}
         <div className="flex items-start gap-3">
@@ -196,7 +196,7 @@ function StaffCard({
             <div className="flex items-center gap-2">
               <p className="font-semibold text-apple-ink">{staff.name}</p>
               {!staff.is_active && (
-                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Pasif</span>
+                <span className="badge badge-coral">Pasif</span>
               )}
               {staff.google_connected && (
                 <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">📅 Takvim bağlı</span>
@@ -234,7 +234,7 @@ function StaffCard({
           {staff.is_active && (
             <button
               onClick={() => onDeactivate(staff.id)}
-              className="text-xs text-red-500 hover:text-red-700 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+              className="text-[11px] text-cyber-coral border border-cyber-coral/30 px-2.5 py-1.5 rounded-lg hover:bg-cyber-coral/10 transition-colors"
             >
               Deaktif
             </button>
@@ -299,7 +299,7 @@ function StaffCard({
             {staff.google_connected ? (
               <button
                 onClick={() => onDisconnectCalendar(staff.id)}
-                className="text-xs text-red-500 hover:underline"
+                className="text-xs text-cyber-coral hover:underline"
               >
                 Bağlantıyı kes
               </button>
@@ -447,8 +447,8 @@ export default function StaffPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Personel</h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <h2 className="text-[28px] font-serif font-light text-cyber-ink">Personel</h2>
+          <p className="text-cyber-ink/55 text-sm mt-1">
             {activeStaff.length} aktif personel
           </p>
         </div>
@@ -462,7 +462,7 @@ export default function StaffPage() {
 
       {/* Add form */}
       {showAdd && (
-        <div className="bg-white rounded-apple-lg border border-apple-border p-6 mb-6">
+        <div className="card p-6 mb-6">
           <h3 className="font-semibold text-apple-ink mb-4">Yeni Personel</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -552,11 +552,11 @@ export default function StaffPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Yükleniyor...</div>
+        <div className="text-center py-20 text-cyber-ink/40">Yükleniyor...</div>
       ) : staff.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-400 mb-2">Henüz personel eklenmemiş.</p>
-          <p className="text-sm text-gray-400">
+          <p className="text-cyber-ink/40 mb-2">Henüz personel eklenmemiş.</p>
+          <p className="text-sm text-cyber-ink/40">
             "+ Personel Ekle" butonuna tıklayarak başlayın.
           </p>
         </div>

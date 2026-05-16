@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { LogoLockup } from "@/components/brand/Logo";
 
 const NAV = [
   { href: "/dashboard", label: "Genel Bakış" },
@@ -45,16 +46,14 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-apple-gray">
+    <div className="min-h-screen flex bg-cyber-bg">
       {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-apple-border flex flex-col shrink-0">
+      <aside className="w-60 bg-cyber-glass backdrop-blur-cyber border-r border-cyber-rule flex flex-col shrink-0">
         {/* Brand */}
         <div className="px-6 py-5 border-b border-apple-border">
-          <span className="font-display font-semibold text-[17px] text-apple-ink tracking-tight">
-            AssistantAI
-          </span>
+          <LogoLockup href="/dashboard" size={28} />
           {businessName && (
-            <p className="text-[12px] text-apple-secondary mt-0.5 truncate">
+            <p className="text-[12px] text-apple-secondary mt-1 truncate">
               {businessName}
             </p>
           )}
@@ -98,7 +97,7 @@ export default function DashboardLayout({
         <div className="px-6 py-4 border-t border-apple-border">
           <button
             onClick={logout}
-            className="text-[13px] text-apple-secondary hover:text-red-500 transition-colors"
+            className="text-[13px] text-cyber-ink/55 hover:text-cyber-emerald transition-colors"
           >
             Çıkış Yap
           </button>

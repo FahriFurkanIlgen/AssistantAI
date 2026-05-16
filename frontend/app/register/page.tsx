@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
+import { LogoLockup } from "@/components/brand/Logo";
 
 const SECTORS = [
   { value: "tattoo", label: "🎨 Dövme Stüdyosu" },
@@ -75,9 +76,9 @@ export default function RegisterPage() {
     <div className="relative min-h-screen bg-relate-canvas flex flex-col items-center justify-center px-4 py-12">
       <div className="absolute inset-0 hero-wash pointer-events-none" aria-hidden />
       {/* Brand */}
-      <Link href="/" className="relative font-semibold text-[21px] text-relate-ink tracking-[-0.022em] mb-10">
-        AssistantAI
-      </Link>
+      <div className="relative mb-10">
+        <LogoLockup href="/" size={40} />
+      </div>
 
       <div className="relative w-full max-w-[420px] card-feature !p-8">
         <h1 className="font-display font-semibold text-[24px] text-apple-ink tracking-tight mb-1">

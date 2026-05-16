@@ -82,3 +82,51 @@ Açık zeminde radial blue wash kullanılır:
   gerekiyorsa önce config'i güncelle, sonra kullan.
 - Tasarım kuralı bilinçli olarak ihlal ediliyorsa PR/commit
   mesajında gerekçesini belirt.
+
+## Alternatif Tema: Cyber Serif (opt-in)
+
+Koyu, serif/emerald estetiği gerektiren özel ekranlar için **opt-in**
+ikinci tema vardır. Varsayılan Relate'in YERİNE GEÇMEZ; sadece bir
+sayfa/section'ı `.dark-cyber` (veya `cyber-shell`) wrapper'ı ile sarmak
+suretiyle aktive edilir.
+
+### Ne zaman kullanılır?
+- Marketing landing varyantı, "enterprise", "labs" gibi alt markalar.
+- Demo / AI-showcase sayfaları.
+- **Asla** dashboard, auth (login/register), chat veya müşteri-yüzü
+  ürün ekranlarında kullanma — onlar Relate kalır.
+
+### Token'lar
+- Renk: `cyber.bg #050505`, `cyber.ink #ebebeb`, `cyber.emerald #10b981`.
+  Emerald dışında vurgu rengi YOK.
+- Tipografi: Headlines → `font-serif` (Newsreader, 200–400 weight,
+  italic kullanılabilir). Body → Inter Light/Regular. Teknik
+  label/badge → `font-grotesk` (Space Grotesk Medium, 10–12px,
+  uppercase, `tracking-[0.2em]`).
+- Border: `border-cyber-rule` (white/8) veya `border-cyber-ruleSoft`
+  (white/5). Heavy shadow yerine ince border kullan.
+
+### Bileşen sınıfları
+- `.cyber-spotlight` — Glassmorphism kart + cursor-takipli radial spot.
+  `onMouseMove` ile `--mouse-x` / `--mouse-y` CSS değişkenlerini set et.
+- `.cyber-glass` — Statik glass yüzey (24px radius, blur 12px).
+- `.cyber-badge` — Pulse'lu emerald pill (Space Grotesk uppercase).
+- `.cyber-label` — Mono uppercase küçük etiket.
+- `.cyber-btn-primary` — Beyaz dolgu + güçlü dış glow.
+- `.cyber-btn-outline` — Glass + emerald hover.
+- `.cyber-nav` — 80px fixed nav (bg `cyber.bg/80` + backdrop blur).
+- `.cyber-num` — Mono numeric (dashboard).
+- `.cyber-typing` — 3 noktalı emerald typing animasyonu.
+- Arkaplan grid: `bg-cyber-grid` veya `.cyber-grid-bg` util sınıfı.
+- Emerald radial glow: `bg-cyber-emerald-glow`.
+
+### Hareket / animasyon
+- Tüm transition'lar `ease-cyber` (`cubic-bezier(0.16, 1, 0.3, 1)`).
+  Lineer veya hızlı `ease-in-out` kullanma — "ucuz" hissi verir.
+
+### Yapılmayacaklar
+- Emerald dışında vibrant renk (kırmızı/mor/turuncu yok).
+- `font-bold` (700+) serif başlıklarda — max weight 400.
+- Saf `#000` veya `#fff` arkaplan (her zaman `#050505` / `#ebebeb`).
+- Cyber bileşenlerini Relate sayfalarına karıştırma — biri tüm sayfaya
+  hâkim olmalı.

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Çevrimdışı – AssistantAI</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #050505; color: #ebebeb;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif; }
+      main { min-height: 100%; display: grid; place-items: center; padding: 32px; text-align: center; }
+      .card { max-width: 420px; }
+      .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 999px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #10b981; }
+      .dot { width: 6px; height: 6px; border-radius: 999px; background: #10b981; box-shadow: 0 0 12px #10b981; }
+      h1 { font-family: ui-serif, "Newsreader", Georgia, serif; font-weight: 300; font-size: 40px; letter-spacing: -0.027em;
+        margin: 16px 0 8px; }
+      p { color: #9ca3af; font-weight: 300; line-height: 1.6; margin: 0 0 24px; }
+      button { background: #ebebeb; color: #050505; border: 0; border-radius: 999px; padding: 12px 24px;
+        font-weight: 500; cursor: pointer; box-shadow: 0 0 32px rgba(235,235,235,0.15); }
+      button:hover { background: #fff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="card">
+        <span class="pill"><span class="dot"></span> Bağlantı yok</span>
+        <h1>Çevrimdışısınız</h1>
+        <p>İnternet bağlantınız geri geldiğinde sayfayı yeniden yükleyin.</p>
+        <button onclick="location.reload()">Yeniden dene</button>
+      </div>
+    </main>
+  </body>
+</html>

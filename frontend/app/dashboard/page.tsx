@@ -166,7 +166,7 @@ export default function DashboardPage() {
       {/* Charts row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {/* Monthly trend */}
-        <div className="bg-white border border-apple-border rounded-apple p-5">
+        <div className="card">
           <p className="text-[14px] font-semibold text-apple-ink">
             Aylık Trend
           </p>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top services */}
-        <div className="bg-white border border-apple-border rounded-apple p-5">
+        <div className="card">
           <p className="text-[14px] font-semibold text-apple-ink">
             Popüler Hizmetler
           </p>
@@ -220,7 +220,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Upcoming appointments */}
-      <div className="bg-white border border-apple-border rounded-apple p-6">
+      <div className="card p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-display font-semibold text-[17px] text-apple-ink tracking-tight">
             Yaklaşan Randevular
@@ -270,8 +270,8 @@ export default function DashboardPage() {
 
       {/* Google Calendar warning */}
       {!profile?.google_connected && (
-        <div className="mt-4 bg-white border border-apple-border rounded-apple px-6 py-4 flex items-center gap-4">
-          <div className="w-8 h-8 bg-apple-gray rounded-full flex items-center justify-center text-[16px] shrink-0">
+        <div className="mt-4 card px-6 py-4 flex items-center gap-4">
+          <div className="w-8 h-8 bg-cyber-emerald/15 border border-cyber-emerald/30 rounded-full flex items-center justify-center text-[16px] shrink-0">
             📅
           </div>
           <div className="flex-1">

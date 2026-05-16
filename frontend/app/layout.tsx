@@ -1,19 +1,63 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Newsreader, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/components/providers/QueryProvider";
+import RegisterSW from "@/components/pwa/RegisterSW";
 
 const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
+  variable: "--font-inter",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-newsreader",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-space-grotesk",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
   title: "AssistantAI – Akıllı Randevu Sistemi",
   description:
     "Yapay zeka destekli randevu yönetim sistemi. Dövme stüdyoları, klinikler, güzellik merkezleri ve daha fazlası için.",
+  applicationName: "AssistantAI",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "AssistantAI",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#050505",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -22,8 +66,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr">
-      <body className={`${inter.className} antialiased bg-relate-canvas text-relate-graphite`}>
+    <html lang="tr" className={`${inter.variable} ${newsreader.variable} ${spaceGrotesk.variable}`}>
+      <body className={`${inter.className} antialiased bg-cyber-bg text-cyber-ink`}>
         <QueryProvider>
           {children}
           <Toaster
@@ -33,6 +77,7 @@ export default function RootLayout({
             }}
           />
         </QueryProvider>
+        <RegisterSW />
       </body>
     </html>
   );

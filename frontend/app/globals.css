@@ -3,26 +3,25 @@
 @tailwind utilities;
 
 /* ──────────────────────────────────────────────────────────
-   Relate design tokens (CSS variables)
+   Relate design tokens (CSS variables) — REMAPPED to Cyber Serif.
    ────────────────────────────────────────────────────────── */
 :root {
-  --color-canvas:   #fcfcfc;
-  --color-wash:     #f0f4fe;
-  --color-card:     #ffffff;
-  --color-ink:      #020520;
-  --color-graphite: #14141e;
-  --color-slate:    #374151;
-  --color-ash:      #696a72;
-  --color-fog:      #95959b;
-  --color-rule:     #cfcfcf;
-  --color-border:   #e8eaf0;
-  --color-signal:   #145aff;
-  --color-action:   #0f1f3d;
+  --color-canvas:   #050505;
+  --color-wash:     #0a0a0a;
+  --color-card:     rgba(255, 255, 255, 0.02);
+  --color-ink:      #ebebeb;
+  --color-graphite: #ebebeb;
+  --color-slate:    rgba(235, 235, 235, 0.70);
+  --color-ash:      rgba(235, 235, 235, 0.55);
+  --color-fog:      rgba(235, 235, 235, 0.40);
+  --color-rule:     rgba(255, 255, 255, 0.12);
+  --color-border:   rgba(255, 255, 255, 0.08);
+  --color-signal:   #10b981;
+  --color-action:   #ebebeb;
+  --color-emerald:  #10b981;
 
-  --shadow-card:    rgba(0, 0, 0, 0.10) 0px 0px 4px -2px;
-  --shadow-feature: rgba(0,0,0,0.082) 0px 0.36px 1.81px -1.42px,
-                    rgba(0,0,0,0.07)  0px 1.37px 6.87px -2.83px,
-                    rgba(0,0,0,0.016) 0px 6px 30px -4.25px;
+  --shadow-card:    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-feature: 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
 @layer base {
@@ -34,17 +33,19 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background-color: var(--color-canvas);
-    color: var(--color-graphite);
+    background-color: #050505;
+    color: #ebebeb;
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system,
       BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    letter-spacing: 0.06px;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    --cyber-ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Inter", ui-sans-serif, system-ui, -apple-system,
-      BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--color-graphite);
-    letter-spacing: -0.022em;
+    font-family: var(--font-newsreader), "Newsreader", ui-serif, Georgia, serif;
+    color: #ebebeb;
+    font-weight: 300;
+    letter-spacing: -0.015em;
   }
   .text-display, h1.display {
     letter-spacing: -0.027em;
@@ -52,112 +53,376 @@
 }
 
 @layer components {
-  /* ── Primary filled CTA — blue gradient ─────────────── */
+  /* ── Primary CTA — white pill with white glow (cyber) ─ */
   .btn-primary {
-    @apply inline-flex items-center justify-center text-white font-semibold
-           rounded-xl px-5 py-3 text-[14px] transition-all duration-150
-           disabled:opacity-40 disabled:cursor-not-allowed shadow-relate-glow;
-    background-image: linear-gradient(rgb(59, 130, 246) 0%, rgb(20, 90, 255) 100%);
-    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    color: #050505;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.04);
-    box-shadow: rgba(20, 90, 255, 0.18) 0px 0px 50px -20px,
-                rgba(0, 0, 0, 0.10) 0px 1px 2px;
+    transform: translateY(-1px);
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.40);
   }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Outlined dark CTA ─────────────────────────────── */
+  /* ── Outlined CTA — glass + emerald hover ──────────── */
   .btn-secondary,
   .btn-outline {
-    @apply inline-flex items-center justify-center font-medium
-           rounded-xl px-5 py-3 text-[14px] transition-colors duration-150
-           disabled:opacity-40 disabled:cursor-not-allowed;
-    background-color: rgba(255, 255, 255, 0.8);
-    color: var(--color-action);
-    border: 1px solid var(--color-action);
-    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #ebebeb;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    transition: background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .btn-secondary:hover:not(:disabled),
   .btn-outline:hover:not(:disabled) {
-    background-color: var(--color-action);
-    color: #ffffff;
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.40);
+    color: #ebebeb;
   }
 
   /* ── Ghost link button ─────────────────────────────── */
   .btn-ghost {
-    @apply inline-flex items-center justify-center font-medium text-[14px]
-           transition-colors duration-150 rounded-pill px-4 py-2;
-    color: var(--color-signal);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 9999px;
+    color: #10b981;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .btn-ghost:hover {
-    color: var(--color-action);
-    background-color: var(--color-wash);
+    background-color: rgba(16, 185, 129, 0.08);
   }
 
-  /* ── Text input ────────────────────────────────────── */
+  /* ── Text input — dark glass ───────────────────────── */
   .input-field {
-    @apply w-full px-4 py-3 bg-white rounded-xl text-[14px]
-           transition-shadow duration-150;
-    border: 1px solid var(--color-rule);
-    color: var(--color-graphite);
+    width: 100%;
+    padding: 12px 16px;
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #ebebeb;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 300;
+    transition: border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .input-field::placeholder {
-    color: var(--color-fog);
-  }
+  .input-field::placeholder { color: rgba(235, 235, 235, 0.35); }
   .input-field:focus {
     outline: none;
-    border-color: #0099ff;
-    box-shadow: rgba(0, 153, 255, 0.25) 0px 0px 0px 3px;
+    border-color: rgba(16, 185, 129, 0.50);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
   }
 
-  /* ── Compact card (radius 8, soft shadow) ──────────── */
+  /* ── Compact glass card ────────────────────────────── */
   .card {
-    @apply bg-white rounded-relate p-5;
-    box-shadow: var(--shadow-card);
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    transition: border-color 500ms cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .card:hover { border-color: rgba(16, 185, 129, 0.25); }
 
   /* ── Tinted section card ───────────────────────────── */
   .card-gray {
-    @apply rounded-relate p-5;
-    background-color: var(--color-wash);
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 20px;
   }
 
   /* ── Large feature card ────────────────────────────── */
   .card-feature {
-    @apply bg-white rounded-relate-lg p-10;
-    box-shadow: var(--shadow-feature);
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 40px;
   }
 
-  /* ── Status badge ──────────────────────────────────── */
+  /* ── Status badges — emerald-tinted ────────────────── */
   .badge {
-    @apply inline-flex items-center rounded-[4px] px-1.5 py-0.5
-           text-[12px] font-medium;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    font-family: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    line-height: 1;
+    border: 1px solid;
   }
-  .badge-emerald { background-color: rgba(22, 202, 46, 0.10);  color: #16ca2e; }
-  .badge-coral   { background-color: rgba(242, 96, 82, 0.10);  color: #f26052; }
-  .badge-azure   { background-color: rgba(59, 130, 246, 0.10); color: #145aff; }
-  .badge-amber   { background-color: rgba(255, 166, 77, 0.10); color: #ffa64d; }
+  .badge-emerald { background-color: rgba(16, 185, 129, 0.08); color: #10b981; border-color: rgba(16, 185, 129, 0.25); }
+  .badge-coral   { background-color: rgba(242, 96, 82, 0.08);  color: #f26052; border-color: rgba(242, 96, 82, 0.25); }
+  .badge-azure   { background-color: rgba(16, 185, 129, 0.08); color: #10b981; border-color: rgba(16, 185, 129, 0.25); }
+  .badge-amber   { background-color: rgba(255, 166, 77, 0.08); color: #ffa64d; border-color: rgba(255, 166, 77, 0.25); }
 
   /* ── Hairline divider ──────────────────────────────── */
   .apple-divider,
   .divider {
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* ── Mono numeric ──────────────────────────────────── */
   .num-mono {
-    font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--font-space-grotesk), "Space Grotesk", ui-monospace, monospace;
     font-weight: 500;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.01em;
   }
 
-  /* ── Hero radial wash ──────────────────────────────── */
+  /* ── Hero wash — emerald radial on dark ────────────── */
   .hero-wash {
     background-image: radial-gradient(
       60% 70% at 50% 30%,
-      rgba(182, 203, 253, 0.55) 0%,
-      rgba(240, 244, 254, 0.6) 45%,
-      rgba(252, 252, 252, 0) 80%
+      rgba(16, 185, 129, 0.18) 0%,
+      rgba(16, 185, 129, 0.04) 45%,
+      rgba(5, 5, 5, 0) 80%
     );
   }
+}
+
+/* ──────────────────────────────────────────────────────────
+   CYBER SERIF (dark) — opt-in theme.
+   Apply by wrapping a subtree with `.dark-cyber` (or using
+   `bg-cyber-bg text-cyber-ink` directly). Coexists with Relate.
+   ────────────────────────────────────────────────────────── */
+.dark-cyber {
+  background-color: #050505;
+  color: #ebebeb;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --cyber-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark-cyber * {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Headings → Newsreader serif, light weight, no negative tracking */
+.dark-cyber h1,
+.dark-cyber h2,
+.dark-cyber h3,
+.dark-cyber h4,
+.font-serif-display {
+  font-family: var(--font-newsreader), "Newsreader", ui-serif, Georgia, serif;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: #ebebeb;
+}
+
+@layer components {
+  /* ── Cyber container helpers ───────────────────────── */
+  .cyber-shell {
+    background-color: #050505;
+    color: #ebebeb;
+  }
+  .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* ── Glass card (foundation for spotlight cards) ───── */
+  .cyber-glass {
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+  }
+
+  /* ── Spotlight card ────────────────────────────────────
+     Usage:
+       <div className="cyber-spotlight" onMouseMove={…}>…</div>
+     Bind --mouse-x / --mouse-y on mousemove for the radial follow. */
+  .cyber-spotlight {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 32px;
+    transition: border-color 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cyber-spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cyber-spotlight:hover {
+    border-color: rgba(16, 185, 129, 0.30);
+  }
+  .cyber-spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* ── Technical pill badge (emerald, pulsing dot) ──── */
+  .cyber-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    background-color: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    color: #10b981;
+    font-family: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .cyber-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: cyber-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  /* ── Mono label (uppercase, wide tracking) ─────────── */
+  .cyber-label {
+    font-family: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(235, 235, 235, 0.60);
+  }
+
+  /* ── Cyber buttons ─────────────────────────────────── */
+  .cyber-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 28px;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    color: #050505;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.30);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cyber-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.45);
+  }
+
+  .cyber-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 28px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #ebebeb;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    transition: background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cyber-btn-outline:hover {
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.40);
+  }
+
+  /* ── Cyber fixed nav ───────────────────────────────── */
+  .cyber-nav {
+    height: 80px;
+    background-color: rgba(5, 5, 5, 0.80);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* ── Mono numerics for cyber dashboard ─────────────── */
+  .cyber-num {
+    font-family: var(--font-space-grotesk), "Space Grotesk", ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #ebebeb;
+  }
+
+  /* ── Emerald typing dots (chat) ────────────────────── */
+  .cyber-typing {
+    display: inline-flex;
+    gap: 4px;
+  }
+  .cyber-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #10b981;
+    animation: cyber-typing 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  .cyber-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .cyber-typing span:nth-child(3) { animation-delay: 0.30s; }
+}
+
+@keyframes cyber-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.7); }
+  70%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0);   }
+}
+
+@keyframes cyber-typing {
+  0%, 60%, 100% { opacity: 0.30; transform: translateY(0); }
+  30%           { opacity: 1.00; transform: translateY(-2px); }
 }

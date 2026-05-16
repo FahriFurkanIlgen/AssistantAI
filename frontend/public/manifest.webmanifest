@@ -1,0 +1,45 @@
+{
+  "name": "AssistantAI – Akıllı Randevu Asistanı",
+  "short_name": "AssistantAI",
+  "description": "Yapay zekâ destekli randevu ve müşteri sohbet asistanı.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "lang": "tr",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "medical"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sohbet Demo",
+      "short_name": "Demo",
+      "description": "Akdeniz Şifa Hastanesi demo sohbeti",
+      "url": "/chat/akdeniz-sifa",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Yönetim Paneli",
+      "short_name": "Panel",
+      "description": "İşletme yönetim paneli",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

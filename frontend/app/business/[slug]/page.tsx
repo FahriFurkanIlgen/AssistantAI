@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { LogoLockup } from "@/components/brand/Logo";
 
 interface WorkingHours {
   start: string;
@@ -96,14 +97,15 @@ export default function PublicBusinessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-apple-gray">
+    <div className="min-h-screen bg-cyber-bg relative">
+      <div className="absolute top-0 inset-x-0 h-[400px] bg-cyber-emerald-glow pointer-events-none" aria-hidden />
       {/* Hero */}
-      <div className="bg-apple-ink text-white px-6 pt-16 pb-10 text-center">
-        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+      <div className="relative px-6 pt-20 pb-12 text-center border-b border-cyber-rule">
+        <div className="w-16 h-16 bg-cyber-glass border border-cyber-rule rounded-full flex items-center justify-center text-3xl mx-auto mb-5 text-cyber-emerald font-serif">
           {business.name.charAt(0)}
         </div>
-        <h1 className="text-3xl font-bold">{business.name}</h1>
-        <p className="text-white/60 mt-1 text-sm capitalize">
+        <h1 className="font-serif font-light text-[40px] leading-tight tracking-tight text-cyber-ink">{business.name}</h1>
+        <p className="text-cyber-ink/55 mt-2 text-sm capitalize font-light">
           {business.sector}
           {business.city ? ` · ${business.city}` : ""}
         </p>
@@ -112,49 +114,49 @@ export default function PublicBusinessPage() {
             href={`https://instagram.com/${business.instagram_handle}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block mt-3 text-white/70 hover:text-white text-sm transition-colors"
+            className="inline-block mt-3 text-cyber-emerald/80 hover:text-cyber-emerald text-sm transition-colors"
           >
             @{business.instagram_handle}
           </a>
         )}
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
+      <div className="relative max-w-lg mx-auto px-4 py-10 space-y-6">
         {/* CTA */}
         <button
           onClick={() => router.push(`/chat/${slug}`)}
-          className="w-full py-4 rounded-apple bg-apple-blue text-white text-base font-semibold hover:bg-[#0077ed] transition-colors shadow-sm"
+          className="btn-primary w-full py-4 text-[15px]"
         >
           Randevu Al
         </button>
 
         {/* Services */}
         {business.services.length > 0 && (
-          <section className="bg-white rounded-apple-lg border border-apple-border overflow-hidden">
-            <div className="px-5 py-3 border-b border-apple-border">
-              <h2 className="font-semibold text-apple-ink">Hizmetler</h2>
+          <section className="card !p-0 overflow-hidden">
+            <div className="px-5 py-3 border-b border-cyber-rule">
+              <h2 className="cyber-label text-[11px]">Hizmetler</h2>
             </div>
-            <ul className="divide-y divide-apple-border">
+            <ul className="divide-y divide-cyber-ruleSoft">
               {business.services.map((s, i) => (
                 <li
                   key={i}
                   className="px-5 py-4 flex items-center justify-between gap-4"
                 >
                   <div>
-                    <p className="font-medium text-apple-ink">
+                    <p className="font-light text-cyber-ink text-[14px]">
                       {s.name_tr || s.name}
                     </p>
                     {s.description && (
-                      <p className="text-xs text-apple-secondary mt-0.5">
+                      <p className="text-xs text-cyber-ink/50 mt-0.5 font-light">
                         {s.description}
                       </p>
                     )}
-                    <p className="text-xs text-apple-secondary mt-1">
+                    <p className="cyber-label text-[9px] mt-1.5">
                       ⏱ {s.duration_minutes} dk
                     </p>
                   </div>
                   {s.price > 0 && (
-                    <span className="text-apple-ink font-semibold shrink-0 text-sm">
+                    <span className="num-mono text-cyber-emerald shrink-0 text-[14px]">
                       {s.price.toLocaleString("tr-TR")} ₺
                     </span>
                   )}
@@ -166,11 +168,11 @@ export default function PublicBusinessPage() {
 
         {/* Working Hours */}
         {business.working_schedule && (
-          <section className="bg-white rounded-apple-lg border border-apple-border overflow-hidden">
-            <div className="px-5 py-3 border-b border-apple-border">
-              <h2 className="font-semibold text-apple-ink">Çalışma Saatleri</h2>
+          <section className="card !p-0 overflow-hidden">
+            <div className="px-5 py-3 border-b border-cyber-rule">
+              <h2 className="cyber-label text-[11px]">Çalışma Saatleri</h2>
             </div>
-            <ul className="divide-y divide-apple-border">
+            <ul className="divide-y divide-cyber-ruleSoft">
               {DAY_ORDER.map((day) => {
                 const hours = (business.working_schedule as WorkingSchedule)[
                   day as keyof WorkingSchedule
@@ -178,17 +180,15 @@ export default function PublicBusinessPage() {
                 return (
                   <li
                     key={day}
-                    className="px-5 py-3 flex items-center justify-between text-sm"
+                    className="px-5 py-3 flex items-center justify-between text-sm font-light"
                   >
-                    <span className="text-apple-ink">{DAY_LABELS[day]}</span>
+                    <span className="text-cyber-ink/85">{DAY_LABELS[day]}</span>
                     {hours.is_open ? (
-                      <span className="text-apple-secondary">
+                      <span className="num-mono text-cyber-ink/60 text-[13px]">
                         {hours.start} – {hours.end}
                       </span>
                     ) : (
-                      <span className="text-red-500 text-xs font-medium">
-                        Kapalı
-                      </span>
+                      <span className="badge badge-coral">Kapalı</span>
                     )}
                   </li>
                 );
@@ -198,8 +198,8 @@ export default function PublicBusinessPage() {
         )}
 
         {/* Footer */}
-        <p className="text-center text-xs text-apple-secondary pb-4">
-          Powered by AssistantAI
+        <p className="text-center text-xs text-apple-secondary pb-4 inline-flex items-center justify-center gap-1.5">
+          Powered by <LogoLockup size={14} wordmark />
         </p>
       </div>
     </div>
