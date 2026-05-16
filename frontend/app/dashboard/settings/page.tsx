@@ -18,6 +18,8 @@ export default function SettingsPage() {
     ai_persona_name: "",
     ai_welcome_message_tr: "",
     ai_welcome_message_en: "",
+    ai_welcome_message_ru: "",
+    ai_welcome_message_de: "",
     custom_ai_instructions: "",
     default_appointment_duration: 60,
     phone: "",
@@ -33,6 +35,8 @@ export default function SettingsPage() {
         ai_persona_name: p.ai_persona_name || "",
         ai_welcome_message_tr: p.ai_welcome_message_tr || "",
         ai_welcome_message_en: p.ai_welcome_message_en || "",
+        ai_welcome_message_ru: p.ai_welcome_message_ru || "",
+        ai_welcome_message_de: p.ai_welcome_message_de || "",
         custom_ai_instructions: p.custom_ai_instructions || "",
         default_appointment_duration: p.default_appointment_duration || 60,
         phone: p.phone || "",
@@ -160,6 +164,36 @@ export default function SettingsPage() {
             }
             rows={2}
             className="input-field resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Karşılama Mesajı (Rusça)
+          </label>
+          <textarea
+            value={form.ai_welcome_message_ru}
+            onChange={(e) =>
+              setForm({ ...form, ai_welcome_message_ru: e.target.value })
+            }
+            rows={2}
+            className="input-field resize-none"
+            placeholder="Здравствуйте! Чем я могу вам помочь?"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Karşılama Mesajı (Almanca)
+          </label>
+          <textarea
+            value={form.ai_welcome_message_de}
+            onChange={(e) =>
+              setForm({ ...form, ai_welcome_message_de: e.target.value })
+            }
+            rows={2}
+            className="input-field resize-none"
+            placeholder="Hallo! Wie kann ich Ihnen helfen?"
           />
         </div>
 

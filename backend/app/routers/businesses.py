@@ -20,6 +20,8 @@ class UpdateBusinessRequest(BaseModel):
     ai_persona_name: Optional[str] = None
     ai_welcome_message_tr: Optional[str] = None
     ai_welcome_message_en: Optional[str] = None
+    ai_welcome_message_ru: Optional[str] = None
+    ai_welcome_message_de: Optional[str] = None
     custom_ai_instructions: Optional[str] = None
     default_appointment_duration: Optional[int] = None
     instagram_handle: Optional[str] = None
@@ -41,6 +43,8 @@ async def get_profile(current_business: Business = Depends(get_current_user)):
         "ai_persona_name": current_business.ai_persona_name,
         "ai_welcome_message_tr": current_business.ai_welcome_message_tr,
         "ai_welcome_message_en": current_business.ai_welcome_message_en,
+        "ai_welcome_message_ru": current_business.ai_welcome_message_ru,
+        "ai_welcome_message_de": current_business.ai_welcome_message_de,
         "custom_ai_instructions": current_business.custom_ai_instructions,
         "services": [s.model_dump() for s in current_business.services],
         "working_schedule": current_business.working_schedule.model_dump(),

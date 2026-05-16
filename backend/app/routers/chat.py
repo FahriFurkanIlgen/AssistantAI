@@ -120,11 +120,13 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
     if not business:
         raise HTTPException(status_code=404, detail="İşletme bulunamadı")
 
-    message = (
-        business.ai_welcome_message_tr
-        if lang == "tr"
-        else business.ai_welcome_message_en
-    )
+    welcome_by_lang = {
+        "tr": business.ai_welcome_message_tr,
+        "en": business.ai_welcome_message_en,
+        "ru": business.ai_welcome_message_ru,
+        "de": business.ai_welcome_message_de,
+    }
+    message = welcome_by_lang.get(lang) or business.ai_welcome_message_tr
     return {
         "business_name": business.name,
         "persona_name": business.ai_persona_name,

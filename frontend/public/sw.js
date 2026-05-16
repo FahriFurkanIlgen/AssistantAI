@@ -4,7 +4,7 @@
  *  - Sayfa navigasyonları: network-first + offline fallback
  *  - API çağrıları (/api): network-only (cache yok — taze veri zorunlu)
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `assistantai-static-${VERSION}`;
 const PAGE_CACHE = `assistantai-pages-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -14,6 +14,9 @@ const PRECACHE_URLS = [
   "/offline.html",
   "/manifest.webmanifest",
   "/icon.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (event) => {

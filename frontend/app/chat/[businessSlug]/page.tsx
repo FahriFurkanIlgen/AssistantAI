@@ -8,7 +8,7 @@ interface Props {
 export default async function ChatPage({ params, searchParams }: Props) {
   const { businessSlug } = await params;
   const { lang: langParam } = await searchParams;
-  const lang = (langParam === "en" ? "en" : "tr") as "tr" | "en";
+  const lang = (langParam === "en" || langParam === "ru" || langParam === "de" ? langParam : "tr") as "tr" | "en" | "ru" | "de";
 
   return (
     <div className="h-screen w-screen bg-cyber-bg overflow-hidden">

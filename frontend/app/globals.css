@@ -3,6 +3,45 @@
 @tailwind utilities;
 
 /* ──────────────────────────────────────────────────────────
+   Cyber palette CSS variables.
+   Default = dark. Override with `data-chat-theme="light"` on
+   any subtree (e.g. chat widget root) to flip to light.
+   Used by Tailwind via `rgb(var(--cyber-bg) / <alpha-value>)`
+   so opacity modifiers (`text-cyber-ink/55`) keep working.
+   ────────────────────────────────────────────────────────── */
+:root {
+  /* Solid (rgb triplets for alpha-value support) */
+  --cyber-bg:        5 5 5;
+  --cyber-surface:   10 10 10;
+  --cyber-ink:       235 235 235;
+  --cyber-emerald:   16 185 129;
+
+  /* Translucent helpers (resolved values) */
+  --cyber-mute:        rgba(235, 235, 235, 0.60);
+  --cyber-dim:         rgba(235, 235, 235, 0.50);
+  --cyber-faint:       rgba(235, 235, 235, 0.30);
+  --cyber-rule:        rgba(255, 255, 255, 0.08);
+  --cyber-rule-soft:   rgba(255, 255, 255, 0.05);
+  --cyber-glass:       rgba(255, 255, 255, 0.02);
+  --cyber-emerald-dim: rgba(16, 185, 129, 0.20);
+}
+
+[data-chat-theme="light"] {
+  --cyber-bg:        255 255 255;
+  --cyber-surface:   247 247 247;
+  --cyber-ink:       17 17 17;
+  --cyber-emerald:   16 185 129;
+
+  --cyber-mute:        rgba(17, 17, 17, 0.70);
+  --cyber-dim:         rgba(17, 17, 17, 0.55);
+  --cyber-faint:       rgba(17, 17, 17, 0.35);
+  --cyber-rule:        rgba(0, 0, 0, 0.10);
+  --cyber-rule-soft:   rgba(0, 0, 0, 0.05);
+  --cyber-glass:       rgba(0, 0, 0, 0.03);
+  --cyber-emerald-dim: rgba(16, 185, 129, 0.20);
+}
+
+/* ──────────────────────────────────────────────────────────
    Relate design tokens (CSS variables) — REMAPPED to Cyber Serif.
    ────────────────────────────────────────────────────────── */
 :root {

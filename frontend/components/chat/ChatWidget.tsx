@@ -26,7 +26,9 @@ interface PortfolioPost {
   thumbnail: string | null;
 }
 
-const SUGGESTIONS: Record<"tr" | "en", string[]> = {
+type Lang = "tr" | "en" | "ru" | "de";
+
+const SUGGESTIONS: Record<Lang, string[]> = {
   tr: [
     "Hangi hizmetleri sunuyorsunuz?",
     "Yarın için randevu alabilir miyim?",
@@ -39,6 +41,120 @@ const SUGGESTIONS: Record<"tr" | "en", string[]> = {
     "Tell me about your prices.",
     "What are your working hours?",
   ],
+  ru: [
+    "Какие услуги вы предлагаете?",
+    "Можно записаться на завтра?",
+    "Расскажите о ваших ценах.",
+    "Каковы ваши часы работы?",
+  ],
+  de: [
+    "Welche Leistungen bieten Sie an?",
+    "Kann ich morgen einen Termin buchen?",
+    "Erzählen Sie mir von Ihren Preisen.",
+    "Wie sind Ihre Öffnungszeiten?",
+  ],
+};
+
+const T: Record<Lang, {
+  online: string;
+  newChat: string;
+  assistant: string;
+  here: string;
+  suggested: string;
+  you: string;
+  apptOk: string;
+  imgWillSend: string;
+  attachImg: string;
+  sendMsg: string;
+  sendHint: string;
+  loading: string;
+  igFail: string;
+  tapLiked: string;
+  pickImage: string;
+  imgTooLarge: string;
+  likeStyle: string;
+  portfolio: string;
+}> = {
+  tr: {
+    online: "Çevrimiçi",
+    newChat: "Yeni sohbet",
+    assistant: "Asistan",
+    here: "Yardımcı olmak için buradayım.",
+    suggested: "Öneri",
+    you: "Sen",
+    apptOk: "Randevunuz oluşturuldu",
+    imgWillSend: "Görsel eklenecek",
+    attachImg: "Görsel ekle",
+    sendMsg: "Bir mesaj yazın...",
+    sendHint: "Enter ile gönder · Shift+Enter ile yeni satır",
+    loading: "Yükleniyor...",
+    igFail: "Görseller yüklenemedi. Instagram'ı doğrudan ziyaret edin.",
+    tapLiked: "Beğendiğinize tıklayın",
+    pickImage: "Lütfen bir görsel seçin.",
+    imgTooLarge: "Görsel 5MB'dan küçük olmalı.",
+    likeStyle: "Bu stili beğendim, benzer bir şey istiyorum.",
+    portfolio: "Portfolyo",
+  },
+  en: {
+    online: "Online",
+    newChat: "New chat",
+    assistant: "Assistant",
+    here: "I'm here to help.",
+    suggested: "Suggested",
+    you: "You",
+    apptOk: "Appointment confirmed",
+    imgWillSend: "Image will be sent",
+    attachImg: "Attach image",
+    sendMsg: "Send a message...",
+    sendHint: "Enter to send · Shift+Enter for new line",
+    loading: "Loading...",
+    igFail: "Images could not be loaded. Visit Instagram directly.",
+    tapLiked: "Tap one you like",
+    pickImage: "Please select an image.",
+    imgTooLarge: "Image must be under 5MB.",
+    likeStyle: "I like this style, I want something similar.",
+    portfolio: "Portfolio",
+  },
+  ru: {
+    online: "В сети",
+    newChat: "Новый чат",
+    assistant: "Ассистент",
+    here: "Я здесь, чтобы помочь.",
+    suggested: "Совет",
+    you: "Вы",
+    apptOk: "Запись подтверждена",
+    imgWillSend: "Изображение будет отправлено",
+    attachImg: "Прикрепить изображение",
+    sendMsg: "Напишите сообщение...",
+    sendHint: "Enter — отправить · Shift+Enter — новая строка",
+    loading: "Загрузка...",
+    igFail: "Не удалось загрузить изображения. Перейдите в Instagram напрямую.",
+    tapLiked: "Нажмите на понравившееся",
+    pickImage: "Пожалуйста, выберите изображение.",
+    imgTooLarge: "Изображение должно быть меньше 5 МБ.",
+    likeStyle: "Мне нравится этот стиль, хочу что-то похожее.",
+    portfolio: "Портфолио",
+  },
+  de: {
+    online: "Online",
+    newChat: "Neuer Chat",
+    assistant: "Assistent",
+    here: "Ich bin hier, um zu helfen.",
+    suggested: "Vorschlag",
+    you: "Sie",
+    apptOk: "Termin bestätigt",
+    imgWillSend: "Bild wird gesendet",
+    attachImg: "Bild anhängen",
+    sendMsg: "Nachricht schreiben...",
+    sendHint: "Enter zum Senden · Shift+Enter für neue Zeile",
+    loading: "Lädt...",
+    igFail: "Bilder konnten nicht geladen werden. Besuchen Sie Instagram direkt.",
+    tapLiked: "Tippen Sie auf eines, das Ihnen gefällt",
+    pickImage: "Bitte wählen Sie ein Bild aus.",
+    imgTooLarge: "Das Bild muss unter 5 MB sein.",
+    likeStyle: "Mir gefällt dieser Stil, ich möchte etwas Ähnliches.",
+    portfolio: "Portfolio",
+  },
 };
 
 export default function ChatWidget({
@@ -46,7 +162,7 @@ export default function ChatWidget({
   lang = "tr",
 }: {
   businessSlug: string;
-  lang?: "tr" | "en";
+  lang?: Lang;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -54,13 +170,28 @@ export default function ChatWidget({
   const [sessionId, setSessionId] = useState<string | undefined>();
   const [welcomeInfo, setWelcomeInfo] = useState<WelcomeInfo | null>(null);
   const [appointmentCreated, setAppointmentCreated] = useState(false);
-  const [activeLang, setActiveLang] = useState<"tr" | "en">(lang);
+  const [activeLang, setActiveLang] = useState<Lang>(lang);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageSendData, setImageSendData] = useState<string | null>(null);
   const [showPortfolio, setShowPortfolio] = useState(false);
   const [portfolioPosts, setPortfolioPosts] = useState<PortfolioPost[]>([]);
   const [portfolioLoading, setPortfolioLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  // Load persisted theme preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("chat-theme");
+      if (saved === "light" || saved === "dark") setTheme(saved);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("chat-theme", theme);
+    } catch {}
+  }, [theme]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -204,11 +335,7 @@ export default function ChatWidget({
     }
     if (post.url) {
       setInput(
-        (prev) =>
-          prev ||
-          (activeLang === "tr"
-            ? "Bu stili beğendim, benzer bir şey istiyorum."
-            : "I like this style, I want something similar."),
+        (prev) => prev || T[activeLang].likeStyle,
       );
     }
     setShowPortfolio(false);
@@ -218,11 +345,11 @@ export default function ChatWidget({
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error(activeLang === "tr" ? "Lütfen bir görsel seçin." : "Please select an image.");
+      toast.error(T[activeLang].pickImage);
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(activeLang === "tr" ? "Görsel 5MB'dan küçük olmalı." : "Image must be under 5MB.");
+      toast.error(T[activeLang].imgTooLarge);
       return;
     }
     const reader = new FileReader();
@@ -249,7 +376,7 @@ export default function ChatWidget({
   const isEmptyState = messages.length <= 1 && !loading;
 
   return (
-    <div className="flex flex-col h-full bg-cyber-bg text-cyber-ink">
+    <div data-chat-theme={theme} className="flex flex-col h-full bg-cyber-bg text-cyber-ink">
       {/* ============ HEADER ============ */}
       <header className="sticky top-0 z-20 bg-cyber-bg/85 backdrop-blur-cyber border-b border-cyber-rule">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
@@ -264,7 +391,7 @@ export default function ChatWidget({
               {welcomeInfo?.business_name ?? ""}
               <span className="ml-2 inline-flex items-center gap-1 text-cyber-emerald normal-case tracking-normal">
                 <span className="w-1 h-1 rounded-full bg-cyber-emerald animate-pulse" />
-                {activeLang === "tr" ? "Çevrimiçi" : "Online"}
+                {T[activeLang].online}
               </span>
             </p>
           </div>
@@ -273,17 +400,17 @@ export default function ChatWidget({
           <div className="flex items-center gap-1.5">
             <button
               onClick={newConversation}
-              title={activeLang === "tr" ? "Yeni sohbet" : "New chat"}
+              title={T[activeLang].newChat}
               className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-ink hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber text-[12px] font-light"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
               </svg>
-              {activeLang === "tr" ? "Yeni sohbet" : "New chat"}
+              {T[activeLang].newChat}
             </button>
             <button
               onClick={newConversation}
-              title={activeLang === "tr" ? "Yeni sohbet" : "New chat"}
+              title={T[activeLang].newChat}
               className="sm:hidden w-8 h-8 flex items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-ink"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,9 +430,28 @@ export default function ChatWidget({
               </button>
             )}
 
+            {/* Theme toggle */}
+            <button
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              title={theme === "dark" ? "Light mode" : "Dark mode"}
+              aria-label="Toggle theme"
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
+            >
+              {theme === "dark" ? (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" strokeWidth={1.5} />
+                  <path strokeLinecap="round" strokeWidth={1.5} d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              )}
+            </button>
+
             {/* Lang toggle */}
             <div className="flex bg-cyber-glass border border-cyber-rule rounded-full p-0.5 text-[10px] font-grotesk uppercase tracking-[0.15em]">
-              {(["tr", "en"] as const).map((l) => (
+              {(['tr', 'en', 'ru', 'de'] as const).map((l) => (
                 <button
                   key={l}
                   onClick={() => {
@@ -346,10 +492,7 @@ export default function ChatWidget({
                 <span className="italic text-cyber-emerald">.</span>
               </h1>
               <p className="text-[14px] text-cyber-ink/55 font-light max-w-md mx-auto mb-10">
-                {messages[0]?.content ??
-                  (activeLang === "tr"
-                    ? "Yardımcı olmak için buradayım."
-                    : "I'm here to help.")}
+                {messages[0]?.content ?? T[activeLang].here}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
@@ -361,7 +504,7 @@ export default function ChatWidget({
                     className="group px-4 py-3 rounded-2xl border border-cyber-rule bg-cyber-glass hover:border-cyber-emerald/40 hover:bg-cyber-emerald/[0.04] transition-all duration-500 ease-cyber text-[13px] text-cyber-ink/75 font-light disabled:opacity-40 disabled:hover:border-cyber-rule"
                   >
                     <span className="cyber-label text-[8px] text-cyber-emerald/70 block mb-1 group-hover:text-cyber-emerald transition-colors">
-                      {activeLang === "tr" ? "Öneri" : "Suggested"}
+                      {T[activeLang].suggested}
                     </span>
                     {s}
                   </button>
@@ -391,10 +534,8 @@ export default function ChatWidget({
                 <div className="flex-1 min-w-0 pt-1">
                   <p className="cyber-label text-[9px] mb-1.5 text-cyber-ink/40">
                     {msg.role === "assistant"
-                      ? welcomeInfo?.persona_name ?? "Asistan"
-                      : activeLang === "tr"
-                        ? "Sen"
-                        : "You"}
+                      ? welcomeInfo?.persona_name ?? T[activeLang].assistant
+                      : T[activeLang].you}
                   </p>
                   {msg.imagePreview && msg.role === "user" && (
                     <img
@@ -445,9 +586,7 @@ export default function ChatWidget({
       {/* Appointment success banner */}
       {appointmentCreated && (
         <div className="bg-cyber-emerald/[0.06] border-t border-cyber-emerald/20 px-4 py-2.5 text-center text-[12px] text-cyber-emerald font-grotesk uppercase tracking-[0.2em]">
-          {activeLang === "tr"
-            ? "Randevunuz oluşturuldu"
-            : "Appointment confirmed"}
+          {T[activeLang].apptOk}
         </div>
       )}
 
@@ -473,7 +612,7 @@ export default function ChatWidget({
                 </button>
               </div>
               <span className="cyber-label text-[9px]">
-                {activeLang === "tr" ? "Görsel eklenecek" : "Image will be sent"}
+                {T[activeLang].imgWillSend}
               </span>
             </div>
           )}
@@ -489,7 +628,7 @@ export default function ChatWidget({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || appointmentCreated}
-              title={activeLang === "tr" ? "Görsel ekle" : "Attach image"}
+              title={T[activeLang].attachImg}
               className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-cyber-ink/55 hover:text-cyber-emerald hover:bg-cyber-emerald/10 transition-all duration-500 ease-cyber disabled:opacity-30"
             >
               <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -502,11 +641,7 @@ export default function ChatWidget({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={
-                activeLang === "tr"
-                  ? "Bir mesaj yazın..."
-                  : "Send a message..."
-              }
+              placeholder={T[activeLang].sendMsg}
               rows={1}
               disabled={loading || appointmentCreated}
               className="flex-1 resize-none bg-transparent border-0 outline-none px-1 py-2 text-[14px] leading-relaxed text-cyber-ink placeholder-cyber-ink/35 font-light max-h-[200px]"
@@ -531,9 +666,7 @@ export default function ChatWidget({
           </div>
 
           <p className="text-[10px] text-cyber-ink/35 text-center mt-2 font-light">
-            {activeLang === "tr"
-              ? "Enter ile gönder · Shift+Enter ile yeni satır"
-              : "Enter to send · Shift+Enter for new line"}
+            {T[activeLang].sendHint}
             <span className="mx-1.5 text-cyber-ink/20">·</span>
             AssistantAI
           </p>
@@ -546,7 +679,7 @@ export default function ChatWidget({
           <div className="flex items-center justify-between px-5 py-4 border-b border-cyber-rule">
             <div>
               <p className="font-serif font-light text-[18px] text-cyber-ink leading-tight">
-                Portfolyo
+                {T[activeLang].portfolio}
               </p>
               {welcomeInfo?.instagram_handle && (
                 <a
@@ -569,14 +702,12 @@ export default function ChatWidget({
           <div className="flex-1 overflow-y-auto p-3 bg-cyber-bg">
             {portfolioLoading ? (
               <div className="flex items-center justify-center h-full text-cyber-ink/55 text-[13px] font-light">
-                {activeLang === "tr" ? "Yükleniyor..." : "Loading..."}
+                {T[activeLang].loading}
               </div>
             ) : portfolioPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
                 <p className="text-cyber-ink/55 text-[13px] font-light">
-                  {activeLang === "tr"
-                    ? "Görseller yüklenemedi. Instagram'ı doğrudan ziyaret edin."
-                    : "Images could not be loaded. Visit Instagram directly."}
+                  {T[activeLang].igFail}
                 </p>
                 {welcomeInfo?.instagram_handle && (
                   <a
@@ -592,9 +723,7 @@ export default function ChatWidget({
             ) : (
               <div className="max-w-3xl mx-auto">
                 <p className="cyber-label text-[9px] mb-2 px-1">
-                  {activeLang === "tr"
-                    ? "Beğendiğinize tıklayın"
-                    : "Tap one you like"}
+                  {T[activeLang].tapLiked}
                 </p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {portfolioPosts.map((post, i) => (

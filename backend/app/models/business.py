@@ -46,6 +46,8 @@ class Business(Document):
     ai_persona_name: str = "Asistan"
     ai_welcome_message_tr: str = "Merhaba! Size nasıl yardımcı olabilirim?"
     ai_welcome_message_en: str = "Hello! How can I help you today?"
+    ai_welcome_message_ru: str = "Здравствуйте! Чем я могу вам помочь?"
+    ai_welcome_message_de: str = "Hallo! Wie kann ich Ihnen helfen?"
     custom_ai_instructions: Optional[str] = None
 
     # Services offered

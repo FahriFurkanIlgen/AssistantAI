@@ -34,18 +34,20 @@ module.exports = {
         },
         // Cyber Serif (dark) — opt-in via `.dark-cyber` wrapper or
         // `bg-cyber-bg` / `text-cyber-ink` utilities. Coexists with Relate.
+        // Backed by CSS variables so a subtree can be flipped to light
+        // via `data-chat-theme="light"` (see globals.css).
         cyber: {
-          bg:        "#050505",
-          surface:   "#0a0a0a",
-          ink:       "#ebebeb",
-          mute:      "rgba(235,235,235,0.60)",
-          dim:       "rgba(235,235,235,0.50)",
-          faint:     "rgba(235,235,235,0.30)",
-          rule:      "rgba(255,255,255,0.08)",
-          ruleSoft:  "rgba(255,255,255,0.05)",
-          glass:     "rgba(255,255,255,0.02)",
-          emerald:   "#10b981",
-          emeraldDim:"rgba(16,185,129,0.20)",
+          bg:        "rgb(var(--cyber-bg) / <alpha-value>)",
+          surface:   "rgb(var(--cyber-surface) / <alpha-value>)",
+          ink:       "rgb(var(--cyber-ink) / <alpha-value>)",
+          emerald:   "rgb(var(--cyber-emerald) / <alpha-value>)",
+          mute:      "var(--cyber-mute)",
+          dim:       "var(--cyber-dim)",
+          faint:     "var(--cyber-faint)",
+          rule:      "var(--cyber-rule)",
+          ruleSoft:  "var(--cyber-rule-soft)",
+          glass:     "var(--cyber-glass)",
+          emeraldDim:"var(--cyber-emerald-dim)",
         },
         brand: {
           50:  "#f0f4fe",
