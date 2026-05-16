@@ -1,6 +1,5 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
@@ -13,60 +12,34 @@ const SECTORS = [
   { value: "general", label: "🏢 Diğer" },
 ];
 
-export default function RegisterPage() {
-  const router = useRouter();
+export default function RequestDemoPage() {
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: "",
-    slug: "",
-    email: "",
-    password: "",
+    business_name: "",
     sector: "tattoo",
-    city: "",
     phone: "",
+    email: "",
+    city: "",
+    message: "",
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-      // Auto-generate slug from name
-      ...(name === "name"
-        ? {
-            slug: value
-              .toLowerCase()
-              .replace(/ğ/g, "g")
-              .replace(/ü/g, "u")
-              .replace(/ş/g, "s")
-              .replace(/ı/g, "i")
-              .replace(/ö/g, "o")
-              .replace(/ç/g, "c")
-              .replace(/[^a-z0-9]/g, "-")
-              .replace(/-+/g, "-")
-              .replace(/^-|-$/g, ""),
-          }
-        : {}),
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await api.register(form);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("business_slug", data.slug);
-      }
-      toast.success("Kayıt başarılı! Hoş geldiniz 🎉");
-      router.push("/dashboard");
+      await api.submitDemoRequest(form);
+      setSubmitted(true);
     } catch (err: any) {
-      toast.error(
-        err.response?.data?.detail || "Kayıt sırasında bir hata oluştu",
-      );
+      toast.error(err.response?.data?.detail || "Bir hata oluştu, lütfen tekrar deneyin.");
     } finally {
       setLoading(false);
     }
@@ -75,144 +48,164 @@ export default function RegisterPage() {
   return (
     <div className="relative min-h-screen bg-relate-canvas flex flex-col items-center justify-center px-4 py-12">
       <div className="absolute inset-0 hero-wash pointer-events-none" aria-hidden />
-      {/* Brand */}
+
       <div className="relative mb-10">
         <LogoLockup href="/" size={40} />
       </div>
 
-      <div className="relative w-full max-w-[420px] card-feature !p-8">
-        <h1 className="font-display font-semibold text-[24px] text-apple-ink tracking-tight mb-1">
-          İşletmenizi Kaydedin
-        </h1>
-        <p className="text-[15px] text-apple-secondary mb-7">
-          Ücretsiz hesap oluşturun, hemen başlayın.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-              İşletme Adı <span className="text-apple-blue">*</span>
-            </label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="Örn: Black Ink Tattoo"
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-              URL Adresi <span className="text-apple-blue">*</span>{" "}
-              <span className="text-apple-secondary font-normal">
-                (/chat/<strong>{form.slug || "..."}</strong>)
-              </span>
-            </label>
-            <input
-              name="slug"
-              value={form.slug}
-              onChange={handleChange}
-              required
-              placeholder="black-ink-tattoo"
-              pattern="[a-z0-9-]+"
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-              Sektör <span className="text-apple-blue">*</span>
-            </label>
-            <select
-              name="sector"
-              value={form.sector}
-              onChange={handleChange}
-              className="input-field"
+      <div className="relative w-full max-w-[460px] card-feature !p-8">
+        {submitted ? (
+          <div className="text-center py-6">
+            <div className="w-14 h-14 rounded-full bg-relate-emerald/10 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-relate-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="font-display font-semibold text-[22px] text-relate-ink tracking-tight mb-2">
+              Talebiniz Alındı!
+            </h2>
+            <p className="text-[15px] text-relate-graphite leading-relaxed">
+              En kısa sürede sizinle iletişime geçeceğiz. Teşekkür ederiz.
+            </p>
+            <Link
+              href="/"
+              className="inline-block mt-6 text-[14px] text-relate-signal hover:opacity-70 transition-opacity"
             >
-              {SECTORS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-              E-posta <span className="text-apple-blue">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-              Şifre <span className="text-apple-blue">*</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              minLength={8}
-              className="input-field"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-                Şehir
-              </label>
-              <input
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                placeholder="İstanbul"
-                className="input-field"
-              />
-            </div>
-            <div>
-              <label className="block text-[13px] font-medium text-apple-ink mb-1.5">
-                Telefon
-              </label>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="+90 5xx..."
-                className="input-field"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-3 text-[15px] mt-2"
-          >
-            {loading ? "Kaydediliyor..." : "Devam Et"}
-          </button>
-        </form>
-
-        <div className="apple-divider mt-6 pt-5">
-          <p className="text-center text-[13px] text-apple-secondary">
-            Zaten hesabınız var mı?{" "}
-            <Link href="/login" className="text-apple-blueLink hover:underline font-medium">
-              Giriş Yap
+              Ana sayfaya dön
             </Link>
-          </p>
-        </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="font-display font-semibold text-[24px] text-relate-ink tracking-tight mb-1">
+              Demo Talep Edin
+            </h1>
+            <p className="text-[15px] text-relate-graphite mb-7">
+              Sizi tanımak ve size özel kurulum hakkında bilgi vermek için formu doldurun.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                  Ad Soyad <span className="text-relate-signal">*</span>
+                </label>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Adınız Soyadınız"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                  İşletme Adı <span className="text-relate-signal">*</span>
+                </label>
+                <input
+                  name="business_name"
+                  value={form.business_name}
+                  onChange={handleChange}
+                  required
+                  placeholder="İşletmenizin adı"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                  Sektör <span className="text-relate-signal">*</span>
+                </label>
+                <select
+                  name="sector"
+                  value={form.sector}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  {SECTORS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                    Telefon <span className="text-relate-signal">*</span>
+                  </label>
+                  <input
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    required
+                    placeholder="+90 5xx..."
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                    E-posta <span className="text-relate-signal">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="ornek@mail.com"
+                    className="input-field"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                  Şehir
+                </label>
+                <input
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
+                  placeholder="İstanbul"
+                  className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
+                  Notunuz
+                </label>
+                <textarea
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Bize iletmek istediğiniz bir şey var mı?"
+                  className="input-field resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full mt-2"
+              >
+                {loading ? "Gönderiliyor..." : "Demo Talep Et"}
+              </button>
+            </form>
+
+            <p className="text-center text-[13px] text-relate-graphite mt-6">
+              Hesabınız var mı?{" "}
+              <Link href="/login" className="text-relate-signal hover:opacity-70 transition-opacity font-medium">
+                Giriş yapın
+              </Link>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
 }
+

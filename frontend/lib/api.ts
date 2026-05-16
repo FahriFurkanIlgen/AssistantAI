@@ -150,6 +150,40 @@ export const api = {
 
   staffLogin: async (email: string, password: string) =>
     (await axiosInstance.post("/api/auth/staff/login", { email, password })).data,
+
+  // Demo Request (public)
+  submitDemoRequest: async (data: {
+    name: string;
+    business_name: string;
+    sector: string;
+    phone: string;
+    email: string;
+    city?: string;
+    message?: string;
+  }) => (await axiosInstance.post("/api/demo-request", data)).data,
+};
+
+export const adminApi = {
+  getDemoRequests: async (key: string) =>
+    (await axios.get(`${BASE_URL}/api/admin/demo-requests`, { headers: { "x-admin-key": key } })).data,
+
+  updateDemoRequest: async (key: string, id: string, data: { status?: string; notes?: string }) =>
+    (await axios.patch(`${BASE_URL}/api/admin/demo-requests/${id}`, data, { headers: { "x-admin-key": key } })).data,
+
+  deleteDemoRequest: async (key: string, id: string) =>
+    (await axios.delete(`${BASE_URL}/api/admin/demo-requests/${id}`, { headers: { "x-admin-key": key } })).data,
+
+  getBusinesses: async (key: string) =>
+    (await axios.get(`${BASE_URL}/api/admin/businesses`, { headers: { "x-admin-key": key } })).data,
+
+  createBusiness: async (key: string, data: object) =>
+    (await axios.post(`${BASE_URL}/api/admin/businesses`, data, { headers: { "x-admin-key": key } })).data,
+
+  updateBusiness: async (key: string, id: string, data: object) =>
+    (await axios.patch(`${BASE_URL}/api/admin/businesses/${id}`, data, { headers: { "x-admin-key": key } })).data,
+
+  impersonate: async (key: string, id: string) =>
+    (await axios.post(`${BASE_URL}/api/admin/businesses/${id}/impersonate`, {}, { headers: { "x-admin-key": key } })).data,
 };
 
 export default axiosInstance;

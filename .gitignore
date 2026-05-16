@@ -27,3 +27,6 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+start-dev.ps1
+.gitignore
+start-dev.bat

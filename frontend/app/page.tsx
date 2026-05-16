@@ -137,7 +137,7 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link href="/register" className="cyber-btn-primary">
-                Ücretsiz başla
+                Demo Talep Et
                 {Ico.arrow}
               </Link>
               <Link href="/login" className="cyber-btn-outline">
@@ -516,7 +516,7 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link href="/register" className="cyber-btn-primary">
-              Ücretsiz başla {Ico.arrow}
+              Demo Talep Et {Ico.arrow}
             </Link>
             <Link href="/login" className="cyber-btn-outline">
               Satışla görüş

@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""       # Gmail: App Password (16 chars, no spaces)
     SMTP_FROM: str = ""           # e.g. yourapp@gmail.com
 
+    # Admin
+    ADMIN_SECRET_KEY: str = "change-me-admin-secret"
+
     # CORS - JSON array veya virgulle ayrilmis string olarak verilebilir.
     # Ornek: ALLOWED_ORIGINS=https://foo.vercel.app,https://example.com
     # NoDecode -> pydantic-settings otomatik JSON parse etmesin, validator calissin

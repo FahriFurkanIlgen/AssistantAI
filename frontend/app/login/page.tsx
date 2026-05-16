@@ -82,9 +82,9 @@ export default function LoginPage() {
 
         <div className="apple-divider mt-6 pt-5">
           <p className="text-center text-[13px] text-apple-secondary">
-            Hesabınız yok mu?{" "}
+            Demo talep etmek ister misiniz?{" "}
             <Link href="/register" className="text-apple-blueLink hover:underline font-medium">
-              Kayıt Ol
+              Demo Talep Et
             </Link>
           </p>
         </div>

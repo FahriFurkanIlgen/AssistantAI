@@ -74,6 +74,8 @@ const T: Record<Lang, {
   imgTooLarge: string;
   likeStyle: string;
   portfolio: string;
+  privacyBanner: string;
+  privacyLink: string;
 }> = {
   tr: {
     online: "Çevrimiçi",
@@ -94,6 +96,8 @@ const T: Record<Lang, {
     imgTooLarge: "Görsel 5MB'dan küçük olmalı.",
     likeStyle: "Bu stili beğendim, benzer bir şey istiyorum.",
     portfolio: "Portfolyo",
+    privacyBanner: "Sohbet ederek",
+    privacyLink: "Gizlilik Politikamızı",
   },
   en: {
     online: "Online",
@@ -114,6 +118,8 @@ const T: Record<Lang, {
     imgTooLarge: "Image must be under 5MB.",
     likeStyle: "I like this style, I want something similar.",
     portfolio: "Portfolio",
+    privacyBanner: "By chatting, you agree to our",
+    privacyLink: "Privacy Policy",
   },
   ru: {
     online: "В сети",
@@ -134,6 +140,8 @@ const T: Record<Lang, {
     imgTooLarge: "Изображение должно быть меньше 5 МБ.",
     likeStyle: "Мне нравится этот стиль, хочу что-то похожее.",
     portfolio: "Портфолио",
+    privacyBanner: "Используя чат, вы соглашаетесь с нашей",
+    privacyLink: "Политикой конфиденциальности",
   },
   de: {
     online: "Online",
@@ -154,6 +162,8 @@ const T: Record<Lang, {
     imgTooLarge: "Das Bild muss unter 5 MB sein.",
     likeStyle: "Mir gefällt dieser Stil, ich möchte etwas Ähnliches.",
     portfolio: "Portfolio",
+    privacyBanner: "Mit dem Chat stimmen Sie unserer",
+    privacyLink: "Datenschutzerklärung",
   },
 };
 
@@ -178,6 +188,7 @@ export default function ChatWidget({
   const [portfolioLoading, setPortfolioLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [showPrivacyBanner, setShowPrivacyBanner] = useState(false);
 
   // Load persisted theme preference
   useEffect(() => {
@@ -186,6 +197,22 @@ export default function ChatWidget({
       if (saved === "light" || saved === "dark") setTheme(saved);
     } catch {}
   }, []);
+
+  // Show privacy banner unless user already dismissed it
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("chat-privacy-accepted")) {
+        setShowPrivacyBanner(true);
+      }
+    } catch {
+      setShowPrivacyBanner(true);
+    }
+  }, []);
+
+  const dismissPrivacyBanner = () => {
+    setShowPrivacyBanner(false);
+    try { localStorage.setItem("chat-privacy-accepted", "1"); } catch {}
+  };
 
   useEffect(() => {
     try {
@@ -473,6 +500,34 @@ export default function ChatWidget({
           </div>
         </div>
       </header>
+
+      {/* ============ PRIVACY BANNER ============ */}
+      {showPrivacyBanner && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-cyber-bg border-b border-cyber-rule text-[11px] text-cyber-ink/60 font-light tracking-wide">
+          <p>
+            {T[activeLang].privacyBanner}{" "}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-cyber-ink/80 underline underline-offset-2 decoration-cyber-ink/40 hover:text-cyber-emerald hover:decoration-cyber-emerald transition-colors"
+            >
+              {T[activeLang].privacyLink}
+            </a>
+            {activeLang === "tr" && " kabul etmiş olursunuz."}
+            {activeLang === "en" && "."}
+            {activeLang === "ru" && "."}
+            {activeLang === "de" && " zu."}
+          </p>
+          <button
+            onClick={dismissPrivacyBanner}
+            aria-label="Kapat"
+            className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-cyber-ink/40 hover:text-cyber-ink hover:bg-cyber-rule transition-colors text-base leading-none"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* ============ MESSAGES SCROLL AREA ============ */}
       <div
