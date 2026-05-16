@@ -1,6 +1,7 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, NoDecode
 from pydantic import field_validator
 from typing import List
+from typing_extensions import Annotated
 from pathlib import Path
 import json
 
@@ -40,7 +41,8 @@ class Settings(BaseSettings):
 
     # CORS - JSON array veya virgulle ayrilmis string olarak verilebilir.
     # Ornek: ALLOWED_ORIGINS=https://foo.vercel.app,https://example.com
-    ALLOWED_ORIGINS: List[str] = [
+    # NoDecode -> pydantic-settings otomatik JSON parse etmesin, validator calissin
+    ALLOWED_ORIGINS: Annotated[List[str], NoDecode] = [
         "http://localhost:3000",
         "http://localhost:3001",
     ]
