@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -70,7 +70,7 @@ export default function KnowledgePage() {
       setGaps(gapsData.gaps);
       setFactsPreview(facts.facts);
     } catch {
-      toast.error("Belgeler yÃ¼klenemedi");
+      toast.error("Belgeler yüklenemedi");
     } finally {
       setLoading(false);
     }
@@ -83,20 +83,20 @@ export default function KnowledgePage() {
   const submitText = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!textTitle.trim() || !textContent.trim()) {
-      toast.error("BaÅŸlÄ±k ve iÃ§erik zorunludur");
+      toast.error("Başlık ve içerik zorunludur");
       return;
     }
     setSaving(true);
     try {
       await api.createKnowledgeText(textTitle.trim(), textContent);
-      toast.success("Belge eklendi ve dizine iÅŸlendi");
+      toast.success("Belge eklendi ve dizine işlendi");
       setTextTitle("");
       setTextContent("");
       await load();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail || "KayÄ±t baÅŸarÄ±sÄ±z";
+          ?.detail || "Kayıt başarısız";
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -106,13 +106,13 @@ export default function KnowledgePage() {
   const submitFile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      toast.error("Dosya seÃ§in");
+      toast.error("Dosya seçin");
       return;
     }
     setSaving(true);
     try {
       await api.uploadKnowledgeFile(file, fileTitle.trim() || undefined);
-      toast.success("Dosya yÃ¼klendi");
+      toast.success("Dosya yüklendi");
       setFile(null);
       setFileTitle("");
       (document.getElementById("kb-file-input") as HTMLInputElement | null)?.value &&
@@ -121,7 +121,7 @@ export default function KnowledgePage() {
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail || "YÃ¼kleme baÅŸarÄ±sÄ±z";
+          ?.detail || "Yükleme başarısız";
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -129,7 +129,7 @@ export default function KnowledgePage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Bu belgeyi silmek istediÄŸinizden emin misiniz?")) return;
+    if (!confirm("Bu belgeyi silmek istediğinizden emin misiniz?")) return;
     try {
       await api.deleteKnowledgeDoc(id);
       toast.success("Belge silindi");
@@ -144,7 +144,7 @@ export default function KnowledgePage() {
       const d = await api.getKnowledgeDoc(id);
       setViewDoc({ title: d.title, content: d.raw_content });
     } catch {
-      toast.error("Belge aÃ§Ä±lamadÄ±");
+      toast.error("Belge açılamadı");
     }
   };
 
@@ -157,7 +157,7 @@ export default function KnowledgePage() {
       const data = await api.searchKnowledge(query.trim());
       setHits(data.results);
     } catch {
-      toast.error("Arama baÅŸarÄ±sÄ±z");
+      toast.error("Arama başarısız");
     } finally {
       setSearching(false);
     }
@@ -176,9 +176,9 @@ export default function KnowledgePage() {
     try {
       await api.updateKnowledgeGap(id, "resolved");
       setGaps((g) => g.filter((x) => x.id !== id));
-      toast.success("Ã‡Ã¶zÃ¼ldÃ¼ olarak iÅŸaretlendi");
+      toast.success("Çözüldü olarak işaretlendi");
     } catch {
-      toast.error("Ä°ÅŸlem baÅŸarÄ±sÄ±z");
+      toast.error("İşlem başarısız");
     }
   };
 
@@ -187,22 +187,22 @@ export default function KnowledgePage() {
       await api.updateKnowledgeGap(id, "dismissed");
       setGaps((g) => g.filter((x) => x.id !== id));
     } catch {
-      toast.error("Ä°ÅŸlem baÅŸarÄ±sÄ±z");
+      toast.error("İşlem başarısız");
     }
   };
 
   return (
     <div className="p-8 max-w-[960px]">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-relate-ink">Bilgi BankasÄ±</h2>
+        <h2 className="text-2xl font-bold text-relate-ink">Bilgi Bankası</h2>
         <p className="text-sm text-relate-graphite mt-1">
-          AI asistanÄ±, mÃ¼ÅŸteri randevu dÄ±ÅŸÄ± bir ÅŸey sorduÄŸunda burada yÃ¼klediÄŸiniz
-          belgelerden cevap Ã¼retir. SSS, fiyat listesi, iade politikasÄ±, bakÄ±m
-          Ã¶nerileri, konum/park bilgisi gibi her ÅŸeyi ekleyebilirsiniz.
+          AI asistanı, müşteri randevu dışı bir şey sorduğunda burada yüklediğiniz
+          belgelerden cevap üretir. SSS, fiyat listesi, iade politikası, bakım
+          önerileri, konum/park bilgisi gibi her şeyi ekleyebilirsiniz.
         </p>
       </div>
 
-      {/* â”€â”€ AI'Ä±n bildiÄŸi gerÃ§ekler (live preview) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── AI'ın bildiği gerçekler (live preview) ───────────────── */}
       <div className="mb-6 bg-white rounded-2xl border border-relate-border">
         <button
           onClick={() => setShowFacts((s) => !s)}
@@ -210,37 +210,37 @@ export default function KnowledgePage() {
         >
           <div>
             <p className="font-semibold text-relate-ink text-[14px]">
-              ğŸ¤– AI'Ä±n iÅŸletmeniz hakkÄ±nda bildiÄŸi temel gerÃ§ekler
+              🤖 AI'ın işletmeniz hakkında bildiği temel gerçekler
             </p>
             <p className="text-[12px] text-relate-graphite mt-0.5">
               Bu blok her sohbette otomatik olarak asistana verilir. Bilgiler
-              ayarlarÄ±nÄ±zdan gelir (ad, adres, telefon, Ã§alÄ±ÅŸma saatleri,
-              hizmetler/fiyatlar). Eksik bir ÅŸey varsa Ayarlar veya Hizmetler
-              ekranÄ±ndan gÃ¼ncelleyin.
+              ayarlarınızdan gelir (ad, adres, telefon, çalışma saatleri,
+              hizmetler/fiyatlar). Eksik bir şey varsa Ayarlar veya Hizmetler
+              ekranından güncelleyin.
             </p>
           </div>
           <span className="text-relate-graphite text-sm shrink-0 ml-3">
-            {showFacts ? "Gizle" : "GÃ¶ster"}
+            {showFacts ? "Gizle" : "Göster"}
           </span>
         </button>
         {showFacts && (
           <pre className="px-5 pb-4 text-[12px] text-relate-ink whitespace-pre-wrap font-mono border-t border-relate-border pt-3">
-            {factsPreview || "(HenÃ¼z veri yok)"}
+            {factsPreview || "(Henüz veri yok)"}
           </pre>
         )}
       </div>
 
-      {/* â”€â”€ Bilgi aÃ§Ä±klarÄ± (cevaplanamayan sorular) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Bilgi açıkları (cevaplanamayan sorular) ─────────────── */}
       {gaps.length > 0 && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="font-semibold text-amber-900">
-                âš ï¸ CevaplayamadÄ±ÄŸÄ± sorular ({gaps.length})
+                ⚠️ Cevaplayamadığı sorular ({gaps.length})
               </h3>
               <p className="text-[12px] text-amber-800 mt-0.5">
-                AI bu sorulara gÃ¼venle cevap veremedi. Bilgi bankanÄ±za ekleyin,
-                bir daha aynÄ± durum yaÅŸanmasÄ±n.
+                AI bu sorulara güvenle cevap veremedi. Bilgi bankanıza ekleyin,
+                bir daha aynı durum yaşanmasın.
               </p>
             </div>
           </div>
@@ -252,11 +252,11 @@ export default function KnowledgePage() {
               >
                 <div className="min-w-0">
                   <p className="text-sm text-relate-ink truncate">
-                    â€œ{g.question}â€
+                    “{g.question}”
                   </p>
                   <p className="text-[11px] text-relate-graphite mt-0.5">
-                    {g.hit_count}Ã— soruldu â€¢ en yÃ¼ksek benzerlik{" "}
-                    {g.best_score.toFixed(2)} â€¢{" "}
+                    {g.hit_count}× soruldu • en yüksek benzerlik{" "}
+                    {g.best_score.toFixed(2)} •{" "}
                     {new Date(g.last_seen_at).toLocaleString("tr-TR")}
                   </p>
                 </div>
@@ -271,7 +271,7 @@ export default function KnowledgePage() {
                     onClick={() => resolveGap(g.id)}
                     className="text-[13px] text-emerald-700 hover:underline"
                   >
-                    Ã‡Ã¶zÃ¼ldÃ¼
+                    Çözüldü
                   </button>
                   <button
                     onClick={() => dismissGap(g.id)}
@@ -286,7 +286,7 @@ export default function KnowledgePage() {
         </div>
       )}
 
-      {/* â”€â”€ Add forms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Add forms ───────────────────────────────────────────── */}
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         {/* Text form */}
         <form
@@ -298,24 +298,24 @@ export default function KnowledgePage() {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                BaÅŸlÄ±k
+                Başlık
               </label>
               <input
                 value={textTitle}
                 onChange={(e) => setTextTitle(e.target.value)}
-                placeholder="Ã¶rn. SÄ±kÃ§a Sorulan Sorular"
+                placeholder="örn. Sıkça Sorulan Sorular"
                 className="input-field"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ä°Ã§erik
+                İçerik
               </label>
               <textarea
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
                 rows={8}
-                placeholder={"Soru: Park yeriniz var mÄ±?\nCevap: Evet, binanÄ±n altÄ±nda Ã¼cretsiz otopark mevcut.\n\nÄ°ade politikasÄ±: ..."}
+                placeholder={"Soru: Park yeriniz var mı?\nCevap: Evet, binanın altında ücretsiz otopark mevcut.\n\nİade politikası: ..."}
                 className="input-field font-mono text-[13px]"
               />
               <p className="text-[11px] text-relate-graphite mt-1">
@@ -327,7 +327,7 @@ export default function KnowledgePage() {
               disabled={saving}
               className="btn-primary px-5 py-2.5 text-sm w-full"
             >
-              {saving ? "Kaydediliyorâ€¦" : "Belgeyi ekle"}
+              {saving ? "Kaydediliyor…" : "Belgeyi ekle"}
             </button>
           </div>
         </form>
@@ -337,16 +337,16 @@ export default function KnowledgePage() {
           onSubmit={submitFile}
           className="bg-white rounded-2xl p-5 border border-relate-border"
         >
-          <h3 className="font-semibold text-relate-ink mb-4">Dosya yÃ¼kle</h3>
+          <h3 className="font-semibold text-relate-ink mb-4">Dosya yükle</h3>
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                BaÅŸlÄ±k (opsiyonel)
+                Başlık (opsiyonel)
               </label>
               <input
                 value={fileTitle}
                 onChange={(e) => setFileTitle(e.target.value)}
-                placeholder="BoÅŸ bÄ±rakÄ±rsanÄ±z dosya adÄ± kullanÄ±lÄ±r"
+                placeholder="Boş bırakırsanız dosya adı kullanılır"
                 className="input-field"
               />
             </div>
@@ -362,7 +362,7 @@ export default function KnowledgePage() {
                 className="block w-full text-sm text-relate-graphite file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-relate-wash file:text-relate-ink hover:file:bg-gray-200"
               />
               <p className="text-[11px] text-relate-graphite mt-1">
-                Desteklenenler: .txt, .md, .pdf, .csv â€¢ Maks 2 MB
+                Desteklenenler: .txt, .md, .pdf, .csv • Maks 2 MB
               </p>
             </div>
             <button
@@ -370,21 +370,21 @@ export default function KnowledgePage() {
               disabled={saving || !file}
               className="btn-primary px-5 py-2.5 text-sm w-full"
             >
-              {saving ? "YÃ¼kleniyorâ€¦" : "YÃ¼kle ve dizinle"}
+              {saving ? "Yükleniyor…" : "Yükle ve dizinle"}
             </button>
           </div>
         </form>
       </div>
 
-      {/* â”€â”€ Document list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Document list ───────────────────────────────────────── */}
       <div className="mb-10">
-        <h3 className="font-semibold text-relate-ink mb-3">YÃ¼klÃ¼ belgeler</h3>
+        <h3 className="font-semibold text-relate-ink mb-3">Yüklü belgeler</h3>
         {loading ? (
-          <p className="text-sm text-relate-graphite">YÃ¼kleniyorâ€¦</p>
+          <p className="text-sm text-relate-graphite">Yükleniyor…</p>
         ) : docs.length === 0 ? (
           <div className="bg-white rounded-2xl p-6 border border-relate-border text-center">
             <p className="text-sm text-relate-graphite">
-              HenÃ¼z belge yok. YukarÄ±daki formla ilk belgenizi ekleyin.
+              Henüz belge yok. Yukarıdaki formla ilk belgenizi ekleyin.
             </p>
           </div>
         ) : (
@@ -399,9 +399,9 @@ export default function KnowledgePage() {
                     {d.title}
                   </p>
                   <p className="text-[12px] text-relate-graphite mt-0.5">
-                    {d.source_type === "file" ? "ğŸ“ " : "ğŸ“ "}
-                    {d.filename || "Metin"} â€¢ {d.chunk_count} parÃ§a â€¢{" "}
-                    {d.char_count.toLocaleString("tr-TR")} karakter â€¢{" "}
+                    {d.source_type === "file" ? "📎 " : "📝 "}
+                    {d.filename || "Metin"} • {d.chunk_count} parça •{" "}
+                    {d.char_count.toLocaleString("tr-TR")} karakter •{" "}
                     {new Date(d.created_at).toLocaleDateString("tr-TR")}
                   </p>
                 </div>
@@ -410,7 +410,7 @@ export default function KnowledgePage() {
                     onClick={() => openView(d.id)}
                     className="text-[13px] text-relate-signal hover:underline"
                   >
-                    GÃ¶rÃ¼ntÃ¼le
+                    Görüntüle
                   </button>
                   <button
                     onClick={() => remove(d.id)}
@@ -425,17 +425,17 @@ export default function KnowledgePage() {
         )}
       </div>
 
-      {/* â”€â”€ Search debug â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Search debug ────────────────────────────────────────── */}
       <div>
         <h3 className="font-semibold text-relate-ink mb-3">Arama testi</h3>
         <p className="text-sm text-relate-graphite mb-3">
-          AI'Ä±n mÃ¼ÅŸteri sorusunu sorduÄŸunda gÃ¶receÄŸi pasajlarÄ± test edin.
+          AI'ın müşteri sorusunu sorduğunda göreceği pasajları test edin.
         </p>
         <form onSubmit={runSearch} className="flex gap-2 mb-4">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ã¶rn. iade politikanÄ±z nedir?"
+            placeholder="örn. iade politikanız nedir?"
             className="input-field flex-1"
           />
           <button
@@ -443,14 +443,14 @@ export default function KnowledgePage() {
             disabled={searching || !query.trim()}
             className="btn-primary px-5 py-2.5 text-sm"
           >
-            {searching ? "AranÄ±yorâ€¦" : "Ara"}
+            {searching ? "Aranıyor…" : "Ara"}
           </button>
         </form>
         {hits !== null && (
           <div className="space-y-2">
             {hits.length === 0 ? (
               <p className="text-sm text-relate-graphite">
-                EÅŸleÅŸen pasaj bulunamadÄ±.
+                Eşleşen pasaj bulunamadı.
               </p>
             ) : (
               hits.map((h, i) => (
@@ -476,7 +476,7 @@ export default function KnowledgePage() {
         )}
       </div>
 
-      {/* â”€â”€ Viewer modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Viewer modal ────────────────────────────────────────── */}
       {viewDoc && (
         <div
           className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
@@ -494,7 +494,7 @@ export default function KnowledgePage() {
                 onClick={() => setViewDoc(null)}
                 className="text-relate-graphite hover:text-relate-ink text-xl leading-none"
               >
-                Ã—
+                ×
               </button>
             </div>
             <pre className="p-5 overflow-auto text-[13px] text-relate-ink whitespace-pre-wrap font-sans">
