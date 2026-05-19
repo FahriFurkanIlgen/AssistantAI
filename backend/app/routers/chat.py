@@ -3,24 +3,33 @@ Chat Router - SSE streaming chat endpoint for the AI assistant.
 """
 import logging
 import uuid
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
+import io
 import json
 import asyncio
 
-from openai import AuthenticationError, APIError, RateLimitError
+from openai import AuthenticationError, APIError, RateLimitError, AsyncOpenAI
 
+from app.config import settings
 from app.models.business import Business
 from app.models.conversation import Conversation, Message
 from app.services.ai_service import AIService
 from app.services.appointment_service import AppointmentService
 from app.services.vision_service import is_instagram_url, extract_og_image, fetch_instagram_portfolio
+from app.services import knowledge_service
+from app.services import customer_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+# Voices accepted by OpenAI tts-1 — 'nova' works well for Turkish.
+_TTS_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+_TTS_MAX_CHARS = 1500  # safety cap (one TTS call ~ a minute of audio)
+_tts_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 class ChatRequest(BaseModel):
@@ -31,11 +40,17 @@ class ChatRequest(BaseModel):
     image_url: Optional[str] = None      # Instagram post URL or direct image URL
 
 
+class Citation(BaseModel):
+    title: str
+    score: float
+
+
 class ChatResponse(BaseModel):
     session_id: str
     reply: str
     appointment_created: bool = False
     appointment_id: Optional[str] = None
+    citations: list[Citation] = []
 
 
 @router.post("/{business_slug}", response_model=ChatResponse)
@@ -61,7 +76,75 @@ async def chat(business_slug: str, request: ChatRequest):
 
     # Build services
     appt_service = AppointmentService(business)
-    ai_service = AIService(business, appt_service.execute_tool)
+
+    async def tool_executor(fn_name: str, fn_args: dict, conv):
+        if fn_name == "search_knowledge_base":
+            results = await knowledge_service.search(
+                business_id=str(business.id),
+                query=fn_args.get("query", ""),
+                top_k=fn_args.get("top_k", 4),
+            )
+            return {"results": results}
+        return await appt_service.execute_tool(fn_name, fn_args, conv)
+
+    # Pre-retrieval hook (called once per user turn by AIService); also logs
+    # questions the KB could not confidently answer so the owner can fill gaps.
+    # Captures the latest hits so we can surface them as citations in the reply.
+    last_kb_hits: list[dict] = []
+
+    async def kb_pre_retrieve(query: str):
+        hits = await knowledge_service.search(
+            business_id=str(business.id),
+            query=query,
+            top_k=4,
+            min_score=0.30,
+        )
+        last_kb_hits.clear()
+        last_kb_hits.extend(hits)
+        try:
+            best = max((h["score"] for h in hits), default=0.0)
+            if best < 0.45 and knowledge_service.looks_like_question(query):
+                await knowledge_service.log_gap(
+                    business_id=str(business.id),
+                    question=query,
+                    language=conversation.language,
+                    session_id=session_id,
+                    best_score=best,
+                )
+        except Exception:
+            pass
+        return hits
+
+    business_facts = await knowledge_service.build_business_facts(business)
+
+    # ── Customer memory: try to identify a returning customer for this turn ─
+    customer_memory = ""
+    matched_customer = None
+    candidate_phone = (
+        conversation.customer_phone
+        or customer_service.detect_phone_in_text(request.message)
+    )
+    if candidate_phone:
+        matched_customer = await customer_service.find_by_phone(
+            str(business.id), candidate_phone
+        )
+        if matched_customer:
+            customer_memory = customer_service.format_memory_block(matched_customer)
+            # Persist phone on conversation so subsequent turns short-circuit
+            if not conversation.customer_phone:
+                conversation.customer_phone = candidate_phone
+                conversation.customer_name = (
+                    conversation.customer_name or matched_customer.name
+                )
+                await conversation.save()
+
+    ai_service = AIService(
+        business,
+        tool_executor,
+        kb_search=kb_pre_retrieve,
+        business_facts=business_facts,
+        customer_memory=customer_memory,
+    )
 
     # Resolve image: Instagram link → extract og:image; base64 → use as-is
     resolved_image: Optional[str] = None
@@ -106,11 +189,36 @@ async def chat(business_slug: str, request: ChatRequest):
             detail="Bir hata oluştu. Lütfen tekrar deneyin.",
         )
 
+    # ── Memory refresh (background, throttled) ──────────────────────────────
+    # If a customer was identified for this turn, asynchronously update their
+    # rolling summary + extracted preferences from the latest transcript.
+    if matched_customer is not None:
+        asyncio.create_task(
+            customer_service.maybe_update_summary(matched_customer, conversation)
+        )
+
+    # ── Citations: unique sources of the KB chunks retrieved this turn ──────
+    # We only surface them if at least one hit was reasonably confident, so we
+    # don't flash a "source" badge for cosmetic small-talk answers.
+    citations: list[Citation] = []
+    seen_titles: set[str] = set()
+    for h in last_kb_hits:
+        if h.get("score", 0) < 0.35:
+            continue
+        title = h.get("document_title") or "Bilgi bankası"
+        if title in seen_titles:
+            continue
+        seen_titles.add(title)
+        citations.append(Citation(title=title, score=round(float(h["score"]), 2)))
+        if len(citations) >= 3:
+            break
+
     return ChatResponse(
         session_id=session_id,
         reply=reply,
         appointment_created=conversation.appointment_id is not None,
         appointment_id=conversation.appointment_id,
+        citations=citations,
     )
 
 
@@ -125,6 +233,7 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
         "en": business.ai_welcome_message_en,
         "ru": business.ai_welcome_message_ru,
         "de": business.ai_welcome_message_de,
+        "ar": business.ai_welcome_message_ar,
     }
     message = welcome_by_lang.get(lang) or business.ai_welcome_message_tr
     return {
@@ -133,6 +242,7 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
         "welcome_message": message,
         "sector": business.sector,
         "instagram_handle": business.instagram_handle,
+        "suggested_questions": list(business.suggested_questions or []),
     }
 
 
@@ -153,3 +263,99 @@ async def get_portfolio(business_slug: str):
         "instagram_url": f"https://www.instagram.com/{handle}/",
         "posts": posts,
     }
+
+
+class TTSRequest(BaseModel):
+    text: str
+    voice: Optional[str] = "nova"
+
+
+@router.post("/{business_slug}/tts")
+async def synthesize_speech(business_slug: str, request: TTSRequest):
+    """Synthesize an assistant reply to speech (MP3) via OpenAI tts-1."""
+    business = await Business.find_one(
+        Business.slug == business_slug, Business.is_active == True
+    )
+    if not business:
+        raise HTTPException(status_code=404, detail="İşletme bulunamadı")
+
+    text = (request.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Boş metin seslendirilemez")
+    if len(text) > _TTS_MAX_CHARS:
+        text = text[:_TTS_MAX_CHARS]
+
+    voice = (request.voice or business.tts_voice or "nova").lower()
+    if voice not in _TTS_VOICES:
+        voice = "nova"
+
+    try:
+        # OpenAI returns the full MP3; we relay it in one response.
+        speech = await _tts_client.audio.speech.create(
+            model="tts-1",
+            voice=voice,
+            input=text,
+            response_format="mp3",
+        )
+        audio_bytes = speech.content  # type: ignore[attr-defined]
+    except RateLimitError:
+        raise HTTPException(status_code=429, detail="Ses servisi meşgul, biraz sonra deneyin")
+    except (AuthenticationError, APIError) as e:
+        logger.error(f"TTS error: {e}")
+        raise HTTPException(status_code=502, detail="Ses servisi şu an kullanılamıyor")
+    except Exception as e:
+        logger.exception(f"Unexpected TTS error: {e}")
+        raise HTTPException(status_code=500, detail="Sesli yanıt üretilemedi")
+
+    return StreamingResponse(
+        iter([audio_bytes]),
+        media_type="audio/mpeg",
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+# ── Speech → Text (Whisper) ──────────────────────────────────────────────
+_STT_MAX_BYTES = 8 * 1024 * 1024  # 8 MB cap (Whisper accepts up to 25 MB)
+
+
+@router.post("/{business_slug}/stt")
+async def transcribe_audio(
+    business_slug: str,
+    audio: UploadFile = File(...),
+    language: Optional[str] = Form("tr"),
+):
+    """Transcribe a short user voice clip via OpenAI Whisper."""
+    business = await Business.find_one(
+        Business.slug == business_slug, Business.is_active == True
+    )
+    if not business:
+        raise HTTPException(status_code=404, detail="İşletme bulunamadı")
+
+    raw = await audio.read()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Boş ses dosyası")
+    if len(raw) > _STT_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Ses dosyası çok büyük (max 8 MB)")
+
+    # Whisper needs a file-like object with a filename hint for format detection.
+    filename = audio.filename or "clip.webm"
+    buf = io.BytesIO(raw)
+    buf.name = filename
+
+    try:
+        result = await _tts_client.audio.transcriptions.create(
+            model="whisper-1",
+            file=buf,
+            language=(language or "tr")[:2],
+        )
+        text = (result.text or "").strip()
+    except RateLimitError:
+        raise HTTPException(status_code=429, detail="Ses servisi meşgul, biraz sonra deneyin")
+    except (AuthenticationError, APIError) as e:
+        logger.error(f"STT error: {e}")
+        raise HTTPException(status_code=502, detail="Ses tanıma servisi şu an kullanılamıyor")
+    except Exception as e:
+        logger.exception(f"Unexpected STT error: {e}")
+        raise HTTPException(status_code=500, detail="Ses metne dönüştürülemedi")
+
+    return {"text": text, "language": language or "tr"}

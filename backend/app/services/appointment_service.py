@@ -13,6 +13,7 @@ from app.models.conversation import Conversation
 from app.models.otp_code import OtpCode
 from app.services.calendar_service import CalendarService
 from app.services.email_service import send_confirmation_email
+from app.services import customer_service
 
 
 class AppointmentService:
@@ -232,6 +233,23 @@ class AppointmentService:
             conversation.customer_name = customer_name
             conversation.customer_phone = customer_phone
             conversation.status = "completed"
+
+            # Upsert Customer record (memory/loyalty layer)
+            try:
+                customer = await customer_service.upsert_customer(
+                    business_id=str(self.business.id),
+                    name=customer_name,
+                    phone=customer_phone,
+                    email=customer_email,
+                    language=conversation.language,
+                    increment_appointments=True,
+                )
+                # Fire-and-forget summary refresh
+                asyncio.create_task(
+                    customer_service.maybe_update_summary(customer, conversation)
+                )
+            except Exception:
+                pass  # Customer side-effect must never break the booking
 
             return {
                 "success": True,

@@ -15,6 +15,7 @@ const SECTORS = [
 export default function RequestDemoPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [form, setForm] = useState({
     name: "",
     business_name: "",
@@ -34,6 +35,12 @@ export default function RequestDemoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!kvkkAccepted) {
+      toast.error(
+        "Devam etmeden önce KVKK Aydınlatma Metnini okuyup onaylamanız gerekir.",
+      );
+      return;
+    }
     setLoading(true);
     try {
       await api.submitDemoRequest(form);
@@ -187,10 +194,35 @@ export default function RequestDemoPage() {
                 />
               </div>
 
+              <div className="rounded-xl border border-relate-border bg-relate-wash/60 px-4 py-3.5">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={kvkkAccepted}
+                    onChange={(e) => setKvkkAccepted(e.target.checked)}
+                    required
+                    className="mt-0.5 w-4 h-4 rounded border-relate-border text-relate-signal focus:ring-2 focus:ring-relate-signal/40 cursor-pointer shrink-0"
+                  />
+                  <span className="text-[13px] leading-[1.55] text-relate-graphite">
+                    Lütfen devam etmeden önce{" "}
+                    <Link
+                      href="/kvkk"
+                      target="_blank"
+                      className="text-relate-signal hover:opacity-70 transition-opacity font-medium underline underline-offset-2"
+                    >
+                      AssistantAI KVKK Aydınlatma Metnini
+                    </Link>{" "}
+                    okuyunuz. Kişisel verilerinizin metinde belirtilen amaçlar
+                    doğrultusunda işlenmesini kabul ediyorum.
+                    <span className="text-relate-signal ml-0.5">*</span>
+                  </span>
+                </label>
+              </div>
+
               <button
                 type="submit"
-                disabled={loading}
-                className="btn-primary w-full mt-2"
+                disabled={loading || !kvkkAccepted}
+                className="btn-primary w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Gönderiliyor..." : "Demo Talep Et"}
               </button>

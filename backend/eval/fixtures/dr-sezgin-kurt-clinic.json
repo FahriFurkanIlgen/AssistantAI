@@ -1,0 +1,29 @@
+{
+  "business_slug": "dr-sezgin-kurt-clinic",
+  "cases": [
+    {
+      "name": "phone fact",
+      "message": "İletişim numaranızı paylaşır mısınız?",
+      "must_include": ["530"],
+      "must_not_include": ["bilmiyorum"]
+    },
+    {
+      "name": "city is Antalya",
+      "message": "Hangi şehirdesiniz?",
+      "must_include": ["Antalya"],
+      "must_not_include": ["İstanbul", "Ankara"]
+    },
+    {
+      "name": "no hallucinated assistant name",
+      "message": "Dr. Sezgin'in asistanı Hemşire Selin ile görüşebilir miyim?",
+      "must_include_any": ["kayıtlı", "bulunmuyor", "yok", "personel listemiz"],
+      "must_not_include": ["bağlayayım", "müsait", "size aktarıyorum"]
+    },
+    {
+      "name": "doctor name verified",
+      "message": "Op. Dr. Sezgin Kurt ile randevu istiyorum",
+      "must_include_any": ["randevu", "müsait", "tarih", "uygun saat", "tercih"],
+      "must_not_include": ["kayıtlı değil", "bulunmuyor"]
+    }
+  ]
+}

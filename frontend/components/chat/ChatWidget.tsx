@@ -6,10 +6,16 @@ import toast from "react-hot-toast";
 
 const INSTAGRAM_RE = /https?:\/\/(?:www\.)?instagram\.com\/p\/[\w-]+/;
 
+interface Citation {
+  title: string;
+  score: number;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   imagePreview?: string;
+  citations?: Citation[];
 }
 
 interface WelcomeInfo {
@@ -18,6 +24,7 @@ interface WelcomeInfo {
   welcome_message: string;
   sector: string;
   instagram_handle?: string;
+  suggested_questions?: string[];
 }
 
 interface PortfolioPost {
@@ -26,7 +33,7 @@ interface PortfolioPost {
   thumbnail: string | null;
 }
 
-type Lang = "tr" | "en" | "ru" | "de";
+type Lang = "tr" | "en" | "ru" | "de" | "ar";
 
 const SUGGESTIONS: Record<Lang, string[]> = {
   tr: [
@@ -52,6 +59,12 @@ const SUGGESTIONS: Record<Lang, string[]> = {
     "Kann ich morgen einen Termin buchen?",
     "Erzählen Sie mir von Ihren Preisen.",
     "Wie sind Ihre Öffnungszeiten?",
+  ],
+  ar: [
+    "ما هي الخدمات التي تقدمونها؟",
+    "هل يمكنني حجز موعد غدًا؟",
+    "ما هي أسعاركم؟",
+    "ما هي ساعات العمل؟",
   ],
 };
 
@@ -165,6 +178,28 @@ const T: Record<Lang, {
     privacyBanner: "Mit dem Chat stimmen Sie unserer",
     privacyLink: "Datenschutzerklärung",
   },
+  ar: {
+    online: "متصل",
+    newChat: "محادثة جديدة",
+    assistant: "المساعد",
+    here: "أنا هنا لمساعدتك.",
+    suggested: "اقتراح",
+    you: "أنت",
+    apptOk: "تم تأكيد الموعد",
+    imgWillSend: "سيتم إرسال الصورة",
+    attachImg: "إرفاق صورة",
+    sendMsg: "اكتب رسالة...",
+    sendHint: "Enter للإرسال · Shift+Enter لسطر جديد",
+    loading: "جارٍ التحميل...",
+    igFail: "تعذّر تحميل الصور. تفضّل بزيارة إنستغرام مباشرة.",
+    tapLiked: "اضغط على الصورة التي تعجبك",
+    pickImage: "الرجاء اختيار صورة.",
+    imgTooLarge: "يجب أن تكون الصورة أقل من 5 ميغابايت.",
+    likeStyle: "يعجبني هذا الأسلوب، أريد شيئًا مشابهًا.",
+    portfolio: "أعمالنا",
+    privacyBanner: "بالدردشة، فإنك توافق على",
+    privacyLink: "سياسة الخصوصية",
+  },
 };
 
 export default function ChatWidget({
@@ -187,7 +222,7 @@ export default function ChatWidget({
   const [portfolioPosts, setPortfolioPosts] = useState<PortfolioPost[]>([]);
   const [portfolioLoading, setPortfolioLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const [showPrivacyBanner, setShowPrivacyBanner] = useState(false);
 
   // Load persisted theme preference
@@ -224,6 +259,153 @@ export default function ChatWidget({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  const [ttsLoadingIdx, setTtsLoadingIdx] = useState<number | null>(null);
+
+  // Auto-play: when on, every new assistant reply is automatically spoken.
+  const [autoPlay, setAutoPlay] = useState<boolean>(false);
+  useEffect(() => {
+    try {
+      setAutoPlay(localStorage.getItem("chat:autoPlay") === "1");
+    } catch {}
+  }, []);
+  const toggleAutoPlay = () => {
+    setAutoPlay((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("chat:autoPlay", next ? "1" : "0");
+      } catch {}
+      return next;
+    });
+  };
+
+  // Voice recording (Whisper STT)
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+
+  const playMessageAudio = useCallback(
+    async (idx: number, text: string) => {
+      // Toggle off if same bubble is playing
+      if (playingIdx === idx && audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+        setPlayingIdx(null);
+        return;
+      }
+      // Stop any prior audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setTtsLoadingIdx(idx);
+      try {
+        const url = await api.synthesizeSpeech(businessSlug, text);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = () => {
+          setPlayingIdx(null);
+          URL.revokeObjectURL(url);
+          if (audioRef.current === audio) audioRef.current = null;
+        };
+        audio.onerror = () => {
+          setPlayingIdx(null);
+          URL.revokeObjectURL(url);
+          if (audioRef.current === audio) audioRef.current = null;
+        };
+        setPlayingIdx(idx);
+        await audio.play();
+      } catch {
+        toast.error(
+          activeLang === "tr"
+            ? "Sesli yanıt üretilemedi"
+            : "Could not play audio",
+        );
+      } finally {
+        setTtsLoadingIdx(null);
+      }
+    },
+    [playingIdx, businessSlug, activeLang],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // ── Mic recording → Whisper transcription ─────────────────────────────────
+  const startRecording = async () => {
+    if (recording || transcribing) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      recordedChunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recordedChunksRef.current, {
+          type: mr.mimeType || "audio/webm",
+        });
+        recordedChunksRef.current = [];
+        if (blob.size < 1024) {
+          // less than ~1 KB → likely silence or accidental tap
+          return;
+        }
+        setTranscribing(true);
+        try {
+          const result = await api.transcribeAudio(
+            businessSlug,
+            blob,
+            activeLang,
+          );
+          if (result.text) {
+            setInput((prev) => (prev ? `${prev} ${result.text}` : result.text));
+            // Focus the textarea so the user can edit or hit Enter
+            setTimeout(() => textareaRef.current?.focus(), 0);
+          } else {
+            toast.error(
+              activeLang === "tr"
+                ? "Sesinizi anlayamadık, tekrar dener misiniz?"
+                : "Couldn't hear you, please try again.",
+            );
+          }
+        } catch {
+          toast.error(
+            activeLang === "tr"
+              ? "Ses metne dönüştürülemedi"
+              : "Could not transcribe audio",
+          );
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setRecording(true);
+    } catch {
+      toast.error(
+        activeLang === "tr"
+          ? "Mikrofon erişimi reddedildi"
+          : "Microphone access denied",
+      );
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+      setRecording(false);
+    }
+  };
 
   // Load welcome
   useEffect(() => {
@@ -290,10 +472,28 @@ export default function ChatWidget({
         currentImageUrl,
       );
       setSessionId(data.session_id);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply },
-      ]);
+      const newMsgIndex = (() => {
+        let idx = -1;
+        setMessages((prev) => {
+          const next = [
+            ...prev,
+            {
+              role: "assistant" as const,
+              content: data.reply,
+              citations: data.citations || [],
+            },
+          ];
+          idx = next.length - 1;
+          return next;
+        });
+        return idx;
+      })();
+      // Fire-and-forget auto-play for fresh assistant reply
+      if (autoPlay && data.reply) {
+        setTimeout(() => {
+          if (newMsgIndex >= 0) playMessageAudio(newMsgIndex, data.reply);
+        }, 200);
+      }
       if (data.appointment_created && !appointmentCreated) {
         setAppointmentCreated(true);
         toast.success(
@@ -403,10 +603,10 @@ export default function ChatWidget({
   const isEmptyState = messages.length <= 1 && !loading;
 
   return (
-    <div data-chat-theme={theme} className="flex flex-col h-full bg-cyber-bg text-cyber-ink">
+    <div data-chat-theme={theme} dir={activeLang === "ar" ? "rtl" : "ltr"} lang={activeLang} className="flex flex-col h-full bg-cyber-bg text-cyber-ink">
       {/* ============ HEADER ============ */}
       <header className="sticky top-0 z-20 bg-cyber-bg/85 backdrop-blur-cyber border-b border-cyber-rule">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+        <div className="max-w-3xl mx-auto px-3 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[14px] font-serif shrink-0">
             {personaInitial}
           </div>
@@ -424,7 +624,38 @@ export default function ChatWidget({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <button
+              onClick={toggleAutoPlay}
+              title={
+                activeLang === "tr"
+                  ? autoPlay
+                    ? "Otomatik sesli okuma açık"
+                    : "Otomatik sesli okuma kapalı"
+                  : autoPlay
+                    ? "Auto-play on"
+                    : "Auto-play off"
+              }
+              className={`hidden sm:flex w-8 h-8 items-center justify-center rounded-full border transition-all duration-500 ease-cyber ${
+                autoPlay
+                  ? "border-cyber-emerald/50 text-cyber-emerald bg-cyber-emerald/10"
+                  : "border-cyber-rule text-cyber-ink/55 hover:text-cyber-ink"
+              }`}
+              aria-pressed={autoPlay}
+            >
+              {autoPlay ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.5 8.5a5 5 0 010 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.5 5.5a9 9 0 010 13" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M22 9l-6 6m0-6l6 6" />
+                </svg>
+              )}
+            </button>
             <button
               onClick={newConversation}
               title={T[activeLang].newChat}
@@ -449,7 +680,7 @@ export default function ChatWidget({
               <button
                 onClick={openPortfolio}
                 title="Portfolyo"
-                className="w-8 h-8 flex items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
+                className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -462,7 +693,7 @@ export default function ChatWidget({
               onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
               title={theme === "dark" ? "Light mode" : "Dark mode"}
               aria-label="Toggle theme"
-              className="w-8 h-8 flex items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
+              className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
             >
               {theme === "dark" ? (
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -477,8 +708,8 @@ export default function ChatWidget({
             </button>
 
             {/* Lang toggle */}
-            <div className="flex bg-cyber-glass border border-cyber-rule rounded-full p-0.5 text-[10px] font-grotesk uppercase tracking-[0.15em]">
-              {(['tr', 'en', 'ru', 'de'] as const).map((l) => (
+            <div className="flex bg-cyber-glass border border-cyber-rule rounded-full p-0.5 text-[10px] font-grotesk uppercase tracking-[0.1em] sm:tracking-[0.15em]">
+              {(['tr', 'en', 'ru', 'de', 'ar'] as const).map((l) => (
                 <button
                   key={l}
                   onClick={() => {
@@ -487,7 +718,7 @@ export default function ChatWidget({
                       setSessionId(undefined);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded-full transition-colors duration-500 ease-cyber ${
+                  className={`px-1.5 sm:px-2.5 py-1 rounded-full transition-colors duration-500 ease-cyber ${
                     activeLang === l
                       ? "bg-cyber-emerald/15 text-cyber-emerald"
                       : "text-cyber-ink/45 hover:text-cyber-ink"
@@ -551,7 +782,7 @@ export default function ChatWidget({
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
-                {SUGGESTIONS[activeLang].map((s) => (
+                {(welcomeInfo?.suggested_questions ?? []).map((s) => (
                   <button
                     key={s}
                     onClick={() => sendMessage(s)}
@@ -600,6 +831,82 @@ export default function ChatWidget({
                     />
                   )}
                   <MessageBubble role={msg.role} content={msg.content} />
+                  {msg.role === "assistant" && msg.content && (
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => playMessageAudio(i, msg.content)}
+                        disabled={ttsLoadingIdx === i}
+                        title={
+                          playingIdx === i
+                            ? activeLang === "tr"
+                              ? "Durdur"
+                              : "Stop"
+                            : activeLang === "tr"
+                              ? "Sesli dinle"
+                              : "Listen"
+                        }
+                        className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-cyber-ink/40 hover:text-cyber-emerald transition-colors disabled:opacity-50"
+                      >
+                        {ttsLoadingIdx === i ? (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="animate-spin"
+                            aria-hidden
+                          >
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="9"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeDasharray="40"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        ) : playingIdx === i ? (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                            <rect x="6" y="5" width="4" height="14" rx="1" />
+                            <rect x="14" y="5" width="4" height="14" rx="1" />
+                          </svg>
+                        ) : (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
+                            <path d="M15.5 8.5a5 5 0 010 7" />
+                            <path d="M18.5 5.5a9 9 0 010 13" />
+                          </svg>
+                        )}
+                        {playingIdx === i
+                          ? activeLang === "tr"
+                            ? "Durdur"
+                            : "Stop"
+                          : activeLang === "tr"
+                            ? "Dinle"
+                            : "Listen"}
+                      </button>
+                    </div>
+                  )}
+                  {msg.role === "assistant" &&
+                    msg.citations &&
+                    msg.citations.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {msg.citations.map((c, idx) => (
+                          <span
+                            key={`${i}-${idx}`}
+                            title={`Benzerlik: ${(c.score * 100).toFixed(0)}%`}
+                            className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.12em] text-cyber-emerald/90 border border-cyber-emerald/30 bg-cyber-emerald/5 rounded-full px-2 py-0.5"
+                          >
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" aria-hidden>
+                              <circle cx="4" cy="4" r="3" />
+                            </svg>
+                            {c.title}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                 </div>
               </div>
             ))}
@@ -691,6 +998,35 @@ export default function ChatWidget({
               </svg>
             </button>
 
+            <button
+              onClick={recording ? stopRecording : startRecording}
+              disabled={loading || transcribing || appointmentCreated}
+              title={
+                recording
+                  ? activeLang === "tr" ? "Kaydı durdur" : "Stop recording"
+                  : activeLang === "tr" ? "Sesli mesaj" : "Voice message"
+              }
+              className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-all duration-500 ease-cyber disabled:opacity-30 ${
+                recording
+                  ? "bg-red-500/15 text-red-400 animate-pulse"
+                  : "text-cyber-ink/55 hover:text-cyber-emerald hover:bg-cyber-emerald/10"
+              }`}
+              aria-pressed={recording}
+            >
+              {transcribing ? (
+                <svg className="w-[16px] h-[16px] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" strokeWidth={2} strokeDasharray="40 60" />
+                </svg>
+              ) : recording ? (
+                <span className="w-3 h-3 rounded-sm bg-red-400" />
+              ) : (
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="9" y="3" width="6" height="12" rx="3" strokeWidth={1.5} />
+                  <path strokeLinecap="round" strokeWidth={1.5} d="M5 11a7 7 0 0014 0M12 18v3M8 21h8" />
+                </svg>
+              )}
+            </button>
+
             <textarea
               ref={textareaRef}
               value={input}
@@ -721,8 +1057,6 @@ export default function ChatWidget({
           </div>
 
           <p className="text-[10px] text-cyber-ink/35 text-center mt-2 font-light">
-            {T[activeLang].sendHint}
-            <span className="mx-1.5 text-cyber-ink/20">·</span>
             AssistantAI
           </p>
         </div>

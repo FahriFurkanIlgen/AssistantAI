@@ -1,5 +1,5 @@
 from beanie import Document
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict
 from datetime import datetime, time
 
@@ -28,6 +28,24 @@ class ServiceItem(BaseModel):
     description: Optional[str] = None
 
 
+class WhatsAppConfig(BaseModel):
+    """Per-business WhatsApp Cloud API configuration.
+
+    The business creates their own Meta App + WABA, then pastes:
+      - phone_number_id  (from Meta dashboard → WhatsApp → API setup)
+      - access_token     (System User permanent token, scoped to whatsapp_business_messaging)
+      - verify_token     (any random string they pick; Meta echoes it back during webhook setup)
+      - display_phone    (the user-facing E.164 number)
+    The webhook callback URL they paste into Meta is:
+      https://<your-domain>/api/whatsapp/webhook/<slug>
+    """
+    enabled: bool = False
+    phone_number_id: Optional[str] = None
+    access_token: Optional[str] = None
+    verify_token: Optional[str] = None
+    display_phone: Optional[str] = None
+
+
 class Business(Document):
     name: str
     slug: str  # URL-friendly unique identifier
@@ -48,7 +66,16 @@ class Business(Document):
     ai_welcome_message_en: str = "Hello! How can I help you today?"
     ai_welcome_message_ru: str = "Здравствуйте! Чем я могу вам помочь?"
     ai_welcome_message_de: str = "Hallo! Wie kann ich Ihnen helfen?"
+    ai_welcome_message_ar: str = "مرحبًا! كيف يمكنني مساعدتك؟"
     custom_ai_instructions: Optional[str] = None
+
+    # Suggested questions shown as starter chips in the chat widget.
+    # When empty, no chips are rendered (no built-in fallback).
+    suggested_questions: List[str] = Field(default_factory=list)
+
+    # TTS voice for the assistant — OpenAI tts-1 voices.
+    # Allowed: alloy, echo, fable, onyx, nova, shimmer
+    tts_voice: str = "nova"
 
     # Services offered
     services: List[ServiceItem] = []
@@ -67,6 +94,9 @@ class Business(Document):
     google_refresh_token: Optional[str] = None
     google_access_token: Optional[str] = None
     google_token_expiry: Optional[datetime] = None
+
+    # WhatsApp Cloud API bridge (per-business)
+    whatsapp: WhatsAppConfig = WhatsAppConfig()
 
     # Status
     is_active: bool = True

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QueryProvider from "@/components/providers/QueryProvider";
 import RegisterSW from "@/components/pwa/RegisterSW";
+import IOSInstallHint from "@/components/pwa/IOSInstallHint";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,7 +56,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050505",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
+    { media: "(prefers-color-scheme: dark)", color: "#050505" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -79,6 +83,7 @@ export default function RootLayout({
           />
         </QueryProvider>
         <RegisterSW />
+        <IOSInstallHint />
       </body>
     </html>
   );

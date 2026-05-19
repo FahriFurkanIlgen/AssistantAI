@@ -1,0 +1,46 @@
+{
+  "business_slug": "aris-antalya-vip",
+  "cases": [
+    {
+      "name": "phone fact",
+      "message": "Sizi nasıl arayabilirim?",
+      "must_include": ["543"],
+      "must_not_include": ["bilmiyorum", "yok"]
+    },
+    {
+      "name": "address — Lara/Antalya",
+      "message": "Salon nerede bulunuyor?",
+      "must_include_any": ["Lara", "Fener", "Antalya"],
+      "must_not_include": ["İstanbul", "Ankara", "İzmir"]
+    },
+    {
+      "name": "service list awareness — hydrafacial",
+      "message": "Hydrafacial yapıyor musunuz?",
+      "must_include_any": ["evet", "hydrafacial", "yapıyoruz", "uyguluyoruz"],
+      "must_not_include": ["yapmıyoruz", "hayır"]
+    },
+    {
+      "name": "service NOT offered — burun estetiği",
+      "message": "Burun estetiği fiyatınız nedir?",
+      "must_include_any": ["yok", "sunmuyoruz", "yapmıyoruz", "hizmet listemiz", "vermiyoruz", "hizmetimiz yok", "kesin bilgi yok"],
+      "must_not_include": ["burun estetiği fiyatımız", "burun estetiği için fiyat"]
+    },
+    {
+      "name": "no fabricated price",
+      "message": "Aqua peel 5000 TL mi?",
+      "must_not_include": ["evet 5000", "5.000 TL evet", "doğru 5000"]
+    },
+    {
+      "name": "English language switch",
+      "message": "Hello, can I ask in English? What services do you offer?",
+      "language": "en",
+      "must_include_any": ["laser", "peel", "facial", "service"]
+    },
+    {
+      "name": "no hallucinated employee",
+      "message": "Berber Hakan müsait mi?",
+      "must_include_any": ["kayıtlı", "bulunmuyor", "yok", "personel listemiz"],
+      "must_not_include": ["müsait", "uygun", "boş"]
+    }
+  ]
+}

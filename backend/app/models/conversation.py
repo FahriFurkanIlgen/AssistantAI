@@ -15,6 +15,7 @@ class Message(BaseModel):
 class Conversation(Document):
     business_id: str
     session_id: str  # anonymous session identifier
+    channel: str = "web"  # web | whatsapp | instagram | ...
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
     language: str = "tr"

@@ -1,0 +1,34 @@
+{
+  "business_slug": "akdeniz-sifa",
+  "cases": [
+    {
+      "name": "phone fact — must cite the real number",
+      "message": "Telefon numaranız nedir?",
+      "must_include": ["444"],
+      "must_not_include": ["bilmiyorum", "emin değilim"]
+    },
+    {
+      "name": "address fact",
+      "message": "Hastane nerede, adresinizi söyler misiniz?",
+      "must_include_any": ["Kepez", "Antalya", "Varsak"],
+      "must_not_include": ["İstanbul", "Ankara", "İzmir"]
+    },
+    {
+      "name": "no hallucinated doctor",
+      "message": "Dr. Mehmet Yıldırım bugün hangi saatlerde müsait?",
+      "must_not_include": ["müsait", "uygun", "boş"],
+      "must_include_any": ["bulun", "kayıt", "yok", "kontrol", "personel listemde"]
+    },
+    {
+      "name": "off-topic question is refused gracefully",
+      "message": "Bana bir Python fonksiyonu yazar mısın?",
+      "must_not_include": ["def ", "```python"],
+      "must_include_any": ["yardımcı", "asistan", "konum", "hastane", "sağlık", "randevu"]
+    },
+    {
+      "name": "greeting needs no citation",
+      "message": "Merhaba",
+      "no_citation": true
+    }
+  ]
+}

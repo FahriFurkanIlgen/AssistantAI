@@ -102,6 +102,36 @@ export const api = {
   getPortfolio: async (businessSlug: string) =>
     (await axiosInstance.get(`/api/chat/${businessSlug}/portfolio`)).data,
 
+  synthesizeSpeech: async (
+    businessSlug: string,
+    text: string,
+    voice = "nova",
+  ): Promise<string> => {
+    const resp = await axiosInstance.post(
+      `/api/chat/${businessSlug}/tts`,
+      { text, voice },
+      { responseType: "blob" },
+    );
+    return URL.createObjectURL(resp.data as Blob);
+  },
+
+  transcribeAudio: async (
+    businessSlug: string,
+    blob: Blob,
+    language = "tr",
+  ): Promise<{ text: string; language: string }> => {
+    const form = new FormData();
+    // .webm is the typical MediaRecorder output in Chrome/Firefox
+    form.append("audio", blob, "clip.webm");
+    form.append("language", language);
+    const resp = await axiosInstance.post(
+      `/api/chat/${businessSlug}/stt`,
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return resp.data;
+  },
+
   getPublicBusiness: async (slug: string) =>
     (await axiosInstance.get(`/api/business/public/${slug}`)).data,
 
@@ -111,6 +141,19 @@ export const api = {
 
   disconnectGoogle: async () =>
     (await axiosInstance.delete("/api/calendar/disconnect")).data,
+
+  // WhatsApp Cloud API bridge
+  getWhatsAppStatus: async (): Promise<{
+    enabled: boolean;
+    phone_number_id?: string | null;
+    display_phone?: string | null;
+    access_token_preview?: string | null;
+    verify_token_set?: boolean;
+    webhook_path?: string;
+  }> => (await axiosInstance.get("/api/whatsapp/status")).data,
+
+  sendWhatsAppTest: async (to: string, text?: string) =>
+    (await axiosInstance.post("/api/whatsapp/test-send", { to, text })).data,
 
   // Staff
   getStaff: async () => (await axiosInstance.get("/api/staff/")).data,
@@ -161,6 +204,153 @@ export const api = {
     city?: string;
     message?: string;
   }) => (await axiosInstance.post("/api/demo-request", data)).data,
+
+  // Knowledge base (RAG)
+  listKnowledge: async () =>
+    (await axiosInstance.get("/api/knowledge/")).data as {
+      documents: Array<{
+        id: string;
+        title: string;
+        source_type: string;
+        filename: string | null;
+        chunk_count: number;
+        char_count: number;
+        created_at: string;
+        updated_at: string;
+      }>;
+    },
+
+  getKnowledgeDoc: async (id: string) =>
+    (await axiosInstance.get(`/api/knowledge/${id}`)).data,
+
+  createKnowledgeText: async (title: string, content: string) =>
+    (await axiosInstance.post("/api/knowledge/text", { title, content })).data,
+
+  uploadKnowledgeFile: async (file: File, title?: string) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (title) fd.append("title", title);
+    return (
+      await axiosInstance.post("/api/knowledge/file", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+    ).data;
+  },
+
+  deleteKnowledgeDoc: async (id: string) =>
+    (await axiosInstance.delete(`/api/knowledge/${id}`)).data,
+
+  searchKnowledge: async (query: string, top_k = 4) =>
+    (await axiosInstance.post("/api/knowledge/search", { query, top_k })).data as {
+      results: Array<{
+        score: number;
+        text: string;
+        document_id: string;
+        document_title: string;
+      }>;
+    },
+
+  listKnowledgeGaps: async (status?: string) =>
+    (
+      await axiosInstance.get("/api/knowledge/gaps/list", {
+        params: status ? { status } : undefined,
+      })
+    ).data as {
+      gaps: Array<{
+        id: string;
+        question: string;
+        language: string;
+        best_score: number;
+        hit_count: number;
+        status: string;
+        created_at: string;
+        last_seen_at: string;
+      }>;
+    },
+
+  updateKnowledgeGap: async (id: string, status: "open" | "resolved" | "dismissed") =>
+    (await axiosInstance.patch(`/api/knowledge/gaps/${id}`, { status })).data,
+
+  deleteKnowledgeGap: async (id: string) =>
+    (await axiosInstance.delete(`/api/knowledge/gaps/${id}`)).data,
+
+  getKnowledgeFactsPreview: async () =>
+    (await axiosInstance.get("/api/knowledge/facts/preview")).data as { facts: string },
+
+  // Customer memory layer
+  listCustomers: async () =>
+    (await axiosInstance.get("/api/customers/")).data as {
+      customers: Array<{
+        id: string;
+        name: string;
+        phone: string;
+        phone_display: string | null;
+        email: string | null;
+        language_preference: string;
+        total_appointments: number;
+        total_conversations: number;
+        tags: string[];
+        last_seen_at: string | null;
+        last_summary_at: string | null;
+        created_at: string;
+      }>;
+    },
+
+  getCustomerByPhone: async (phone: string) =>
+    (await axiosInstance.get(`/api/customers/by-phone/${encodeURIComponent(phone)}`))
+      .data as {
+      customer: null | {
+        id: string;
+        name: string;
+        phone: string;
+        phone_display: string | null;
+        email: string | null;
+        language_preference: string;
+        total_appointments: number;
+        total_conversations: number;
+        tags: string[];
+        memory_summary: string | null;
+        preferences: {
+          preferred_staff: string | null;
+          preferred_staff_id: string | null;
+          preferred_times: string | null;
+          favorite_services: string[];
+          allergies: string | null;
+          notes: string | null;
+        };
+        last_seen_at: string | null;
+        last_summary_at: string | null;
+        created_at: string;
+      };
+      recent_appointments?: Array<{
+        id: string;
+        service_name: string;
+        start_time: string;
+        status: string;
+      }>;
+    },
+
+  updateCustomer: async (
+    id: string,
+    data: {
+      name?: string;
+      email?: string | null;
+      language_preference?: string;
+      tags?: string[];
+      memory_summary?: string | null;
+      preferences?: {
+        preferred_staff?: string | null;
+        preferred_staff_id?: string | null;
+        preferred_times?: string | null;
+        favorite_services?: string[];
+        allergies?: string | null;
+        notes?: string | null;
+      };
+    },
+  ) => (await axiosInstance.patch(`/api/customers/${id}`, data)).data,
+
+  resetCustomerMemory: async (id: string) =>
+    (await axiosInstance.delete(`/api/customers/${id}/memory`)).data,
 };
 
 export const adminApi = {

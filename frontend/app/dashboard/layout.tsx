@@ -11,6 +11,7 @@ const NAV = [
   { href: "/dashboard/services", label: "Hizmetler" },
   { href: "/dashboard/customers", label: "Müşteriler" },
   { href: "/dashboard/staff", label: "Personel" },
+  { href: "/dashboard/knowledge", label: "Bilgi Bankası" },
   { href: "/dashboard/settings", label: "Ayarlar" },
 ];
 

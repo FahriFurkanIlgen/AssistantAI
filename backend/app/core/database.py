@@ -14,10 +14,21 @@ async def init_db(app):
     from app.models.otp_code import OtpCode
     from app.models.staff_member import StaffMember
     from app.models.demo_request import DemoRequest
+    from app.models.knowledge import KnowledgeDocument, KnowledgeGap
 
     await init_beanie(
         database=client[settings.MONGODB_DB_NAME],
-        document_models=[Business, Appointment, Customer, Conversation, OtpCode, StaffMember, DemoRequest],
+        document_models=[
+            Business,
+            Appointment,
+            Customer,
+            Conversation,
+            OtpCode,
+            StaffMember,
+            DemoRequest,
+            KnowledgeDocument,
+            KnowledgeGap,
+        ],
     )
 
 

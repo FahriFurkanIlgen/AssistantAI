@@ -52,6 +52,14 @@ SECTOR_PROMPTS = {
             "Prüfe Verfügbarkeit, schlage passende Slots vor und bestätige den Termin. "
             "Antworte kurz und klar. Emojis sind erlaubt."
         ),
+        "ar": (
+            "أنت مساعد الذكاء الاصطناعي لاستوديو الوشم {business_name}، اسمك {persona_name}. "
+            "رحّب بالعملاء بحرارة وود. "
+            "مهمتك: الحصول على خدمة الوشم المطلوبة، والتاريخ والوقت المفضلين، ثم إنشاء الموعد. "
+            "أولاً اطلب اسم العميل ورقم هاتفه، ثم اسأل عن الخدمة المطلوبة وتفضيلات التاريخ/الوقت. "
+            "تحقق من التوفر، واعرض الأوقات المناسبة، وأكّد الموعد. "
+            "اجعل إجاباتك قصيرة وواضحة. يمكنك استخدام الرموز التعبيرية."
+        ),
     },
     "doctor": {
         "tr": (
@@ -83,6 +91,13 @@ SECTOR_PROMPTS = {
             "Prüfe Verfügbarkeit und bestätige den Termin. "
             "Stelle keine Diagnosen und verschreibe keine Medikamente — das macht der Arzt in der Sprechstunde."
         ),
+        "ar": (
+            "أنت مساعد الذكاء الاصطناعي لحجز المواعيد في عيادة {business_name}، اسمك {persona_name}. "
+            "تعامل مع المرضى باحترافية وتعاطف. "
+            "مهمتك: تلقي شكوى المريض أو طلب الفحص، والتاريخ والوقت المفضلين، ثم إنشاء الموعد. "
+            "أولاً اطلب اسم المريض ورقم هاتفه. تحقق من التوفر وأكّد الموعد. "
+            "لا تقدّم تشخيصاً أو وصفة طبية — دع الطبيب يتولّى ذلك في الاستشارة."
+        ),
     },
     "beauty": {
         "tr": (
@@ -111,6 +126,12 @@ SECTOR_PROMPTS = {
             "Deine Aufgabe: gewünschte Beauty-Leistung, Wunschdatum und -uhrzeit erfragen und einen Termin erstellen. "
             "Frage zuerst nach Name und Telefonnummer. Prüfe Verfügbarkeit und bestätige den Termin. ✨"
         ),
+        "ar": (
+            "أنت مساعد الذكاء الاصطناعي لمركز التجميل {business_name}، اسمك {persona_name}. "
+            "رحّب بالعملاء بحرارة وحيوية. "
+            "مهمتك: الحصول على خدمة التجميل المطلوبة، والتاريخ والوقت المفضلين، ثم إنشاء الموعد. "
+            "أولاً اطلب اسم العميل ورقم هاتفه. تحقق من التوفر وأكّد الموعد. ✨"
+        ),
     },
     "general": {
         "tr": (
@@ -134,6 +155,11 @@ SECTOR_PROMPTS = {
             "Du bist die KI-Terminassistentin von {business_name}, dein Name ist {persona_name}. "
             "Begrüße Kunden höflich und hilf beim Buchungsprozess. "
             "Frage zuerst nach Name und Telefonnummer, dann nach gewünschter Leistung und Datum/Uhrzeit."
+        ),
+        "ar": (
+            "أنت مساعد الذكاء الاصطناعي لحجز المواعيد في {business_name}، اسمك {persona_name}. "
+            "رحّب بالعملاء بأدب وساعدهم في عملية حجز المواعيد. "
+            "أولاً اطلب اسم العميل ورقم هاتفه، ثم اسأل عن الخدمة المطلوبة وتفضيلات التاريخ/الوقت."
         ),
     },
 }
@@ -278,15 +304,45 @@ APPOINTMENT_TOOLS = [
         "function": {
             "name": "get_staff_list",
             "description": (
-                "Get the list of active staff members (employees) of the business, "
-                "along with the services each one offers. "
-                "Call this when the business has multiple staff members and the customer "
-                "needs to choose who to book with."
+                "Get the canonical, authoritative list of active staff members (employees) "
+                "of the business, along with the services each one offers. "
+                "YOU MUST CALL THIS BEFORE confirming, denying, or acting on ANY message "
+                "that contains a person's name (e.g. 'Dr. Mehmet', 'Ayşe hanım', 'Bay Yılmaz') "
+                "or any reference to a specific employee. Never assume a named person works "
+                "here — verify against this list first. Also call when the customer needs to "
+                "choose who to book with."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {},
                 "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge_base",
+            "description": (
+                "Search the business's own knowledge base (FAQ, price list, policies, "
+                "after-care instructions, location/parking info, custom notes uploaded by "
+                "the owner). Use this whenever the customer asks a factual question that is "
+                "NOT about appointment availability — e.g. 'do you take walk-ins?', "
+                "'what's your refund policy?', 'how do I prepare for the session?', "
+                "'where exactly are you located?'. Returns the most relevant passages. "
+                "ALWAYS prefer answering from these passages over guessing. If the search "
+                "returns no results, tell the customer you don't have that information and "
+                "suggest they contact the business directly."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The customer's question rephrased as a concise search query.",
+                    },
+                },
+                "required": ["query"],
             },
         },
     },
@@ -296,13 +352,29 @@ APPOINTMENT_TOOLS = [
 # ── Main AI service ──────────────────────────────────────────────────────────
 
 class AIService:
-    def __init__(self, business: Business, tool_executor):
+    def __init__(self, business: Business, tool_executor, kb_search=None, business_facts: str = "", customer_memory: str = ""):
+        """
+        Args:
+            business: the Business document.
+            tool_executor: async callable (fn_name, fn_args, conversation) -> dict
+                that runs the AI's tool calls.
+            kb_search: optional async callable (query: str) -> list[dict] that
+                returns retrieval hits for pre-injection on every user turn.
+            business_facts: a pre-rendered "ground-truth" block (from
+                knowledge_service.build_business_facts) appended to the system
+                prompt so the assistant always has authoritative info.
+            customer_memory: optional block from customer_service.format_memory_block
+                injected when a returning customer is recognized.
+        """
         self.business = business
-        self.tool_executor = tool_executor  # async callable that executes tool calls
+        self.tool_executor = tool_executor
+        self.kb_search = kb_search
+        self.business_facts = business_facts
+        self.customer_memory = customer_memory
 
     def _build_system_prompt(self, language: str) -> str:
         sector = self.business.sector
-        lang_key = language if language in ("tr", "en", "ru", "de") else "tr"
+        lang_key = language if language in ("tr", "en", "ru", "de", "ar") else "tr"
 
         template = SECTOR_PROMPTS.get(sector, SECTOR_PROMPTS["general"])[lang_key]
         base_prompt = template.format(
@@ -370,12 +442,13 @@ class AIService:
             "E-posta adresi yoksa müşteriye bildirip işletmeyle iletişime geçmelerini söyle."
         )
 
-        # Returning customer context
+        # Returning customer context — the actual memory block (if any) is
+        # appended later via `customer_memory`. This is just a generic hint
+        # for cases where no Customer record exists yet.
         base_prompt += (
-            "\n\nTEKRAR MÜŞTERI: Müşteri sana telefon numarasını söylediğinde, randevu oluşturma sırasında "
-            "aynı numaranın daha önce kullanılıp kullanılmadığına bakabilirsin. Eğer daha önce randevu oluşturduysa, "
-            "adını zaten biliyorsundur — 'Tekrar hoş geldiniz [isim]!' şeklinde karşıla ve "
-            "yeniden isim sormana gerek yok."
+            "\n\nTEKRAR MÜŞTERI: Aşağıda 'TEKRAR MÜŞTERİ TANIMLANDI' bloğu varsa, "
+            "müşteri sistemde kayıtlı demektir — isim/telefon tekrar SORMA, doğrudan adıyla karşıla. "
+            "Blok yoksa standart akış: önce ad ve telefon iste."
         )
 
         # Staff selection context (async staff check happens at runtime via get_staff_list tool)
@@ -386,6 +459,43 @@ class AIService:
             "Müşteri tercih belirtmezse 'herhangi biri' seçeneğini sun ve staff_id olmadan randevu oluştur. "
             "Personel seçildikten sonra `check_availability` aracını o personelin staff_id'si ile çağır."
         )
+
+        # Knowledge base (RAG) instruction — STRICT grounding rules
+        base_prompt += (
+            "\n\n=== KESİN BİLGİ DOĞRULUĞU / ANTI-HALÜSİNASYON KURALLARI ===\n"
+            "Bu asistan sadece bu işletmenin resmi temsilcisidir; bir 'web sitesi danışmanı' "
+            "gibi davranır. Aşağıdaki kurallara KESİNLİKLE uy:\n"
+            "1) Bir bilgi vermeden önce kendine sor: 'Bu bilgi (a) İŞLETME GERÇEKLERİ "
+            "bloğunda mı? (b) İLGİLİ BİLGİ BANKASI PASAJLARI bloğunda mı? (c) Konuşmada "
+            "müşteri kendi söyledi mi?' Üçü de hayır ise UYDURMA.\n"
+            "2) KB'de olmayan bir bilgi için 'Bu konuda elimde kesin bilgi yok, "
+            "işletmeyle iletişime geçmenizi öneririm' de. Tahmin, varsayım, 'genelde böyledir' "
+            "tarzı cevap YASAK.\n"
+            "3) Fiyat, süre, garanti, prosedür, sağlık iddiası, malzeme/marka, lokasyon "
+            "detayı, çalışma günü gibi kritik bilgilerde KAYNAK GÖSTER (örn. 'SSS belgemize göre…' "
+            "veya 'fiyat listemize göre…'). Bu kaynaklar mevcut bloklardaki başlıklardır.\n"
+            "4) Kapsam: SADECE bu işletme hakkında konuş. Genel dünya bilgisi, rakip işletme, "
+            "tıbbi/hukuki/finansal tavsiye verme. Konu dışı sorulara kibarca 'Ben sadece "
+            "{business_name} hakkında yardımcı olabiliyorum' diye yönlendir.\n"
+            "5) Eğer ek bilgi gerekiyorsa `search_knowledge_base` aracını farklı bir sorgu ile "
+            "tekrar çağırabilirsin. Pre-injected pasajlar yeterliyse tekrar arama yapma.\n"
+            "6) Cevabını VERİLEN BİLGİYE DAYANDIR; dolgu cümle veya genel geçer yorum ekleme.\n"
+            "7) PERSONEL ADI KURALI: Müşteri mesajında bir kişi adı geçiyorsa (örn. 'Dr. X', "
+            "'Ayşe hanım', 'Bay Y') veya belirli bir çalışana atıfta bulunuyorsa, CEVAP VERMEDEN "
+            "ÖNCE mutlaka `get_staff_list` aracını çağır. Dönen listede o kişi YOKSA, "
+            "varlığını ima eden ('müsaitlik kontrol edeyim', 'hangi bölümde' gibi) hiçbir cümle "
+            "kurma — bunun yerine net şekilde 'Bu isimde kayıtlı bir personelimiz bulunmuyor. "
+            "Doğru ismi paylaşır mısınız ya da personel listemizden tercih etmek ister misiniz?' "
+            "de ve mevcut personeli listele. Asla isim üzerinden bilgi uydurma."
+        ).replace("{business_name}", self.business.name)
+
+        # Append the authoritative business facts (ground truth)
+        if self.business_facts:
+            base_prompt += "\n\n" + self.business_facts
+
+        # Append per-customer memory (returning customer)
+        if self.customer_memory:
+            base_prompt += "\n\n" + self.customer_memory
 
         # Instagram portfolio context
         if self.business.instagram_handle:
@@ -412,8 +522,23 @@ class AIService:
             Message(role="user", content=user_message)
         )
 
+        # ── Pre-retrieval: always try to ground this turn in real KB content
+        retrieved_block = ""
+        if self.kb_search and user_message and len(user_message.strip()) >= 4:
+            try:
+                hits = await self.kb_search(user_message)
+                if hits:
+                    from app.services.knowledge_service import format_retrieved_context
+                    retrieved_block = format_retrieved_context(hits)
+            except Exception:
+                # Retrieval must never break the chat
+                retrieved_block = ""
+
         # Build messages for OpenAI
-        messages = [{"role": "system", "content": self._build_system_prompt(language)}]
+        system_prompt = self._build_system_prompt(language)
+        if retrieved_block:
+            system_prompt += "\n\n" + retrieved_block
+        messages = [{"role": "system", "content": system_prompt}]
         for msg in conversation.messages[:-1]:
             entry: dict = {"role": msg.role, "content": msg.content}
             if msg.tool_call_id:
@@ -439,7 +564,7 @@ class AIService:
                 messages=messages,
                 tools=APPOINTMENT_TOOLS,
                 tool_choice="auto",
-                temperature=0.7,
+                temperature=0.3,
             )
 
             choice = response.choices[0]

@@ -1,0 +1,54 @@
+{
+  "business_slug": "akdeniz-sifa",
+  "cases": [
+    {
+      "name": "EN — opening hours",
+      "language": "en",
+      "message": "Hello, what are your opening hours on weekdays?",
+      "must_include_any": ["09", "10", "17", "18", "monday", "weekday", "open"],
+      "must_not_include": ["i don't know", "not sure"]
+    },
+    {
+      "name": "EN — address question",
+      "language": "en",
+      "message": "Where exactly is the clinic located?",
+      "must_include_any": ["antalya", "konyaaltı", "konyaalti", "address"],
+      "must_not_include": ["i'm not sure where", "no idea"]
+    },
+    {
+      "name": "DE — Adresse",
+      "language": "de",
+      "message": "Wo befindet sich die Klinik?",
+      "must_include_any": ["Antalya", "Konyaaltı", "Konyaalti", "Adresse"],
+      "must_not_include": ["weiß nicht", "keine Ahnung"]
+    },
+    {
+      "name": "DE — Termin",
+      "language": "de",
+      "message": "Kann ich einen Termin für nächste Woche vereinbaren?",
+      "must_include_any": ["Termin", "Datum", "Uhrzeit", "gerne", "natürlich"],
+      "must_not_include": ["nicht möglich"]
+    },
+    {
+      "name": "RU — адрес",
+      "language": "ru",
+      "message": "Здравствуйте, где находится ваша клиника?",
+      "must_include_any": ["Antalya", "Konyaaltı", "Konyaalti", "Анталь", "адрес"],
+      "must_not_include": ["не знаю"]
+    },
+    {
+      "name": "RU — рабочие часы",
+      "language": "ru",
+      "message": "В какое время вы работаете в будние дни?",
+      "must_include_any": ["09", "10", "17", "18", "часы", "работ"],
+      "must_not_include": ["не знаю"]
+    },
+    {
+      "name": "EN — staff question (must not invent doctor)",
+      "language": "en",
+      "message": "Does Dr. House work at your clinic?",
+      "must_include_any": ["no", "not", "does not", "doesn't", "yok", "bulunmuyor", "kayıtlı değil", "çalışmıyor"],
+      "must_not_include": ["yes, dr. house", "yes he works", "yes she works"]
+    }
+  ]
+}
