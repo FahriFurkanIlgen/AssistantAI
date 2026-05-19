@@ -234,35 +234,43 @@ export default function KnowledgePage() {
 
       {/* ── Bilgi açıkları (cevaplanamayan sorular) ─────────────── */}
       {gaps.length > 0 && (
-        <div className="mb-8 card p-5 bg-amber-50/60 border-amber-200">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="font-semibold text-amber-900">
-                ⚠️ Cevaplayamadığı sorular ({gaps.length})
-              </h3>
-              <p className="text-[12px] text-amber-800 mt-0.5">
-                AI bu sorulara güvenle cevap veremedi. Bilgi bankanıza ekleyin,
-                bir daha aynı durum yaşanmasın.
-              </p>
+        <div className="mb-8 card p-6">
+          <div className="flex items-start justify-between mb-5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-amber-50 border border-amber-200 rounded-full flex items-center justify-center text-[15px] shrink-0">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight">
+                  Cevaplayamadığı sorular
+                  <span className="ml-2 text-[13px] font-medium text-relate-graphite">
+                    ({gaps.length})
+                  </span>
+                </h3>
+                <p className="text-[12px] text-relate-graphite mt-0.5">
+                  AI bu sorulara güvenle cevap veremedi. Bilgi bankanıza
+                  ekleyin, bir daha aynı durum yaşanmasın.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="divide-y divide-relate-border">
             {gaps.map((g) => (
               <div
                 key={g.id}
-                className="flex items-center justify-between bg-white rounded-lg border border-amber-100 px-4 py-3"
+                className="flex items-center justify-between gap-4 py-3.5 first:pt-0 last:pb-0"
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-relate-ink truncate">
+                  <p className="text-[14px] font-medium text-relate-ink truncate">
                     “{g.question}”
                   </p>
-                  <p className="text-[11px] text-relate-graphite mt-0.5">
-                    {g.hit_count}× soruldu • en yüksek benzerlik{" "}
+                  <p className="text-[12px] text-relate-graphite mt-0.5">
+                    {g.hit_count}× soruldu • benzerlik{" "}
                     {g.best_score.toFixed(2)} •{" "}
                     {new Date(g.last_seen_at).toLocaleString("tr-TR")}
                   </p>
                 </div>
-                <div className="flex items-center gap-3 shrink-0 ml-3">
+                <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => answerGap(g)}
                     className="text-[13px] text-relate-signal hover:underline font-medium"
@@ -277,7 +285,7 @@ export default function KnowledgePage() {
                   </button>
                   <button
                     onClick={() => dismissGap(g.id)}
-                    className="text-[13px] text-relate-graphite hover:underline"
+                    className="text-[13px] text-relate-ash hover:text-relate-ink hover:underline"
                   >
                     Yoksay
                   </button>
