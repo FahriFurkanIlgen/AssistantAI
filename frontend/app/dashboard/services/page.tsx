@@ -85,8 +85,8 @@ export default function ServicesPage() {
     <div className="p-8 max-w-[720px]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-apple-ink">Hizmetler</h2>
-          <p className="text-sm text-apple-secondary mt-1">
+          <h2 className="text-2xl font-semibold text-relate-ink">Hizmetler</h2>
+          <p className="text-sm text-relate-graphite mt-1">
             AI asistan bu listeyi müşterilere sunar
           </p>
         </div>
@@ -98,8 +98,8 @@ export default function ServicesPage() {
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-          <div className="bg-white rounded-apple-lg shadow-2xl w-full max-w-md p-6">
-            <h3 className="font-semibold text-apple-ink text-lg mb-5">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="font-semibold text-relate-ink text-lg mb-5">
               {editIndex !== null ? "Hizmeti Düzenle" : "Yeni Hizmet"}
             </h3>
             <div className="space-y-4">
@@ -207,9 +207,9 @@ export default function ServicesPage() {
 
       {/* Services list */}
       {services.length === 0 ? (
-        <div className="text-center py-20 text-apple-secondary border border-dashed border-apple-border rounded-apple">
+        <div className="text-center py-20 text-relate-graphite border border-dashed border-relate-border rounded-lg">
           <p className="text-4xl mb-3">✂️</p>
-          <p className="font-medium text-apple-ink">Henüz hizmet eklenmemiş</p>
+          <p className="font-medium text-relate-ink">Henüz hizmet eklenmemiş</p>
           <p className="text-sm mt-1">
             AI asistan genel randevu alır. Hizmet ekleyerek daha iyi yönlendirme
             yapın.
@@ -222,14 +222,14 @@ export default function ServicesPage() {
         <div className="space-y-3">
           {services.map((s, i) => (
             <div key={i} className="card flex items-center gap-4">
-              <div className="w-10 h-10 bg-apple-gray rounded-apple flex items-center justify-center text-lg shrink-0">
+              <div className="w-10 h-10 bg-relate-wash rounded-lg flex items-center justify-center text-lg shrink-0">
                 ✂️
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-apple-ink truncate">
+                <p className="font-semibold text-relate-ink truncate">
                   {s.name_tr}
                 </p>
-                <div className="flex gap-3 mt-1 text-xs text-apple-secondary">
+                <div className="flex gap-3 mt-1 text-xs text-relate-graphite">
                   <span>⏱ {s.duration_minutes} dk</span>
                   {s.price != null && (
                     <span>💰 {s.price.toLocaleString("tr-TR")} ₺</span>
@@ -244,7 +244,7 @@ export default function ServicesPage() {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => openEdit(i)}
-                  className="text-xs text-apple-blueLink hover:underline"
+                  className="text-xs text-relate-signal hover:underline"
                 >
                   Düzenle
                 </button>

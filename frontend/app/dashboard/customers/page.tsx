@@ -181,8 +181,8 @@ export default function CustomersPage() {
     <div className="p-8 max-w-[960px]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-apple-ink">Müşteriler</h2>
-          <p className="text-sm text-apple-secondary mt-1">
+          <h2 className="text-2xl font-semibold text-relate-ink">Müşteriler</h2>
+          <p className="text-sm text-relate-graphite mt-1">
             {customers.length} kayıtlı müşteri
           </p>
         </div>
@@ -195,11 +195,11 @@ export default function CustomersPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-apple-secondary">
+        <div className="text-center py-20 text-relate-graphite">
           Yükleniyor...
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-apple-secondary">
+        <div className="text-center py-20 text-relate-graphite">
           Müşteri bulunamadı.
         </div>
       ) : (
@@ -212,25 +212,25 @@ export default function CustomersPage() {
             >
               <div className="flex items-center gap-4">
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue font-semibold text-[15px] shrink-0">
+                <div className="w-10 h-10 rounded-full bg-relate-signal/10 flex items-center justify-center text-relate-signal font-semibold text-[15px] shrink-0">
                   {c.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-apple-ink">{c.name}</p>
-                  <div className="flex gap-3 mt-0.5 text-xs text-apple-secondary">
+                  <p className="font-semibold text-relate-ink">{c.name}</p>
+                  <div className="flex gap-3 mt-0.5 text-xs text-relate-graphite">
                     <span>📞 {c.phone}</span>
                     {c.email && <span>✉️ {c.email}</span>}
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold text-apple-ink">
+                  <p className="text-sm font-semibold text-relate-ink">
                     {c.totalCount} randevu
                   </p>
-                  <p className="text-xs text-apple-secondary mt-0.5">
+                  <p className="text-xs text-relate-graphite mt-0.5">
                     Son: {new Date(c.lastVisit).toLocaleDateString("tr-TR")}
                   </p>
                 </div>
-                <span className="text-apple-secondary text-sm ml-2">
+                <span className="text-relate-graphite text-sm ml-2">
                   {selected?.phone === c.phone ? "▲" : "▼"}
                 </span>
               </div>
@@ -238,7 +238,7 @@ export default function CustomersPage() {
               {/* Expanded appointment history */}
               {selected?.phone === c.phone && (
                 <div
-                  className="mt-4 border-t border-apple-border pt-4 space-y-4"
+                  className="mt-4 border-t border-relate-border pt-4 space-y-4"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* AI memory section */}
@@ -246,15 +246,15 @@ export default function CustomersPage() {
                     const rec = memoryByPhone[c.phone];
                     if (rec === undefined) {
                       return (
-                        <p className="text-xs text-apple-secondary">
+                        <p className="text-xs text-relate-graphite">
                           Hafıza yükleniyor…
                         </p>
                       );
                     }
                     if (rec === null) {
                       return (
-                        <div className="bg-apple-gray/40 rounded-lg p-3">
-                          <p className="text-xs text-apple-secondary">
+                        <div className="bg-relate-wash/60 rounded-lg p-3">
+                          <p className="text-xs text-relate-graphite">
                             🤖 Bu müşteri için henüz AI hafızası oluşmamış.
                             İlk konuşma/randevudan sonra otomatik üretilecek.
                           </p>
@@ -265,10 +265,10 @@ export default function CustomersPage() {
                     return (
                       <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-semibold text-apple-secondary uppercase tracking-wide">
+                          <p className="text-xs font-semibold text-relate-graphite uppercase tracking-wide">
                             🤖 AI Hafızası
                             {rec.last_summary_at && (
-                              <span className="ml-2 text-[10px] font-normal text-apple-secondary normal-case tracking-normal">
+                              <span className="ml-2 text-[10px] font-normal text-relate-graphite normal-case tracking-normal">
                                 son güncelleme:{" "}
                                 {new Date(rec.last_summary_at).toLocaleString("tr-TR")}
                               </span>
@@ -278,7 +278,7 @@ export default function CustomersPage() {
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={() => startEdit(rec)}
-                                className="text-[12px] text-apple-blueLink hover:underline"
+                                className="text-[12px] text-relate-signal hover:underline"
                               >
                                 Düzenle
                               </button>
@@ -295,7 +295,7 @@ export default function CustomersPage() {
                         {isEditing ? (
                           <div className="space-y-2">
                             <div>
-                              <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                              <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                 Özet
                               </label>
                               <textarea
@@ -312,7 +312,7 @@ export default function CustomersPage() {
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                                <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                   Tercih ettiği personel
                                 </label>
                                 <input
@@ -327,7 +327,7 @@ export default function CustomersPage() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                                <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                   Tercih ettiği zaman
                                 </label>
                                 <input
@@ -343,7 +343,7 @@ export default function CustomersPage() {
                               </div>
                             </div>
                             <div>
-                              <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                              <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                 Alerji / dikkat
                               </label>
                               <input
@@ -358,7 +358,7 @@ export default function CustomersPage() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                              <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                 Notlar (sadece sahip görür)
                               </label>
                               <textarea
@@ -374,7 +374,7 @@ export default function CustomersPage() {
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-medium text-apple-secondary mb-1">
+                              <label className="block text-[11px] font-medium text-relate-graphite mb-1">
                                 Etiketler (virgülle ayır)
                               </label>
                               <input
@@ -398,18 +398,18 @@ export default function CustomersPage() {
                               </button>
                               <button
                                 onClick={() => setEditingPhone(null)}
-                                className="text-[13px] text-apple-secondary hover:underline px-2"
+                                className="text-[13px] text-relate-graphite hover:underline px-2"
                               >
                                 İptal
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-2 text-[13px] text-apple-ink">
+                          <div className="space-y-2 text-[13px] text-relate-ink">
                             <p>
-                              <span className="text-apple-secondary">Özet:</span>{" "}
+                              <span className="text-relate-graphite">Özet:</span>{" "}
                               {rec.memory_summary || (
-                                <span className="text-apple-secondary italic">
+                                <span className="text-relate-graphite italic">
                                   Henüz özet yok
                                 </span>
                               )}
@@ -423,25 +423,25 @@ export default function CustomersPage() {
                               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
                                 {rec.preferences.preferred_staff && (
                                   <p>
-                                    <span className="text-apple-secondary">Personel:</span>{" "}
+                                    <span className="text-relate-graphite">Personel:</span>{" "}
                                     {rec.preferences.preferred_staff}
                                   </p>
                                 )}
                                 {rec.preferences.preferred_times && (
                                   <p>
-                                    <span className="text-apple-secondary">Zaman:</span>{" "}
+                                    <span className="text-relate-graphite">Zaman:</span>{" "}
                                     {rec.preferences.preferred_times}
                                   </p>
                                 )}
                                 {rec.preferences.allergies && (
                                   <p>
-                                    <span className="text-apple-secondary">Alerji:</span>{" "}
+                                    <span className="text-relate-graphite">Alerji:</span>{" "}
                                     {rec.preferences.allergies}
                                   </p>
                                 )}
                                 {rec.preferences.favorite_services?.length > 0 && (
                                   <p>
-                                    <span className="text-apple-secondary">
+                                    <span className="text-relate-graphite">
                                       Sık aldığı:
                                     </span>{" "}
                                     {rec.preferences.favorite_services.join(", ")}
@@ -449,7 +449,7 @@ export default function CustomersPage() {
                                 )}
                                 {rec.preferences.notes && (
                                   <p className="col-span-2">
-                                    <span className="text-apple-secondary">Not:</span>{" "}
+                                    <span className="text-relate-graphite">Not:</span>{" "}
                                     {rec.preferences.notes}
                                   </p>
                                 )}
@@ -467,7 +467,7 @@ export default function CustomersPage() {
                                 ))}
                               </div>
                             )}
-                            <p className="text-[11px] text-apple-secondary pt-1">
+                            <p className="text-[11px] text-relate-graphite pt-1">
                               {rec.total_conversations} konuşma
                             </p>
                           </div>
@@ -477,7 +477,7 @@ export default function CustomersPage() {
                   })()}
 
                   <div>
-                    <p className="text-xs font-semibold text-apple-secondary uppercase tracking-wide mb-2">
+                    <p className="text-xs font-semibold text-relate-graphite uppercase tracking-wide mb-2">
                       Randevu Geçmişi
                     </p>
                   {c.appointments
@@ -492,7 +492,7 @@ export default function CustomersPage() {
                         className="flex items-center justify-between text-sm"
                       >
                         <div>
-                          <span className="font-medium text-apple-ink">
+                          <span className="font-medium text-relate-ink">
                             {a.service_name}
                           </span>
                           <span
@@ -515,7 +515,7 @@ export default function CustomersPage() {
                                   : "Bekliyor"}
                           </span>
                         </div>
-                        <span className="text-apple-secondary text-xs">
+                        <span className="text-relate-graphite text-xs">
                           {new Date(a.start_time).toLocaleDateString("tr-TR", {
                             day: "2-digit",
                             month: "long",

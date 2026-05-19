@@ -194,7 +194,7 @@ export default function KnowledgePage() {
   return (
     <div className="p-8 max-w-[960px]">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-relate-ink">Bilgi Bankası</h2>
+        <h2 className="text-2xl font-semibold text-relate-ink">Bilgi Bankası</h2>
         <p className="text-sm text-relate-graphite mt-1">
           AI asistanı, müşteri randevu dışı bir şey sorduğunda burada yüklediğiniz
           belgelerden cevap üretir. SSS, fiyat listesi, iade politikası, bakım

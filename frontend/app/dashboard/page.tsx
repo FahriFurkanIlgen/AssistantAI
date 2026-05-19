@@ -43,12 +43,12 @@ function MiniBarChart({ data }: { data: { month: string; count: number }[] }) {
             key={d.month}
             className="flex flex-col items-center gap-1 flex-1"
           >
-            <span className="text-[10px] text-apple-secondary">{d.count}</span>
+            <span className="text-[10px] text-relate-graphite">{d.count}</span>
             <div
-              className="w-full rounded-t-md bg-apple-blue transition-all"
+              className="w-full rounded-t-md bg-relate-signal transition-all"
               style={{ height: `${pct}%`, minHeight: 4 }}
             />
-            <span className="text-[10px] text-apple-secondary">
+            <span className="text-[10px] text-relate-graphite">
               {months[parseInt(label)]}
             </span>
           </div>
@@ -106,10 +106,10 @@ export default function DashboardPage() {
   return (
     <div className="p-8 max-w-[960px]">
       <div className="mb-8">
-        <h2 className="font-display font-semibold text-[28px] text-apple-ink tracking-tight">
+        <h2 className="font-display font-semibold text-[28px] text-relate-ink tracking-tight">
           {profile?.name ?? "Dashboard"}
         </h2>
-        <p className="text-[15px] text-apple-secondary mt-1">
+        <p className="text-[15px] text-relate-graphite mt-1">
           İşletmenizin özet görünümü
         </p>
       </div>
@@ -167,16 +167,16 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {/* Monthly trend */}
         <div className="card">
-          <p className="text-[14px] font-semibold text-apple-ink">
+          <p className="text-[14px] font-semibold text-relate-ink">
             Aylık Trend
           </p>
-          <p className="text-[12px] text-apple-secondary">
+          <p className="text-[12px] text-relate-graphite">
             Son 6 ay (onaylı randevular)
           </p>
           {stats?.monthly_trend?.length ? (
             <MiniBarChart data={stats.monthly_trend} />
           ) : (
-            <p className="text-[13px] text-apple-secondary text-center py-8">
+            <p className="text-[13px] text-relate-graphite text-center py-8">
               Yeterli veri yok
             </p>
           )}
@@ -184,10 +184,10 @@ export default function DashboardPage() {
 
         {/* Top services */}
         <div className="card">
-          <p className="text-[14px] font-semibold text-apple-ink">
+          <p className="text-[14px] font-semibold text-relate-ink">
             Popüler Hizmetler
           </p>
-          <p className="text-[12px] text-apple-secondary mb-3">Tüm zamanlar</p>
+          <p className="text-[12px] text-relate-graphite mb-3">Tüm zamanlar</p>
           {stats?.top_services?.length ? (
             <div className="space-y-2">
               {stats.top_services.map((s, i) => {
@@ -196,14 +196,14 @@ export default function DashboardPage() {
                 return (
                   <div key={s.name}>
                     <div className="flex justify-between text-[12px] mb-0.5">
-                      <span className="text-apple-ink truncate max-w-[70%]">
+                      <span className="text-relate-ink truncate max-w-[70%]">
                         {s.name}
                       </span>
-                      <span className="text-apple-secondary">{s.count}</span>
+                      <span className="text-relate-graphite">{s.count}</span>
                     </div>
-                    <div className="h-1.5 bg-apple-gray rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-relate-wash rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-apple-blue rounded-full"
+                        className="h-full bg-relate-signal rounded-full"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <p className="text-[13px] text-apple-secondary text-center py-8">
+            <p className="text-[13px] text-relate-graphite text-center py-8">
               Henüz veri yok
             </p>
           )}
@@ -222,40 +222,40 @@ export default function DashboardPage() {
       {/* Upcoming appointments */}
       <div className="card p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="font-display font-semibold text-[17px] text-apple-ink tracking-tight">
+          <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight">
             Yaklaşan Randevular
           </h3>
           <Link
             href="/dashboard/appointments"
-            className="text-[13px] text-apple-blueLink hover:underline"
+            className="text-[13px] text-relate-signal hover:underline"
           >
             Tümünü gör
           </Link>
         </div>
         {nextAppts.length === 0 ? (
-          <p className="text-[14px] text-apple-secondary text-center py-10">
+          <p className="text-[14px] text-relate-graphite text-center py-10">
             Henüz yaklaşan randevu yok.
           </p>
         ) : (
-          <div className="divide-y divide-apple-border">
+          <div className="divide-y divide-relate-border">
             {nextAppts.map((a) => (
               <div
                 key={a.id}
                 className="flex items-center justify-between py-3.5"
               >
                 <div>
-                  <p className="font-medium text-apple-ink text-[14px]">
+                  <p className="font-medium text-relate-ink text-[14px]">
                     {a.customer_name}
                   </p>
-                  <p className="text-[12px] text-apple-secondary mt-0.5">
+                  <p className="text-[12px] text-relate-graphite mt-0.5">
                     {a.service_name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[13px] font-medium text-apple-ink">
+                  <p className="text-[13px] font-medium text-relate-ink">
                     {new Date(a.start_time).toLocaleDateString("tr-TR")}
                   </p>
-                  <p className="text-[12px] text-apple-secondary mt-0.5">
+                  <p className="text-[12px] text-relate-graphite mt-0.5">
                     {new Date(a.start_time).toLocaleTimeString("tr-TR", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -271,20 +271,20 @@ export default function DashboardPage() {
       {/* Google Calendar warning */}
       {!profile?.google_connected && (
         <div className="mt-4 card px-6 py-4 flex items-center gap-4">
-          <div className="w-8 h-8 bg-cyber-emerald/15 border border-cyber-emerald/30 rounded-full flex items-center justify-center text-[16px] shrink-0">
+          <div className="w-8 h-8 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center text-[16px] shrink-0">
             📅
           </div>
           <div className="flex-1">
-            <p className="text-[14px] text-apple-ink font-medium">
+            <p className="text-[14px] text-relate-ink font-medium">
               Google Takvim bağlı değil
             </p>
-            <p className="text-[12px] text-apple-secondary">
+            <p className="text-[12px] text-relate-graphite">
               Randevular otomatik takvime eklensin.
             </p>
           </div>
           <Link
             href="/dashboard/settings"
-            className="text-[13px] text-apple-blueLink hover:underline shrink-0"
+            className="text-[13px] text-relate-signal hover:underline shrink-0"
           >
             Bağla
           </Link>

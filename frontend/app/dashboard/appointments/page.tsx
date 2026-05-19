@@ -92,23 +92,23 @@ function WeeklyCalendar({
   });
 
   return (
-    <div className="bg-white rounded-apple-lg border border-apple-border overflow-hidden">
+    <div className="bg-white rounded-2xl border border-relate-border overflow-hidden">
       {/* Week nav */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-apple-border bg-apple-gray">
-        <button onClick={prevWeek} className="text-apple-secondary hover:text-apple-ink px-2 py-1 rounded-lg hover:bg-apple-border transition-colors">‹ Önceki</button>
-        <span className="font-semibold text-apple-ink capitalize">{monthLabel}</span>
-        <button onClick={nextWeek} className="text-apple-secondary hover:text-apple-ink px-2 py-1 rounded-lg hover:bg-apple-border transition-colors">Sonraki ›</button>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-relate-border bg-relate-wash">
+        <button onClick={prevWeek} className="text-relate-graphite hover:text-relate-ink px-2 py-1 rounded-lg hover:bg-relate-border transition-colors">‹ Önceki</button>
+        <span className="font-semibold text-relate-ink capitalize">{monthLabel}</span>
+        <button onClick={nextWeek} className="text-relate-graphite hover:text-relate-ink px-2 py-1 rounded-lg hover:bg-relate-border transition-colors">Sonraki ›</button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-8 border-b border-apple-border">
+      <div className="grid grid-cols-8 border-b border-relate-border">
         <div className="py-2" /> {/* time col */}
         {days.map((day, i) => {
           const isToday = isSameDay(day, new Date());
           return (
-            <div key={i} className={`py-2 text-center border-l border-apple-border ${isToday ? "bg-blue-50" : ""}`}>
-              <p className="text-xs text-apple-secondary">{DAY_NAMES[i]}</p>
-              <p className={`text-sm font-semibold ${isToday ? "text-apple-blue" : "text-apple-ink"}`}>
+            <div key={i} className={`py-2 text-center border-l border-relate-border ${isToday ? "bg-blue-50" : ""}`}>
+              <p className="text-xs text-relate-graphite">{DAY_NAMES[i]}</p>
+              <p className={`text-sm font-semibold ${isToday ? "text-relate-signal" : "text-relate-ink"}`}>
                 {day.getDate()}
               </p>
             </div>
@@ -119,10 +119,10 @@ function WeeklyCalendar({
       {/* Grid */}
       <div className="overflow-y-auto max-h-[520px]">
         {HOURS.map((hour) => (
-          <div key={hour} className="grid grid-cols-8 border-b border-apple-border" style={{ minHeight: 56 }}>
+          <div key={hour} className="grid grid-cols-8 border-b border-relate-border" style={{ minHeight: 56 }}>
             {/* Hour label */}
             <div className="px-2 pt-1">
-              <span className="text-[11px] text-apple-secondary">{hour}:00</span>
+              <span className="text-[11px] text-relate-graphite">{hour}:00</span>
             </div>
             {days.map((day, di) => {
               const dayAppts = apptsByDay[di].filter((a) => {
@@ -130,7 +130,7 @@ function WeeklyCalendar({
                 return h === hour;
               });
               return (
-                <div key={di} className="border-l border-apple-border p-0.5 relative">
+                <div key={di} className="border-l border-relate-border p-0.5 relative">
                   {dayAppts.map((a) => (
                     <div
                       key={a.id}
@@ -220,16 +220,16 @@ export default function AppointmentsPage() {
         </div>
         <div className="flex items-center gap-3">
           {/* View toggle */}
-          <div className="flex bg-apple-gray rounded-apple border border-apple-border p-0.5">
+          <div className="flex bg-relate-wash rounded-lg border border-relate-border p-0.5">
             <button
               onClick={() => setView("list")}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "list" ? "bg-white shadow-sm text-apple-ink" : "text-apple-secondary"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "list" ? "bg-white shadow-sm text-relate-ink" : "text-relate-graphite"}`}
             >
               ☰ Liste
             </button>
             <button
               onClick={() => setView("week")}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "week" ? "bg-white shadow-sm text-apple-ink" : "text-apple-secondary"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === "week" ? "bg-white shadow-sm text-relate-ink" : "text-relate-graphite"}`}
             >
               📅 Hafta
             </button>

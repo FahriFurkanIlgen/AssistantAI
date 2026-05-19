@@ -82,7 +82,7 @@ function ScheduleEditor({
                 onChange={(e) => update(day, "is_open", e.target.checked)}
                 className="rounded"
               />
-              <span className={`text-sm ${h.is_open ? "text-apple-ink" : "text-apple-secondary"}`}>
+              <span className={`text-sm ${h.is_open ? "text-relate-ink" : "text-relate-graphite"}`}>
                 {DAY_LABELS[day]}
               </span>
             </label>
@@ -92,18 +92,18 @@ function ScheduleEditor({
                   type="time"
                   value={h.start}
                   onChange={(e) => update(day, "start", e.target.value)}
-                  className="border border-apple-border rounded-lg px-2 py-1 text-sm"
+                  className="border border-relate-border rounded-lg px-2 py-1 text-sm"
                 />
-                <span className="text-apple-secondary text-sm">–</span>
+                <span className="text-relate-graphite text-sm">–</span>
                 <input
                   type="time"
                   value={h.end}
                   onChange={(e) => update(day, "end", e.target.value)}
-                  className="border border-apple-border rounded-lg px-2 py-1 text-sm"
+                  className="border border-relate-border rounded-lg px-2 py-1 text-sm"
                 />
               </div>
             ) : (
-              <span className="text-sm text-apple-secondary italic">Kapalı</span>
+              <span className="text-sm text-relate-graphite italic">Kapalı</span>
             )}
           </div>
         );
@@ -194,7 +194,7 @@ function StaffCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-apple-ink">{staff.name}</p>
+              <p className="font-semibold text-relate-ink">{staff.name}</p>
               {!staff.is_active && (
                 <span className="badge badge-coral">Pasif</span>
               )}
@@ -202,9 +202,9 @@ function StaffCard({
                 <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">📅 Takvim bağlı</span>
               )}
             </div>
-            <p className="text-sm text-apple-secondary">{staff.email}</p>
-            {staff.phone && <p className="text-xs text-apple-secondary mt-0.5">{staff.phone}</p>}
-            {staff.bio && <p className="text-xs text-apple-secondary italic mt-1">{staff.bio}</p>}
+            <p className="text-sm text-relate-graphite">{staff.email}</p>
+            {staff.phone && <p className="text-xs text-relate-graphite mt-0.5">{staff.phone}</p>}
+            {staff.bio && <p className="text-xs text-relate-graphite italic mt-1">{staff.bio}</p>}
             {staff.service_names.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {staff.service_names.map((s) => (
@@ -221,20 +221,20 @@ function StaffCard({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => { setEditing(!editing); setEditingSchedule(false); }}
-            className="text-xs text-apple-secondary hover:text-apple-ink border border-apple-border px-2.5 py-1.5 rounded-lg hover:bg-apple-gray transition-colors"
+            className="text-xs text-relate-graphite hover:text-relate-ink border border-relate-border px-2.5 py-1.5 rounded-lg hover:bg-relate-wash transition-colors"
           >
             {editing ? "İptal" : "Düzenle"}
           </button>
           <button
             onClick={() => { setEditingSchedule(!editingSchedule); setEditing(false); }}
-            className="text-xs text-apple-secondary hover:text-apple-ink border border-apple-border px-2.5 py-1.5 rounded-lg hover:bg-apple-gray transition-colors"
+            className="text-xs text-relate-graphite hover:text-relate-ink border border-relate-border px-2.5 py-1.5 rounded-lg hover:bg-relate-wash transition-colors"
           >
             {editingSchedule ? "İptal" : "Takvim"}
           </button>
           {staff.is_active && (
             <button
               onClick={() => onDeactivate(staff.id)}
-              className="text-[11px] text-cyber-coral border border-cyber-coral/30 px-2.5 py-1.5 rounded-lg hover:bg-cyber-coral/10 transition-colors"
+              className="text-[11px] text-red-600 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
             >
               Deaktif
             </button>
@@ -244,10 +244,10 @@ function StaffCard({
 
       {/* Edit form */}
       {editing && (
-        <div className="mt-4 pt-4 border-t border-apple-border space-y-3">
+        <div className="mt-4 pt-4 border-t border-relate-border space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-apple-secondary mb-1 block">İsim</label>
+              <label className="text-xs text-relate-graphite mb-1 block">İsim</label>
               <input
                 className="input-field w-full"
                 value={form.name}
@@ -255,7 +255,7 @@ function StaffCard({
               />
             </div>
             <div>
-              <label className="text-xs text-apple-secondary mb-1 block">Telefon</label>
+              <label className="text-xs text-relate-graphite mb-1 block">Telefon</label>
               <input
                 className="input-field w-full"
                 value={form.phone}
@@ -264,7 +264,7 @@ function StaffCard({
             </div>
           </div>
           <div>
-            <label className="text-xs text-apple-secondary mb-1 block">Biyografi</label>
+            <label className="text-xs text-relate-graphite mb-1 block">Biyografi</label>
             <textarea
               className="input-field w-full resize-none"
               rows={2}
@@ -274,7 +274,7 @@ function StaffCard({
           </div>
           {businessServices.length > 0 && (
             <div>
-              <label className="text-xs text-apple-secondary mb-2 block">Sunduğu Hizmetler</label>
+              <label className="text-xs text-relate-graphite mb-2 block">Sunduğu Hizmetler</label>
               <div className="flex flex-wrap gap-2">
                 {businessServices.map((svc) => (
                   <button
@@ -284,7 +284,7 @@ function StaffCard({
                     className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                       form.service_names.includes(svc)
                         ? "bg-brand-600 text-white border-brand-600"
-                        : "text-apple-secondary border-apple-border hover:bg-apple-gray"
+                        : "text-relate-graphite border-relate-border hover:bg-relate-wash"
                     }`}
                   >
                     {svc}
@@ -295,18 +295,18 @@ function StaffCard({
           )}
           {/* Google Calendar */}
           <div className="flex items-center gap-2 pt-1">
-            <span className="text-xs text-apple-secondary">Google Calendar:</span>
+            <span className="text-xs text-relate-graphite">Google Calendar:</span>
             {staff.google_connected ? (
               <button
                 onClick={() => onDisconnectCalendar(staff.id)}
-                className="text-xs text-cyber-coral hover:underline"
+                className="text-xs text-red-600 hover:underline"
               >
                 Bağlantıyı kes
               </button>
             ) : (
               <button
                 onClick={() => onConnectCalendar(staff.id)}
-                className="text-xs text-apple-blue hover:underline"
+                className="text-xs text-relate-signal hover:underline"
               >
                 Bağla
               </button>
@@ -324,8 +324,8 @@ function StaffCard({
 
       {/* Schedule editor */}
       {editingSchedule && (
-        <div className="mt-4 pt-4 border-t border-apple-border">
-          <h4 className="text-sm font-medium text-apple-ink mb-3">Çalışma Saatleri</h4>
+        <div className="mt-4 pt-4 border-t border-relate-border">
+          <h4 className="text-sm font-medium text-relate-ink mb-3">Çalışma Saatleri</h4>
           <ScheduleEditor schedule={schedule} onChange={setSchedule} />
           <button
             onClick={saveSchedule}
@@ -447,8 +447,8 @@ export default function StaffPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-[28px] font-serif font-light text-cyber-ink">Personel</h2>
-          <p className="text-cyber-ink/55 text-sm mt-1">
+          <h2 className="text-[28px] font-display font-semibold text-relate-ink">Personel</h2>
+          <p className="text-relate-graphite text-sm mt-1">
             {activeStaff.length} aktif personel
           </p>
         </div>
@@ -463,11 +463,11 @@ export default function StaffPage() {
       {/* Add form */}
       {showAdd && (
         <div className="card p-6 mb-6">
-          <h3 className="font-semibold text-apple-ink mb-4">Yeni Personel</h3>
+          <h3 className="font-semibold text-relate-ink mb-4">Yeni Personel</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-apple-secondary mb-1 block">İsim *</label>
+                <label className="text-xs text-relate-graphite mb-1 block">İsim *</label>
                 <input
                   className="input-field w-full"
                   placeholder="Ad Soyad"
@@ -476,7 +476,7 @@ export default function StaffPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-apple-secondary mb-1 block">E-posta *</label>
+                <label className="text-xs text-relate-graphite mb-1 block">E-posta *</label>
                 <input
                   type="email"
                   className="input-field w-full"
@@ -486,7 +486,7 @@ export default function StaffPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-apple-secondary mb-1 block">Şifre *</label>
+                <label className="text-xs text-relate-graphite mb-1 block">Şifre *</label>
                 <input
                   type="password"
                   className="input-field w-full"
@@ -496,7 +496,7 @@ export default function StaffPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-apple-secondary mb-1 block">Telefon</label>
+                <label className="text-xs text-relate-graphite mb-1 block">Telefon</label>
                 <input
                   className="input-field w-full"
                   placeholder="05XX XXX XX XX"
@@ -506,7 +506,7 @@ export default function StaffPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-apple-secondary mb-1 block">Biyografi</label>
+              <label className="text-xs text-relate-graphite mb-1 block">Biyografi</label>
               <textarea
                 className="input-field w-full resize-none"
                 rows={2}
@@ -517,7 +517,7 @@ export default function StaffPage() {
             </div>
             {businessServices.length > 0 && (
               <div>
-                <label className="text-xs text-apple-secondary mb-2 block">Sunduğu Hizmetler</label>
+                <label className="text-xs text-relate-graphite mb-2 block">Sunduğu Hizmetler</label>
                 <div className="flex flex-wrap gap-2">
                   {businessServices.map((svc) => (
                     <button
@@ -527,7 +527,7 @@ export default function StaffPage() {
                       className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                         form.service_names.includes(svc)
                           ? "bg-brand-600 text-white border-brand-600"
-                          : "text-apple-secondary border-apple-border hover:bg-apple-gray"
+                          : "text-relate-graphite border-relate-border hover:bg-relate-wash"
                       }`}
                     >
                       {svc}
@@ -537,7 +537,7 @@ export default function StaffPage() {
               </div>
             )}
             <div>
-              <label className="text-xs text-apple-secondary mb-2 block">Çalışma Saatleri</label>
+              <label className="text-xs text-relate-graphite mb-2 block">Çalışma Saatleri</label>
               <ScheduleEditor schedule={schedule} onChange={setSchedule} />
             </div>
             <button
@@ -552,11 +552,11 @@ export default function StaffPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-cyber-ink/40">Yükleniyor...</div>
+        <div className="text-center py-20 text-relate-ash">Yükleniyor...</div>
       ) : staff.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-cyber-ink/40 mb-2">Henüz personel eklenmemiş.</p>
-          <p className="text-sm text-cyber-ink/40">
+          <p className="text-relate-ash mb-2">Henüz personel eklenmemiş.</p>
+          <p className="text-sm text-relate-ash">
             "+ Personel Ekle" butonuna tıklayarak başlayın.
           </p>
         </div>
@@ -575,7 +575,7 @@ export default function StaffPage() {
           ))}
           {inactiveStaff.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-medium text-apple-secondary mb-3">Pasif Personel</h3>
+              <h3 className="text-sm font-medium text-relate-graphite mb-3">Pasif Personel</h3>
               <div className="space-y-3">
                 {inactiveStaff.map((s) => (
                   <StaffCard

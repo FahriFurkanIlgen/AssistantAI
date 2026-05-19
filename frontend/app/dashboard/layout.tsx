@@ -47,14 +47,14 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-cyber-bg">
+    <div className="min-h-screen flex bg-relate-canvas">
       {/* Sidebar */}
-      <aside className="w-60 bg-cyber-glass backdrop-blur-cyber border-r border-cyber-rule flex flex-col shrink-0">
+      <aside className="w-60 bg-white border-r border-relate-border flex flex-col shrink-0">
         {/* Brand */}
-        <div className="px-6 py-5 border-b border-apple-border">
+        <div className="px-6 py-5 border-b border-relate-border">
           <LogoLockup href="/dashboard" size={28} />
           {businessName && (
-            <p className="text-[12px] text-apple-secondary mt-1 truncate">
+            <p className="text-[12px] text-relate-graphite mt-1 truncate">
               {businessName}
             </p>
           )}
@@ -68,8 +68,8 @@ export default function DashboardLayout({
               href={item.href}
               className={`flex items-center px-3 py-2 rounded-lg text-[14px] font-medium transition-colors ${
                 pathname === item.href
-                  ? "bg-apple-gray text-apple-ink"
-                  : "text-apple-secondary hover:bg-apple-gray hover:text-apple-ink"
+                  ? "bg-relate-wash text-relate-ink"
+                  : "text-relate-graphite hover:bg-relate-wash hover:text-relate-ink"
               }`}
             >
               {item.label}
@@ -79,15 +79,15 @@ export default function DashboardLayout({
 
         {/* Chat link */}
         {slug && (
-          <div className="px-6 py-4 border-t border-apple-border">
-            <p className="text-[11px] text-apple-secondary mb-1.5">
+          <div className="px-6 py-4 border-t border-relate-border">
+            <p className="text-[11px] text-relate-graphite mb-1.5">
               Müşteri linki
             </p>
             <a
               href={`/chat/${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[12px] text-apple-blueLink hover:underline break-all"
+              className="text-[12px] text-relate-signal hover:underline break-all"
             >
               /chat/{slug}
             </a>
@@ -95,10 +95,10 @@ export default function DashboardLayout({
         )}
 
         {/* Logout */}
-        <div className="px-6 py-4 border-t border-apple-border">
+        <div className="px-6 py-4 border-t border-relate-border">
           <button
             onClick={logout}
-            className="text-[13px] text-cyber-ink/55 hover:text-cyber-emerald transition-colors"
+            className="text-[13px] text-relate-graphite hover:text-relate-ink transition-colors"
           >
             Çıkış Yap
           </button>
