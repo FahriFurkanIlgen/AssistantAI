@@ -193,17 +193,19 @@ export default function KnowledgePage() {
 
   return (
     <div className="p-8 max-w-[960px]">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-relate-ink">Bilgi Bankası</h2>
-        <p className="text-sm text-relate-graphite mt-1">
+      <div className="mb-8">
+        <h2 className="font-display font-semibold text-[28px] text-relate-ink tracking-tight">
+          Bilgi Bankası
+        </h2>
+        <p className="text-[15px] text-relate-graphite mt-1">
           AI asistanı, müşteri randevu dışı bir şey sorduğunda burada yüklediğiniz
           belgelerden cevap üretir. SSS, fiyat listesi, iade politikası, bakım
-          önerileri, konum/park bilgisi gibi her şeyi ekleyebilirsiniz.
+          önerileri, konum/park bilgisi gibi her şey ekleyebilirsiniz.
         </p>
       </div>
 
-      {/* ── AI'ın bildiği gerçekler (live preview) ───────────────── */}
-      <div className="mb-6 bg-white rounded-2xl border border-relate-border">
+      {/* ── AI'ın bildiği gerçekler (live preview) ───────────── */}
+      <div className="mb-6 card p-0 overflow-hidden">
         <button
           onClick={() => setShowFacts((s) => !s)}
           className="w-full flex items-center justify-between px-5 py-3 text-left"
@@ -232,7 +234,7 @@ export default function KnowledgePage() {
 
       {/* ── Bilgi açıkları (cevaplanamayan sorular) ─────────────── */}
       {gaps.length > 0 && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div className="mb-8 card p-5 bg-amber-50/60 border-amber-200">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="font-semibold text-amber-900">
@@ -287,14 +289,14 @@ export default function KnowledgePage() {
       )}
 
       {/* ── Add forms ───────────────────────────────────────────── */}
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      <div className="grid md:grid-cols-2 gap-4 mb-8">
         {/* Text form */}
         <form
           id="kb-text-form"
           onSubmit={submitText}
-          className="bg-white rounded-2xl p-5 border border-relate-border"
+          className="card p-5"
         >
-          <h3 className="font-semibold text-relate-ink mb-4">Metin olarak ekle</h3>
+          <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight mb-4">Metin olarak ekle</h3>
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -335,9 +337,9 @@ export default function KnowledgePage() {
         {/* File form */}
         <form
           onSubmit={submitFile}
-          className="bg-white rounded-2xl p-5 border border-relate-border"
+          className="card p-5"
         >
-          <h3 className="font-semibold text-relate-ink mb-4">Dosya yükle</h3>
+          <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight mb-4">Dosya yükle</h3>
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -377,18 +379,18 @@ export default function KnowledgePage() {
       </div>
 
       {/* ── Document list ───────────────────────────────────────── */}
-      <div className="mb-10">
-        <h3 className="font-semibold text-relate-ink mb-3">Yüklü belgeler</h3>
+      <div className="mb-8">
+        <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight mb-3">Yüklü belgeler</h3>
         {loading ? (
           <p className="text-sm text-relate-graphite">Yükleniyor…</p>
         ) : docs.length === 0 ? (
-          <div className="bg-white rounded-2xl p-6 border border-relate-border text-center">
+          <div className="card p-6 text-center">
             <p className="text-sm text-relate-graphite">
               Henüz belge yok. Yukarıdaki formla ilk belgenizi ekleyin.
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-relate-border divide-y divide-relate-border">
+          <div className="card p-0 divide-y divide-relate-border">
             {docs.map((d) => (
               <div
                 key={d.id}
@@ -427,7 +429,7 @@ export default function KnowledgePage() {
 
       {/* ── Search debug ────────────────────────────────────────── */}
       <div>
-        <h3 className="font-semibold text-relate-ink mb-3">Arama testi</h3>
+        <h3 className="font-display font-semibold text-[17px] text-relate-ink tracking-tight mb-3">Arama testi</h3>
         <p className="text-sm text-relate-graphite mb-3">
           AI'ın müşteri sorusunu sorduğunda göreceği pasajları test edin.
         </p>
@@ -456,7 +458,7 @@ export default function KnowledgePage() {
               hits.map((h, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-2xl border border-relate-border p-4"
+                  className="card p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[12px] font-medium text-relate-graphite">

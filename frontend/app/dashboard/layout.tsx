@@ -49,7 +49,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex bg-relate-canvas">
       {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-relate-border flex flex-col shrink-0">
+      <aside className="w-60 border-r border-relate-border flex flex-col shrink-0">
         {/* Brand */}
         <div className="px-6 py-5 border-b border-relate-border">
           <LogoLockup href="/dashboard" size={28} />
