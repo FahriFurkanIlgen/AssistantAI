@@ -46,6 +46,8 @@ export default function SettingsPage() {
     address: "",
     city: "",
     instagram_handle: "",
+    logo_url: "",
+    chat_theme: "light",
     suggested_questions_text: "", // one question per line
   });
 
@@ -66,6 +68,8 @@ export default function SettingsPage() {
         address: p.address || "",
         city: p.city || "",
         instagram_handle: p.instagram_handle || "",
+        logo_url: p.logo_url || "",
+        chat_theme: p.chat_theme === "dark" ? "dark" : "light",
         suggested_questions_text: Array.isArray(p.suggested_questions)
           ? p.suggested_questions.join("\n")
           : "",
@@ -175,7 +179,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-6 md:p-8 max-w-2xl">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Ayarlar</h2>
 
       {/* Google Calendar */}
@@ -371,6 +375,121 @@ export default function SettingsPage() {
             className="input-field"
             placeholder="Örn: Mia, Alex, Randevu Asistanı"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Asistan Logosu / Avatarı
+          </label>
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 rounded-full overflow-hidden border border-relate-border bg-relate-wash flex items-center justify-center shrink-0">
+              {form.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={form.logo_url}
+                  alt="Logo önizleme"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-relate-ash text-xs">Logo</span>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 600_000) {
+                    toast.error(
+                      "Görsel 600 KB altında olmalı. Lütfen sıkıştırın.",
+                    );
+                    e.target.value = "";
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setForm((f) => ({
+                      ...f,
+                      logo_url: String(reader.result || ""),
+                    }));
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="block text-sm text-gray-700 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border file:border-relate-border file:bg-white file:text-relate-ink file:text-xs file:font-medium file:cursor-pointer hover:file:bg-relate-wash"
+              />
+              <input
+                value={form.logo_url}
+                onChange={(e) =>
+                  setForm({ ...form, logo_url: e.target.value })
+                }
+                className="input-field text-xs"
+                placeholder="veya doğrudan https:// URL yapıştırın"
+              />
+              {form.logo_url && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, logo_url: "" })}
+                  className="text-xs text-relate-coral hover:underline"
+                >
+                  Logoyu kaldır
+                </button>
+              )}
+              <p className="text-[11px] text-gray-500">
+                Kare görsel önerilir (PNG/JPG/WebP/SVG, max 600 KB). Chat
+                karşılama dairesinde ve mesaj avatarlarında kullanılır.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Chat Teması
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {(["light", "dark"] as const).map((opt) => {
+              const active = form.chat_theme === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setForm({ ...form, chat_theme: opt })}
+                  className={`text-left rounded-lg border px-4 py-3 transition-all ${
+                    active
+                      ? "border-relate-signal ring-2 ring-relate-signal/30 bg-relate-wash"
+                      : "border-relate-border hover:border-relate-steel"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-md border ${
+                        opt === "dark"
+                          ? "bg-[#050505] border-white/10"
+                          : "bg-white border-relate-border"
+                      }`}
+                      aria-hidden
+                    />
+                    <div>
+                      <div className="font-medium text-sm text-relate-ink capitalize">
+                        {opt === "dark" ? "Koyu (Cyber)" : "Açık (Relate)"}
+                      </div>
+                      <div className="text-[11px] text-relate-graphite">
+                        {opt === "dark"
+                          ? "Siyah zemin, emerald aksan"
+                          : "Beyaz zemin, mavi aksan"}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] text-gray-500">
+            Chat ekranının varsayılan teması. Ziyaretçiler widget içindeki
+            butonla kendi tercihlerini geçici olarak değiştirebilir.
+          </p>
         </div>
 
         <div>

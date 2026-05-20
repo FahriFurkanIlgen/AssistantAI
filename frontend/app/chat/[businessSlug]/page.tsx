@@ -11,7 +11,7 @@ export default async function ChatPage({ params, searchParams }: Props) {
   const lang = (langParam === "en" || langParam === "ru" || langParam === "de" ? langParam : "tr") as "tr" | "en" | "ru" | "de";
 
   return (
-    <div className="h-screen w-screen bg-cyber-bg overflow-hidden">
+    <div className="h-[100dvh] w-screen bg-cyber-bg overflow-hidden">
       <ChatWidget businessSlug={businessSlug} lang={lang} />
     </div>
   );

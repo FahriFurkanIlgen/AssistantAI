@@ -242,6 +242,8 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
         "welcome_message": message,
         "sector": business.sector,
         "instagram_handle": business.instagram_handle,
+        "logo_url": business.logo_url,
+        "chat_theme": business.chat_theme or "light",
         "suggested_questions": list(business.suggested_questions or []),
     }
 

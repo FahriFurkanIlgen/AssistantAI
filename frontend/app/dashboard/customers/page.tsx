@@ -178,7 +178,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="p-8 max-w-[960px]">
+    <div className="p-4 sm:p-6 md:p-8 max-w-[960px]">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-semibold text-relate-ink">Müşteriler</h2>

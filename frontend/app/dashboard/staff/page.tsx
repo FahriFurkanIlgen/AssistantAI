@@ -444,10 +444,10 @@ export default function StaffPage() {
   const inactiveStaff = staff.filter((s) => !s.is_active);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-[28px] font-display font-semibold text-relate-ink">Personel</h2>
+          <h2 className="text-[20px] sm:text-[28px] font-display font-semibold text-relate-ink">Personel</h2>
           <p className="text-relate-graphite text-sm mt-1">
             {activeStaff.length} aktif personel
           </p>

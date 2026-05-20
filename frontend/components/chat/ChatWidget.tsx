@@ -24,6 +24,8 @@ interface WelcomeInfo {
   welcome_message: string;
   sector: string;
   instagram_handle?: string;
+  logo_url?: string | null;
+  chat_theme?: "light" | "dark";
   suggested_questions?: string[];
 }
 
@@ -223,15 +225,20 @@ export default function ChatWidget({
   const [portfolioLoading, setPortfolioLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [themeUserOverride, setThemeUserOverride] = useState(false);
   const [showPrivacyBanner, setShowPrivacyBanner] = useState(false);
 
-  // Load persisted theme preference
+  // Load persisted theme preference (per-business). Eğer kullanıcı bu işletme
+  // için widget içindeki toggle ile manuel seçim yapmışsa onu kullan.
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("chat-theme");
-      if (saved === "light" || saved === "dark") setTheme(saved);
+      const saved = localStorage.getItem(`chat-theme:${businessSlug}`);
+      if (saved === "light" || saved === "dark") {
+        setTheme(saved);
+        setThemeUserOverride(true);
+      }
     } catch {}
-  }, []);
+  }, [businessSlug]);
 
   // Show privacy banner unless user already dismissed it
   useEffect(() => {
@@ -250,10 +257,11 @@ export default function ChatWidget({
   };
 
   useEffect(() => {
+    if (!themeUserOverride) return;
     try {
-      localStorage.setItem("chat-theme", theme);
+      localStorage.setItem(`chat-theme:${businessSlug}`, theme);
     } catch {}
-  }, [theme]);
+  }, [theme, themeUserOverride, businessSlug]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -412,8 +420,12 @@ export default function ChatWidget({
     api.getWelcome(businessSlug, activeLang).then((info) => {
       setWelcomeInfo(info);
       setMessages([{ role: "assistant", content: info.welcome_message }]);
+      // Business-default theme: kullan\u0131c\u0131 manuel override yapmad\u0131ysa uygula.
+      if (!themeUserOverride && (info.chat_theme === "dark" || info.chat_theme === "light")) {
+        setTheme(info.chat_theme);
+      }
     });
-  }, [businessSlug, activeLang]);
+  }, [businessSlug, activeLang, themeUserOverride]);
 
   // Auto-scroll
   useEffect(() => {
@@ -605,10 +617,22 @@ export default function ChatWidget({
   return (
     <div data-chat-theme={theme} dir={activeLang === "ar" ? "rtl" : "ltr"} lang={activeLang} className="flex flex-col h-full bg-cyber-bg text-cyber-ink">
       {/* ============ HEADER ============ */}
-      <header className="sticky top-0 z-20 bg-cyber-bg/85 backdrop-blur-cyber border-b border-cyber-rule">
+      <header
+        className="sticky top-0 z-20 bg-cyber-bg/85 backdrop-blur-cyber border-b border-cyber-rule"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
         <div className="max-w-3xl mx-auto px-3 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[14px] font-serif shrink-0">
-            {personaInitial}
+          <div className="w-8 h-8 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[14px] font-serif shrink-0 overflow-hidden">
+            {welcomeInfo?.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={welcomeInfo.logo_url}
+                alt={welcomeInfo.persona_name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              personaInitial
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-serif font-light text-[15px] leading-tight text-cyber-ink truncate">
@@ -690,7 +714,10 @@ export default function ChatWidget({
 
             {/* Theme toggle */}
             <button
-              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              onClick={() => {
+                setThemeUserOverride(true);
+                setTheme((t) => (t === "dark" ? "light" : "dark"));
+              }}
               title={theme === "dark" ? "Light mode" : "Dark mode"}
               aria-label="Toggle theme"
               className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full border border-cyber-rule text-cyber-ink/70 hover:text-cyber-emerald hover:border-cyber-emerald/40 transition-all duration-500 ease-cyber"
@@ -769,9 +796,18 @@ export default function ChatWidget({
         {/* Empty state */}
         {isEmptyState ? (
           <div className="min-h-full flex items-center justify-center px-4 py-12">
-            <div className="w-full max-w-2xl text-center">
-              <div className="mx-auto w-16 h-16 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[26px] font-serif mb-6">
-                {personaInitial}
+            <div className="w-full max-w-2xl text-center flex flex-col items-center">
+              <div className="w-20 h-20 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[28px] font-serif mb-6 overflow-hidden">
+                {welcomeInfo?.logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={welcomeInfo.logo_url}
+                    alt={welcomeInfo.persona_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  personaInitial
+                )}
               </div>
               <h1 className="font-serif font-light text-[28px] sm:text-[34px] leading-tight tracking-[-0.022em] text-cyber-ink mb-2">
                 {welcomeInfo?.persona_name ?? "Asistan"}
@@ -803,10 +839,19 @@ export default function ChatWidget({
             {messages.map((msg, i) => (
               <div key={i} className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[12px] font-serif border mt-0.5">
+                <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[12px] font-serif border mt-0.5 overflow-hidden">
                   {msg.role === "assistant" ? (
-                    <span className="w-full h-full rounded-full bg-cyber-emerald/15 border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center border">
-                      {personaInitial}
+                    <span className="w-full h-full rounded-full bg-cyber-emerald/15 border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center border overflow-hidden">
+                      {welcomeInfo?.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={welcomeInfo.logo_url}
+                          alt={welcomeInfo.persona_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        personaInitial
+                      )}
                     </span>
                   ) : (
                     <span className="w-full h-full rounded-full bg-cyber-glass border-cyber-rule text-cyber-ink/70 flex items-center justify-center border">
@@ -913,8 +958,17 @@ export default function ChatWidget({
 
             {loading && (
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 shrink-0 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center text-[12px] font-serif mt-0.5">
-                  {personaInitial}
+                <div className="w-8 h-8 shrink-0 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center text-[12px] font-serif mt-0.5 overflow-hidden">
+                  {welcomeInfo?.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={welcomeInfo.logo_url}
+                      alt={welcomeInfo.persona_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    personaInitial
+                  )}
                 </div>
                 <div className="flex-1 pt-1">
                   <p className="cyber-label text-[9px] mb-1.5 text-cyber-ink/40">
@@ -953,7 +1007,10 @@ export default function ChatWidget({
       )}
 
       {/* ============ INPUT BAR ============ */}
-      <div className="border-t border-cyber-rule bg-cyber-bg/85 backdrop-blur-cyber">
+      <div
+        className="border-t border-cyber-rule bg-cyber-bg/85 backdrop-blur-cyber"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           {imagePreview && (
             <div className="flex items-center gap-2 mb-2.5">
@@ -1035,7 +1092,7 @@ export default function ChatWidget({
               placeholder={T[activeLang].sendMsg}
               rows={1}
               disabled={loading || appointmentCreated}
-              className="flex-1 resize-none bg-transparent border-0 outline-none px-1 py-2 text-[14px] leading-relaxed text-cyber-ink placeholder-cyber-ink/35 font-light max-h-[200px]"
+              className="flex-1 resize-none bg-transparent border-0 outline-none px-1 py-2 text-[16px] sm:text-[14px] leading-relaxed text-cyber-ink placeholder-cyber-ink/35 font-light max-h-[200px]"
             />
 
             <button

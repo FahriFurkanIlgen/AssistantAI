@@ -28,6 +28,8 @@ class UpdateBusinessRequest(BaseModel):
     tts_voice: Optional[str] = None
     default_appointment_duration: Optional[int] = None
     instagram_handle: Optional[str] = None
+    logo_url: Optional[str] = None
+    chat_theme: Optional[str] = None
     services: Optional[List[ServiceItem]] = None
     working_schedule: Optional[WorkingSchedule] = None
     whatsapp: Optional[WhatsAppConfig] = None
@@ -57,6 +59,8 @@ async def get_profile(current_business: Business = Depends(get_current_user)):
         "working_schedule": current_business.working_schedule.model_dump(),
         "default_appointment_duration": current_business.default_appointment_duration,
         "instagram_handle": current_business.instagram_handle,
+        "logo_url": current_business.logo_url,
+        "chat_theme": current_business.chat_theme or "light",
         "google_connected": current_business.google_refresh_token is not None,
     }
 
@@ -73,6 +77,10 @@ async def update_profile(
         if v not in {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}:
             v = "nova"
         update_data["tts_voice"] = v
+    # Validate chat_theme if provided
+    if "chat_theme" in update_data:
+        t = (update_data["chat_theme"] or "light").lower()
+        update_data["chat_theme"] = "dark" if t == "dark" else "light"
     # WhatsApp: merge so we don't wipe the stored access_token / verify_token
     # when the frontend only re-sends the visible fields (we mask secrets on GET).
     if "whatsapp" in update_data:
@@ -107,4 +115,6 @@ async def get_public_profile(slug: str):
         "ai_persona_name": business.ai_persona_name,
         "working_schedule": business.working_schedule.model_dump() if business.working_schedule else None,
         "instagram_handle": business.instagram_handle,
+        "logo_url": business.logo_url,
+        "chat_theme": business.chat_theme or "light",
     }

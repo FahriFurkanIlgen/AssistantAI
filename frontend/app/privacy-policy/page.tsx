@@ -242,6 +242,15 @@ export default function PrivacyPolicyPage() {
                   privacy@assistantai.app
                 </a>
               </p>
+              <p>
+                Telefon:{" "}
+                <a
+                  href="tel:+905454999667"
+                  className="text-relate-signal underline underline-offset-2 hover:opacity-80 transition-opacity num-mono"
+                >
+                  +90 545 499 96 67
+                </a>
+              </p>
             </address>
           </section>
 

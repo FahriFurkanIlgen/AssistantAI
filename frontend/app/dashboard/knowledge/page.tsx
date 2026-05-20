@@ -192,9 +192,9 @@ export default function KnowledgePage() {
   };
 
   return (
-    <div className="p-8 max-w-[960px]">
+    <div className="p-4 sm:p-6 md:p-8 max-w-[960px]">
       <div className="mb-8">
-        <h2 className="font-display font-semibold text-[28px] text-relate-ink tracking-tight">
+        <h2 className="font-display font-semibold text-[20px] sm:text-[28px] text-relate-ink tracking-tight">
           Bilgi Bankası
         </h2>
         <p className="text-[15px] text-relate-graphite mt-1">

@@ -535,9 +535,18 @@ export default function HomePage() {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            {["Gizlilik", "Şartlar", "Durum", "İletişim"].map((l) => (
-              <a key={l} href="#" className="cyber-label text-[10px] hover:text-cyber-emerald transition-colors duration-500 ease-cyber">
-                {l}
+            {[
+              { label: "Gizlilik", href: "/privacy-policy" },
+              { label: "Şartlar", href: "/terms" },
+              { label: "Durum", href: "/status" },
+              { label: "İletişim", href: "/contact" },
+            ].map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                className="cyber-label text-[10px] hover:text-cyber-emerald transition-colors duration-500 ease-cyber"
+              >
+                {l.label}
               </a>
             ))}
           </div>

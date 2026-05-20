@@ -104,23 +104,23 @@ export default function DashboardPage() {
     : null;
 
   return (
-    <div className="p-8 max-w-[960px]">
-      <div className="mb-8">
-        <h2 className="font-display font-semibold text-[28px] text-relate-ink tracking-tight">
+    <div className="p-4 sm:p-6 md:p-8 max-w-[960px]">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="font-display font-semibold text-[20px] sm:text-[28px] text-relate-ink tracking-tight break-words">
           {profile?.name ?? "Dashboard"}
         </h2>
-        <p className="text-[15px] text-relate-graphite mt-1">
+        <p className="text-[13px] sm:text-[15px] text-relate-graphite mt-1">
           İşletmenizin özet görünümü
         </p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="card">
           <p className="text-[10px] text-relate-fog uppercase tracking-[0.13px]">
             Bugün
           </p>
-          <p className="num-mono text-[32px] text-relate-graphite mt-1">
+          <p className="num-mono text-[24px] sm:text-[32px] text-relate-graphite mt-1">
             {todayCount}
           </p>
           <p className="text-[11px] text-relate-ash mt-1">randevu</p>
@@ -129,7 +129,7 @@ export default function DashboardPage() {
           <p className="text-[10px] text-relate-fog uppercase tracking-[0.13px]">
             Bu Ay
           </p>
-          <p className="num-mono text-[32px] text-relate-signal mt-1">
+          <p className="num-mono text-[24px] sm:text-[32px] text-relate-signal mt-1">
             {stats?.this_month ?? "—"}
           </p>
           {monthChange !== null && (
@@ -144,7 +144,7 @@ export default function DashboardPage() {
           <p className="text-[10px] text-relate-fog uppercase tracking-[0.13px]">
             7 Gün
           </p>
-          <p className="num-mono text-[32px] text-relate-graphite mt-1">
+          <p className="num-mono text-[24px] sm:text-[32px] text-relate-graphite mt-1">
             {stats?.upcoming_7_days ?? "—"}
           </p>
           <p className="text-[11px] text-relate-ash mt-1">yaklaşan</p>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             İptal Oranı
           </p>
           <p
-            className={`num-mono text-[32px] mt-1 ${(stats?.cancel_rate_percent ?? 0) > 20 ? "text-relate-coral" : "text-relate-graphite"}`}
+            className={`num-mono text-[24px] sm:text-[32px] mt-1 ${(stats?.cancel_rate_percent ?? 0) > 20 ? "text-relate-coral" : "text-relate-graphite"}`}
           >
             {stats?.cancel_rate_percent ?? "—"}
             {stats ? "%" : ""}

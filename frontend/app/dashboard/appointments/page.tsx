@@ -212,7 +212,7 @@ export default function AppointmentsPage() {
       : appointments.filter((a) => a.status === filter);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Randevular</h2>

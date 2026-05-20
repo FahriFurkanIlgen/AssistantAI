@@ -89,6 +89,14 @@ class Business(Document):
     # Social media
     instagram_handle: Optional[str] = None  # e.g. "blackinktattoo" (without @)
 
+    # Brand logo (data URL veya https URL). Chat ekranındaki avatar
+    # dairesinde gösterilir. Boşsa persona harf/emoji fallback'i kullanılır.
+    logo_url: Optional[str] = None
+
+    # Chat ekranı varsayılan teması. "light" (default) veya "dark".
+    # Kullanıcı widget içindeki toggle ile o oturum için override edebilir.
+    chat_theme: str = "light"
+
     # Google Calendar
     google_calendar_id: Optional[str] = None
     google_refresh_token: Optional[str] = None
