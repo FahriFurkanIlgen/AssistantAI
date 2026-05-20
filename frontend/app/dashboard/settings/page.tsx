@@ -32,6 +32,29 @@ export default function SettingsPage() {
   const [waTestTo, setWaTestTo] = useState("");
   const [waSaving, setWaSaving] = useState(false);
   const [waTesting, setWaTesting] = useState(false);
+  const [igStatus, setIgStatus] = useState<{
+    enabled: boolean;
+    ig_user_id?: string | null;
+    page_id?: string | null;
+    ig_username?: string | null;
+    access_token_preview?: string | null;
+    verify_token_set?: boolean;
+    app_secret_set?: boolean;
+    webhook_path?: string;
+  } | null>(null);
+  const [igForm, setIgForm] = useState({
+    enabled: false,
+    ig_user_id: "",
+    page_id: "",
+    ig_username: "",
+    access_token: "", // empty = keep existing
+    verify_token: "", // empty = keep existing
+    app_secret: "",   // empty = keep existing
+  });
+  const [igTestTo, setIgTestTo] = useState("");
+  const [igSaving, setIgSaving] = useState(false);
+  const [igTesting, setIgTesting] = useState(false);
+  const [igRefreshing, setIgRefreshing] = useState(false);
   const [form, setForm] = useState({
     ai_persona_name: "",
     ai_welcome_message_tr: "",
@@ -85,6 +108,21 @@ export default function SettingsPage() {
           display_phone: s.display_phone || "",
           access_token: "",
           verify_token: "",
+        });
+      })
+      .catch(() => {});
+    api
+      .getInstagramStatus()
+      .then((s) => {
+        setIgStatus(s);
+        setIgForm({
+          enabled: !!s.enabled,
+          ig_user_id: s.ig_user_id || "",
+          page_id: s.page_id || "",
+          ig_username: s.ig_username || "",
+          access_token: "",
+          verify_token: "",
+          app_secret: "",
         });
       })
       .catch(() => {});
@@ -171,6 +209,65 @@ export default function SettingsPage() {
       toast.error(e?.response?.data?.detail || "Test mesajı gönderilemedi");
     } finally {
       setWaTesting(false);
+    }
+  };
+
+  const saveInstagram = async () => {
+    setIgSaving(true);
+    try {
+      const payload: Record<string, unknown> = {
+        instagram: {
+          enabled: igForm.enabled,
+          ig_user_id: igForm.ig_user_id || null,
+          ig_username: igForm.ig_username || null,
+          // Empty string = backend keeps stored secret.
+          access_token: igForm.access_token,
+          verify_token: igForm.verify_token,
+          app_secret: igForm.app_secret,
+        },
+      };
+      await api.updateProfile(payload);
+      toast.success("Instagram ayarları kaydedildi ✅");
+      const fresh = await api.getInstagramStatus();
+      setIgStatus(fresh);
+      setIgForm((f) => ({
+        ...f,
+        access_token: "",
+        verify_token: "",
+        app_secret: "",
+      }));
+    } catch {
+      toast.error("Instagram ayarları kaydedilemedi");
+    } finally {
+      setIgSaving(false);
+    }
+  };
+
+  const sendInstagramTest = async () => {
+    if (!igTestTo.trim()) {
+      toast.error("Hedef IGSID (Instagram-scoped user ID) girin");
+      return;
+    }
+    setIgTesting(true);
+    try {
+      await api.sendInstagramTest(igTestTo.trim());
+      toast.success("Test DM gönderildi ✉️");
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Test DM gönderilemedi");
+    } finally {
+      setIgTesting(false);
+    }
+  };
+
+  const refreshInstagramMedia = async () => {
+    setIgRefreshing(true);
+    try {
+      const res = await api.refreshInstagramMedia();
+      toast.success(`Graph API ile ${res?.count ?? 0} medya çekildi ✅`);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || "Medya çekilemedi");
+    } finally {
+      setIgRefreshing(false);
     }
   };
 
@@ -354,6 +451,190 @@ export default function SettingsPage() {
               atmış olması gerekir (Meta&apos;nın customer-service-window
               kuralı). Geliştirme için kendi telefonunuzdan WABA numaranıza
               önce bir &quot;merhaba&quot; gönderin.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Instagram Graph API + DM */}
+      <div className="card mb-6 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              📸 Instagram Köprüsü
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Meta&apos;nın yeni <strong>Instagram API with Instagram Login</strong>
+              {" "}akışı — Facebook Page gerekmez. Portfolyo otomatik çekilir,
+              gelen DM&apos;lere asistanınız cevap verir.
+            </p>
+          </div>
+          <label className="inline-flex items-center gap-2 cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              checked={igForm.enabled}
+              onChange={(e) =>
+                setIgForm({ ...igForm, enabled: e.target.checked })
+              }
+              className="w-4 h-4"
+            />
+            <span className="text-sm text-gray-700">Etkin</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Instagram User Access Token{" "}
+              {igStatus?.access_token_preview && (
+                <span className="text-gray-400 font-normal">
+                  (kayıtlı: {igStatus.access_token_preview})
+                </span>
+              )}
+            </label>
+            <input
+              type="password"
+              value={igForm.access_token}
+              onChange={(e) =>
+                setIgForm({ ...igForm, access_token: e.target.value })
+              }
+              placeholder="IGAA...kalıcı IG User token"
+              className="input-field"
+              autoComplete="new-password"
+            />
+            <p className="text-[11px] text-gray-500 mt-1">
+              Meta App → Instagram → API setup → Generate Token. Token
+              kaydedildiğinde <code>ig_user_id</code> ve kullanıcı adı otomatik
+              doldurulur.
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Instagram Kullanıcı Adı
+            </label>
+            <input
+              value={igForm.ig_username}
+              onChange={(e) =>
+                setIgForm({ ...igForm, ig_username: e.target.value })
+              }
+              placeholder="nimbus_ink (otomatik doldurulur)"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Instagram Business Account ID
+              <span className="text-gray-400 font-normal">
+                {" "}(token kaydedilince otomatik)
+              </span>
+            </label>
+            <input
+              value={igForm.ig_user_id}
+              onChange={(e) =>
+                setIgForm({ ...igForm, ig_user_id: e.target.value })
+              }
+              placeholder="17841400000000000"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Verify Token{" "}
+              {igStatus?.verify_token_set && (
+                <span className="text-gray-400 font-normal">(kayıtlı)</span>
+              )}
+            </label>
+            <input
+              type="password"
+              value={igForm.verify_token}
+              onChange={(e) =>
+                setIgForm({ ...igForm, verify_token: e.target.value })
+              }
+              placeholder="kendi belirlediğiniz rastgele string"
+              className="input-field"
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              App Secret{" "}
+              {igStatus?.app_secret_set && (
+                <span className="text-gray-400 font-normal">(kayıtlı)</span>
+              )}
+            </label>
+            <input
+              type="password"
+              value={igForm.app_secret}
+              onChange={(e) =>
+                setIgForm({ ...igForm, app_secret: e.target.value })
+              }
+              placeholder="X-Hub-Signature-256 doğrulaması için (opsiyonel)"
+              className="input-field"
+              autoComplete="new-password"
+            />
+          </div>
+        </div>
+
+        {igStatus?.webhook_path && (
+          <div className="rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-xs text-gray-600">
+            <p className="font-medium text-gray-700 mb-1">
+              Meta&apos;ya gireceğiniz Webhook URL
+            </p>
+            <code className="font-mono text-[11px] break-all">
+              {typeof window !== "undefined" ? window.location.origin : ""}
+              {igStatus.webhook_path}
+            </code>
+            <p className="mt-2 text-[11px] text-gray-500">
+              Meta App → Instagram → Webhooks ekranında bu URL&apos;yi ve
+              yukarıdaki <strong>Verify Token</strong>&apos;ı girin, sonra{" "}
+              <code>messages</code> ve <code>messaging_postbacks</code>{" "}
+              alanlarına abone olun. Önce hesabınız <strong>Professional</strong>{" "}
+              (Business/Creator) olmalı.
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={saveInstagram}
+            disabled={igSaving}
+            className="btn-primary"
+          >
+            {igSaving ? "Kaydediliyor…" : "Instagram Ayarlarını Kaydet"}
+          </button>
+          {igStatus?.enabled && (
+            <button
+              onClick={refreshInstagramMedia}
+              disabled={igRefreshing}
+              className="btn-secondary"
+            >
+              {igRefreshing ? "Çekiliyor…" : "Portfolyoyu Test Et"}
+            </button>
+          )}
+        </div>
+
+        {igStatus?.enabled && (
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-xs font-medium text-gray-700 mb-2">Test DM</p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                value={igTestTo}
+                onChange={(e) => setIgTestTo(e.target.value)}
+                placeholder="IGSID (Instagram-scoped user ID)"
+                className="input-field flex-1 min-w-[180px]"
+              />
+              <button
+                onClick={sendInstagramTest}
+                disabled={igTesting}
+                className="btn-secondary"
+              >
+                {igTesting ? "Gönderiliyor…" : "Test DM gönder"}
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1">
+              Not: Instagram&apos;da DM göndermek için karşı tarafın son 24 saat
+              içinde size DM atmış olması gerekir. IGSID&apos;yi webhook
+              loglarından alabilirsiniz.
             </p>
           </div>
         )}

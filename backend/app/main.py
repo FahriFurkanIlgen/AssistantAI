@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.core.database import init_db, close_db
-from app.routers import chat, auth, appointments, businesses, calendar, staff, admin, demo_requests, knowledge, customers, whatsapp
+from app.routers import chat, auth, appointments, businesses, calendar, staff, admin, demo_requests, knowledge, customers, whatsapp, instagram
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(demo_requests.router)
 app.include_router(knowledge.router)
 app.include_router(customers.router)
 app.include_router(whatsapp.router)
+app.include_router(instagram.router)
 
 
 @app.get("/health")

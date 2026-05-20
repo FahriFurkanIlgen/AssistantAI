@@ -155,6 +155,27 @@ export const api = {
   sendWhatsAppTest: async (to: string, text?: string) =>
     (await axiosInstance.post("/api/whatsapp/test-send", { to, text })).data,
 
+  // Instagram Graph API + Messenger bridge
+  getInstagramStatus: async (): Promise<{
+    enabled: boolean;
+    ig_user_id?: string | null;
+    page_id?: string | null;
+    ig_username?: string | null;
+    access_token_preview?: string | null;
+    verify_token_set?: boolean;
+    app_secret_set?: boolean;
+    webhook_path?: string;
+  }> => (await axiosInstance.get("/api/instagram/status")).data,
+
+  sendInstagramTest: async (to: string, text?: string) =>
+    (await axiosInstance.post("/api/instagram/test-send", { to, text })).data,
+
+  refreshInstagramMedia: async () =>
+    (await axiosInstance.post("/api/instagram/refresh-media")).data,
+
+  getInstagramPortfolio: async (slug: string, limit = 12) =>
+    (await axiosInstance.get(`/api/instagram/${slug}/portfolio`, { params: { limit } })).data,
+
   // Staff
   getStaff: async () => (await axiosInstance.get("/api/staff/")).data,
 

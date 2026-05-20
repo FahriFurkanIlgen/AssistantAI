@@ -19,6 +19,7 @@ from app.models.conversation import Conversation, Message
 from app.services.ai_service import AIService
 from app.services.appointment_service import AppointmentService
 from app.services.vision_service import is_instagram_url, extract_og_image, fetch_instagram_portfolio
+from app.services import instagram_service
 from app.services import knowledge_service
 from app.services import customer_service
 
@@ -250,20 +251,43 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
 
 @router.get("/{business_slug}/portfolio")
 async def get_portfolio(business_slug: str):
-    """Return Instagram portfolio posts for the business."""
+    """Return Instagram portfolio posts for the business.
+
+    Öncelik: işletme Instagram Graph API ile yapılandırılmışsa
+    resmi medya endpoint'i kullanılır. Yoksa public scrape fallback.
+    """
     business = await Business.find_one(Business.slug == business_slug, Business.is_active == True)
     if not business:
         raise HTTPException(status_code=404, detail="İşletme bulunamadı")
 
-    if not business.instagram_handle:
-        return {"instagram_handle": None, "posts": [], "instagram_url": None}
+    cfg = business.instagram
+    handle = (cfg.ig_username if cfg and cfg.ig_username else business.instagram_handle) or None
+    if handle:
+        handle = handle.lstrip("@")
+    instagram_url = f"https://www.instagram.com/{handle}/" if handle else None
 
-    handle = business.instagram_handle.lstrip("@")
+    # 1) Graph API (resmi, güvenilir)
+    if cfg and cfg.enabled and cfg.access_token and cfg.ig_user_id:
+        try:
+            posts = await instagram_service.fetch_media(business, limit=12)
+            return {
+                "instagram_handle": handle,
+                "instagram_url": instagram_url,
+                "posts": posts,
+                "source": "graph_api",
+            }
+        except Exception:
+            pass  # fallback'e düş
+
+    # 2) Public scrape fallback
+    if not handle:
+        return {"instagram_handle": None, "posts": [], "instagram_url": None}
     posts = await fetch_instagram_portfolio(handle)
     return {
         "instagram_handle": handle,
-        "instagram_url": f"https://www.instagram.com/{handle}/",
+        "instagram_url": instagram_url,
         "posts": posts,
+        "source": "scrape",
     }
 
 

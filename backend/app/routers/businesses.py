@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
-from app.models.business import Business, WorkingHours, WorkingSchedule, ServiceItem, WhatsAppConfig
+from app.models.business import Business, WorkingHours, WorkingSchedule, ServiceItem, WhatsAppConfig, InstagramConfig
 from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/api/business", tags=["business"])
@@ -33,6 +33,7 @@ class UpdateBusinessRequest(BaseModel):
     services: Optional[List[ServiceItem]] = None
     working_schedule: Optional[WorkingSchedule] = None
     whatsapp: Optional[WhatsAppConfig] = None
+    instagram: Optional[InstagramConfig] = None
 
 
 @router.get("/profile")
@@ -94,6 +95,32 @@ async def update_profile(
                 continue
             merged[k] = v
         current_business.whatsapp = WhatsAppConfig(**merged)
+    # Instagram: aynı merge mantığı — boş access_token/verify_token/app_secret
+    # mevcut sırrı silmesin. Yeni access_token verildiyse ig_user_id'yi
+    # otomatik /me'den çekip doldur.
+    if "instagram" in update_data:
+        incoming = update_data.pop("instagram")
+        existing = current_business.instagram or InstagramConfig()
+        merged = existing.model_dump()
+        new_token: Optional[str] = None
+        for k, v in incoming.items():
+            if k in ("access_token", "verify_token", "app_secret") and (v == "" or v is None):
+                continue
+            if k == "access_token":
+                new_token = v
+            merged[k] = v
+        # Auto-discover ig_user_id / ig_username
+        if new_token:
+            try:
+                from app.services import instagram_service
+                ident = await instagram_service.fetch_identity(new_token)
+                if ident.get("id"):
+                    merged["ig_user_id"] = str(ident["id"])
+                if ident.get("username") and not merged.get("ig_username"):
+                    merged["ig_username"] = ident["username"]
+            except Exception:
+                pass
+        current_business.instagram = InstagramConfig(**merged)
     for key, value in update_data.items():
         setattr(current_business, key, value)
     current_business.updated_at = datetime.utcnow()

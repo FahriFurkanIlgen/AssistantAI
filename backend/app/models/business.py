@@ -46,6 +46,45 @@ class WhatsAppConfig(BaseModel):
     display_phone: Optional[str] = None
 
 
+class InstagramConfig(BaseModel):
+    """Per-business Instagram API (Instagram Login flow) configuration.
+
+    Meta'nın 2024+ yeni "Instagram API with Instagram Login" akışı kullanılır.
+    Facebook Page ve Page Access Token GEREKMEZ.
+
+    Setup adımları (işletme sahibi):
+      1. Instagram hesabı Professional (Business veya Creator) olmalı.
+      2. developers.facebook.com → Create App → use case:
+         "Manage messaging & content on Instagram" seç.
+      3. Permissions: `instagram_business_basic`,
+         `instagram_business_manage_messages`,
+         (opsiyonel) `instagram_business_manage_comments`,
+         `instagram_business_content_publish`.
+      4. App'in Instagram ayarlarından Instagram User Access Token üret
+         (kalıcı / long-lived) ve buraya yapıştır.
+      5. ig_user_id otomatik /me endpoint'inden çekilir (save sırasında).
+
+    Saklanan alanlar:
+      - ig_user_id   : Instagram Business Account ID (otomatik doldurulur).
+      - page_id      : (deprecated, eski Messenger akışı için; kullanılmıyor)
+      - access_token : Instagram User Access Token (kalıcı).
+      - verify_token : Webhook el sıkışmasında kullanıcı tarafından seçilen string.
+      - app_secret   : (opsiyonel) X-Hub-Signature-256 HMAC doğrulaması için.
+      - ig_username  : İsim göstermek için (handle, "@" olmadan).
+
+    Webhook callback URL'i:
+      https://<your-domain>/api/instagram/webhook/<slug>
+    Subscription field'ları: `messages`, `messaging_postbacks`.
+    """
+    enabled: bool = False
+    ig_user_id: Optional[str] = None
+    page_id: Optional[str] = None
+    access_token: Optional[str] = None
+    verify_token: Optional[str] = None
+    app_secret: Optional[str] = None
+    ig_username: Optional[str] = None
+
+
 class Business(Document):
     name: str
     slug: str  # URL-friendly unique identifier
@@ -105,6 +144,9 @@ class Business(Document):
 
     # WhatsApp Cloud API bridge (per-business)
     whatsapp: WhatsAppConfig = WhatsAppConfig()
+
+    # Instagram Graph API + Messenger Platform bridge (per-business)
+    instagram: InstagramConfig = InstagramConfig()
 
     # Status
     is_active: bool = True
