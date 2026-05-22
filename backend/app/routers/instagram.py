@@ -20,9 +20,10 @@ from typing import Optional
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query, Request
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from pydantic import BaseModel
 
+from app.config import settings
 from app.core.auth import get_current_user
 from app.models.business import Business
 from app.services import instagram_service
@@ -179,3 +180,133 @@ async def get_status(current_business: Business = Depends(get_current_user)):
         "app_secret_set": bool(cfg.app_secret),
         "webhook_path": f"/api/instagram/webhook/{current_business.slug}",
     }
+
+
+# ── OAuth: tek tık "Instagram'a Bağlan" akışı ─────────────────────────────
+@router.post("/oauth/start")
+async def oauth_start(current_business: Business = Depends(get_current_user)):
+    """Frontend popup için Meta authorize URL'ini döndür."""
+    if not settings.INSTAGRAM_APP_ID or not settings.INSTAGRAM_APP_SECRET:
+        raise HTTPException(
+            status_code=503,
+            detail="Instagram OAuth sunucuda yapılandırılmamış (INSTAGRAM_APP_ID / SECRET)",
+        )
+    url = instagram_service.build_authorize_url(str(current_business.id))
+    return {"authorize_url": url}
+
+
+def _oauth_close_page(ok: bool, message: str, username: Optional[str] = None) -> HTMLResponse:
+    """Popup'ı kapatmadan önce parent window'a postMessage gönder."""
+    safe_msg = message.replace("\\", "\\\\").replace("'", "\\'")
+    safe_user = (username or "").replace("\\", "\\\\").replace("'", "\\'")
+    status = "Bağlandı ✅" if ok else "Bağlanamadı ✗"
+    body_color = "#0f1f3d" if ok else "#b91c1c"
+    return HTMLResponse(
+        f"""<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Instagram bağlantısı</title>
+  <style>
+    body {{
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #fcfcfc; color: {body_color};
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; padding: 24px; text-align: center;
+    }}
+    .box {{ max-width: 360px; }}
+    h1 {{ margin: 0 0 8px; font-size: 20px; letter-spacing: -0.022em; font-weight: 600; }}
+    p  {{ margin: 0; font-size: 13px; color: #475569; }}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>{status}</h1>
+    <p>{message}</p>
+  </div>
+  <script>
+    try {{
+      if (window.opener) {{
+        window.opener.postMessage({{
+          type: 'instagram_oauth_result',
+          ok: {str(ok).lower()},
+          message: '{safe_msg}',
+          username: '{safe_user}'
+        }}, '*');
+      }}
+    }} catch (e) {{}}
+    setTimeout(function() {{ window.close(); }}, 1500);
+  </script>
+</body>
+</html>"""
+    )
+
+
+@router.get("/oauth/callback")
+async def oauth_callback(
+    code: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
+    error: Optional[str] = Query(None),
+    error_description: Optional[str] = Query(None),
+):
+    """Meta'dan dönen authorization code'u işle, business'a kaydet."""
+    if error:
+        return _oauth_close_page(False, error_description or error)
+
+    if not code or not state:
+        return _oauth_close_page(False, "Eksik parametre (code/state)")
+
+    parsed = instagram_service.parse_oauth_state(state)
+    if not parsed:
+        return _oauth_close_page(False, "State token geçersiz veya süresi doldu")
+
+    business = await Business.get(parsed["bid"])
+    if not business:
+        return _oauth_close_page(False, "İşletme bulunamadı")
+
+    # 1) Short-lived token
+    try:
+        short = await instagram_service.exchange_code_for_token(code)
+    except httpx.HTTPStatusError as e:
+        logger.warning("IG oauth code exchange failed: %s", e.response.text[:300])
+        return _oauth_close_page(False, "Yetkilendirme kodu doğrulanamadı")
+    except Exception as e:
+        logger.exception("IG oauth code exchange error: %s", e)
+        return _oauth_close_page(False, "Sunucu hatası (code exchange)")
+
+    short_token = short.get("access_token")
+    if not short_token:
+        return _oauth_close_page(False, "Token alınamadı")
+
+    # 2) Long-lived token (~60 gün)
+    try:
+        longl = await instagram_service.exchange_long_lived(short_token)
+        access_token = longl.get("access_token") or short_token
+    except Exception as e:
+        logger.warning("IG long-lived exchange failed, kısa ömürlü kullanılacak: %s", e)
+        access_token = short_token
+
+    # 3) Identity
+    ident = await instagram_service.fetch_identity(access_token)
+
+    # 4) Business kaydı
+    cfg = business.instagram
+    cfg.enabled = True
+    cfg.access_token = access_token
+    cfg.ig_user_id = str(ident.get("id") or short.get("user_id") or cfg.ig_user_id or "")
+    cfg.ig_username = ident.get("username") or cfg.ig_username
+    business.instagram = cfg
+    await business.save()
+
+    # 5) Webhook'a subscribe (best-effort)
+    try:
+        await instagram_service.subscribe_app_to_messages(access_token)
+    except Exception as e:
+        logger.warning("subscribe_app_to_messages failed: %s", e)
+
+    return _oauth_close_page(
+        True,
+        f"@{cfg.ig_username or '—'} hesabı bağlandı",
+        username=cfg.ig_username,
+    )

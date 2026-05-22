@@ -27,13 +27,18 @@ Webhook payload (DM):
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import hmac
+import json
 import logging
+import secrets
+import time
 from typing import List, Optional
 
 import httpx
 
+from app.config import settings
 from app.models.business import Business
 from app.models.conversation import Conversation
 from app.services import customer_service, knowledge_service
@@ -310,3 +315,131 @@ async def handle_incoming(business: Business, payload: dict) -> None:
             logger.error("IG send failed: %s — %s", e, e.response.text)
         except Exception:
             logger.exception("IG send raised")
+
+
+# ── OAuth (Calendly-stili tek tık bağlantı) ────────────────────────────────
+# Akış:
+#   1. Frontend POST /api/instagram/oauth/start (JWT'li) → {authorize_url}
+#   2. Frontend popup açar; kullanıcı Meta'da Allow basar
+#   3. Meta GET /api/instagram/oauth/callback?code=&state= çağırır
+#   4. State doğrulanır → code → kısa ömürlü token → uzun ömürlü token
+#      → Business.instagram alanları doldurulur, subscribed_apps tetiklenir
+#   5. Callback HTML postMessage ile popup'ı kapatır, frontend yenilenir.
+
+_OAUTH_AUTHORIZE_URL = "https://www.instagram.com/oauth/authorize"
+_OAUTH_TOKEN_URL = "https://api.instagram.com/oauth/access_token"
+_LONG_LIVED_URL = f"{GRAPH_BASE.replace('/v21.0', '')}/access_token"
+_OAUTH_SCOPES = (
+    "instagram_business_basic,"
+    "instagram_business_manage_messages,"
+    "instagram_business_manage_comments,"
+    "instagram_business_content_publish"
+)
+_STATE_TTL_SEC = 600  # 10 dakika
+
+
+def _state_secret() -> bytes:
+    return (settings.SECRET_KEY or "change-me").encode("utf-8")
+
+
+def _b64url_encode(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+
+def _b64url_decode(s: str) -> bytes:
+    pad = "=" * (-len(s) % 4)
+    return base64.urlsafe_b64decode(s + pad)
+
+
+def build_oauth_state(business_id: str) -> str:
+    """HMAC-imzalı state token üret. Format: `<payload_b64>.<sig_b64>`."""
+    payload = {
+        "bid": business_id,
+        "nonce": secrets.token_urlsafe(12),
+        "exp": int(time.time()) + _STATE_TTL_SEC,
+    }
+    body = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode())
+    sig = hmac.new(_state_secret(), body.encode(), hashlib.sha256).digest()
+    return f"{body}.{_b64url_encode(sig)}"
+
+
+def parse_oauth_state(token: str) -> Optional[dict]:
+    """State token'ı doğrula → {bid, nonce, exp} ya da None."""
+    if not token or "." not in token:
+        return None
+    body, sig = token.split(".", 1)
+    expected = hmac.new(_state_secret(), body.encode(), hashlib.sha256).digest()
+    try:
+        provided = _b64url_decode(sig)
+    except Exception:
+        return None
+    if not hmac.compare_digest(expected, provided):
+        return None
+    try:
+        data = json.loads(_b64url_decode(body))
+    except Exception:
+        return None
+    if int(data.get("exp", 0)) < int(time.time()):
+        return None
+    return data
+
+
+def build_authorize_url(business_id: str) -> str:
+    """Meta IG OAuth authorize URL'i — frontend popup'ta açılır."""
+    if not settings.INSTAGRAM_APP_ID:
+        raise RuntimeError("INSTAGRAM_APP_ID yapılandırılmamış")
+    state = build_oauth_state(business_id)
+    params = httpx.QueryParams({
+        "client_id": settings.INSTAGRAM_APP_ID,
+        "redirect_uri": settings.INSTAGRAM_OAUTH_REDIRECT_URI,
+        "response_type": "code",
+        "scope": _OAUTH_SCOPES,
+        "state": state,
+    })
+    return f"{_OAUTH_AUTHORIZE_URL}?{params}"
+
+
+async def exchange_code_for_token(code: str) -> dict:
+    """Authorization code → kısa ömürlü access_token + user_id (~1 saat)."""
+    if not settings.INSTAGRAM_APP_ID or not settings.INSTAGRAM_APP_SECRET:
+        raise RuntimeError("INSTAGRAM_APP_ID/SECRET yapılandırılmamış")
+    data = {
+        "client_id": settings.INSTAGRAM_APP_ID,
+        "client_secret": settings.INSTAGRAM_APP_SECRET,
+        "grant_type": "authorization_code",
+        "redirect_uri": settings.INSTAGRAM_OAUTH_REDIRECT_URI,
+        "code": code,
+    }
+    async with httpx.AsyncClient(timeout=_SEND_TIMEOUT) as client:
+        resp = await client.post(_OAUTH_TOKEN_URL, data=data)
+        resp.raise_for_status()
+        return resp.json()  # {access_token, user_id, permissions}
+
+
+async def exchange_long_lived(short_token: str) -> dict:
+    """Kısa ömürlü token → uzun ömürlü (~60 gün) IG User Access Token."""
+    if not settings.INSTAGRAM_APP_SECRET:
+        raise RuntimeError("INSTAGRAM_APP_SECRET yapılandırılmamış")
+    params = {
+        "grant_type": "ig_exchange_token",
+        "client_secret": settings.INSTAGRAM_APP_SECRET,
+        "access_token": short_token,
+    }
+    async with httpx.AsyncClient(timeout=_SEND_TIMEOUT) as client:
+        resp = await client.get(_LONG_LIVED_URL, params=params)
+        resp.raise_for_status()
+        return resp.json()  # {access_token, token_type, expires_in}
+
+
+async def subscribe_app_to_messages(access_token: str) -> dict:
+    """IG kullanıcısını app'in `messages` webhook'una abone et."""
+    url = f"{GRAPH_BASE}/me/subscribed_apps"
+    params = {
+        "subscribed_fields": "messages,messaging_postbacks",
+        "access_token": access_token,
+    }
+    async with httpx.AsyncClient(timeout=_SEND_TIMEOUT) as client:
+        resp = await client.post(url, params=params)
+        # Hata olursa fırlat ama caller logla, OAuth akışını kırma.
+        resp.raise_for_status()
+        return resp.json()

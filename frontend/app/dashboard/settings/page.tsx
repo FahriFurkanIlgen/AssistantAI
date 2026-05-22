@@ -271,6 +271,63 @@ export default function SettingsPage() {
     }
   };
 
+  const [igConnecting, setIgConnecting] = useState(false);
+  const connectInstagramOAuth = async () => {
+    setIgConnecting(true);
+    try {
+      const { authorize_url } = await api.startInstagramOAuth();
+      const w = 600,
+        h = 720;
+      const y = window.top!.outerHeight / 2 + window.top!.screenY - h / 2;
+      const x = window.top!.outerWidth / 2 + window.top!.screenX - w / 2;
+      const popup = window.open(
+        authorize_url,
+        "ig_oauth",
+        `width=${w},height=${h},left=${x},top=${y}`,
+      );
+
+      const onMessage = async (ev: MessageEvent) => {
+        if (!ev?.data || ev.data.type !== "instagram_oauth_result") return;
+        window.removeEventListener("message", onMessage);
+        setIgConnecting(false);
+        if (ev.data.ok) {
+          toast.success(
+            `Instagram bağlandı: @${ev.data.username || ""} ✅`,
+          );
+          try {
+            const fresh = await api.getInstagramStatus();
+            setIgStatus(fresh);
+            setIgForm((f) => ({
+              ...f,
+              enabled: true,
+              ig_user_id: fresh.ig_user_id || f.ig_user_id,
+              ig_username: fresh.ig_username || f.ig_username,
+            }));
+          } catch {}
+        } else {
+          toast.error(ev.data.message || "Bağlantı başarısız");
+        }
+      };
+      window.addEventListener("message", onMessage);
+
+      // Popup kapanırsa state'i temizle (örn. kullanıcı vazgeçti)
+      const interval = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(interval);
+          setTimeout(() => {
+            window.removeEventListener("message", onMessage);
+            setIgConnecting(false);
+          }, 500);
+        }
+      }, 700);
+    } catch (e: any) {
+      setIgConnecting(false);
+      toast.error(
+        e?.response?.data?.detail || "OAuth başlatılamadı",
+      );
+    }
+  };
+
   if (!profile) {
     return <div className="p-8 text-gray-400">Yükleniyor...</div>;
   }
@@ -482,8 +539,38 @@ export default function SettingsPage() {
           </label>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
+        {/* Tek tık Calendly-stili bağlantı */}
+        <div className="rounded-md border border-relate-border bg-relate-wash p-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-sm font-medium text-relate-ink">
+                Tek tıkla bağlan
+              </p>
+              <p className="text-[11px] text-gray-500">
+                Instagram&apos;a gidip Allow tıklayın — token, kullanıcı ID
+                ve webhook subscription otomatik kurulur.
+              </p>
+            </div>
+            <button
+              onClick={connectInstagramOAuth}
+              disabled={igConnecting}
+              className="btn-primary text-sm"
+            >
+              {igConnecting
+                ? "Bağlanıyor…"
+                : igStatus?.ig_username
+                ? `Yeniden bağla (@${igStatus.ig_username})`
+                : "📸 Instagram'a Bağlan"}
+            </button>
+          </div>
+        </div>
+
+        <details className="text-xs">
+          <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+            Manuel kurulum (gelişmiş)
+          </summary>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
               Instagram User Access Token{" "}
               {igStatus?.access_token_preview && (
@@ -574,6 +661,7 @@ export default function SettingsPage() {
             />
           </div>
         </div>
+        </details>
 
         {igStatus?.webhook_path && (
           <div className="rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-xs text-gray-600">

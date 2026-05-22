@@ -42,6 +42,19 @@ class Settings(BaseSettings):
     # Admin
     ADMIN_SECRET_KEY: str = "change-me-admin-secret"
 
+    # Instagram OAuth (Meta App — tek tık "Instagram'a Bağlan" akışı için)
+    INSTAGRAM_APP_ID: str = ""
+    INSTAGRAM_APP_SECRET: str = ""
+    # Meta dashboard'da Valid OAuth Redirect URIs listesine birebir bu URL
+    # eklenmiş olmalı.
+    INSTAGRAM_OAUTH_REDIRECT_URI: str = (
+        "http://localhost:8000/api/instagram/oauth/callback"
+    )
+    # OAuth bittikten sonra kullanıcının yönlendirileceği frontend sayfası.
+    INSTAGRAM_OAUTH_FRONTEND_RETURN_URL: str = (
+        "http://localhost:3000/dashboard/settings"
+    )
+
     # CORS - JSON array veya virgulle ayrilmis string olarak verilebilir.
     # Ornek: ALLOWED_ORIGINS=https://foo.vercel.app,https://example.com
     # NoDecode -> pydantic-settings otomatik JSON parse etmesin, validator calissin

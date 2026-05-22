@@ -176,6 +176,9 @@ export const api = {
   getInstagramPortfolio: async (slug: string, limit = 12) =>
     (await axiosInstance.get(`/api/instagram/${slug}/portfolio`, { params: { limit } })).data,
 
+  startInstagramOAuth: async (): Promise<{ authorize_url: string }> =>
+    (await axiosInstance.post("/api/instagram/oauth/start")).data,
+
   // Staff
   getStaff: async () => (await axiosInstance.get("/api/staff/")).data,
 
