@@ -273,18 +273,33 @@ export default function SettingsPage() {
 
   const [igConnecting, setIgConnecting] = useState(false);
   const connectInstagramOAuth = async () => {
+    // ÖNEMLİ: popup'ı user-gesture içinde (await'ten ÖNCE) aç,
+    // yoksa tarayıcı popup blocker engelliyor.
+    const w = 600,
+      h = 720;
+    const y = window.top!.outerHeight / 2 + window.top!.screenY - h / 2;
+    const x = window.top!.outerWidth / 2 + window.top!.screenX - w / 2;
+    const popup = window.open(
+      "about:blank",
+      "ig_oauth",
+      `width=${w},height=${h},left=${x},top=${y}`,
+    );
+    if (!popup) {
+      toast.error(
+        "Tarayıcı popup'ı engelledi. Adres çubuğundaki popup ikonuna tıklayıp izin verin.",
+      );
+      return;
+    }
+    try {
+      popup.document.write(
+        "<p style='font-family:sans-serif;padding:24px'>Instagram'a yönlendiriliyor…</p>",
+      );
+    } catch {}
+
     setIgConnecting(true);
     try {
       const { authorize_url } = await api.startInstagramOAuth();
-      const w = 600,
-        h = 720;
-      const y = window.top!.outerHeight / 2 + window.top!.screenY - h / 2;
-      const x = window.top!.outerWidth / 2 + window.top!.screenX - w / 2;
-      const popup = window.open(
-        authorize_url,
-        "ig_oauth",
-        `width=${w},height=${h},left=${x},top=${y}`,
-      );
+      popup.location.href = authorize_url;
 
       const onMessage = async (ev: MessageEvent) => {
         if (!ev?.data || ev.data.type !== "instagram_oauth_result") return;
@@ -321,6 +336,7 @@ export default function SettingsPage() {
         }
       }, 700);
     } catch (e: any) {
+      try { popup?.close(); } catch {}
       setIgConnecting(false);
       toast.error(
         e?.response?.data?.detail || "OAuth başlatılamadı",
