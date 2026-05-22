@@ -195,52 +195,19 @@ async def oauth_start(current_business: Business = Depends(get_current_user)):
     return {"authorize_url": url}
 
 
-def _oauth_close_page(ok: bool, message: str, username: Optional[str] = None) -> HTMLResponse:
-    """Popup'ı kapatmadan önce parent window'a postMessage gönder."""
-    safe_msg = message.replace("\\", "\\\\").replace("'", "\\'")
-    safe_user = (username or "").replace("\\", "\\\\").replace("'", "\\'")
-    status = "Bağlandı ✅" if ok else "Bağlanamadı ✗"
-    body_color = "#0f1f3d" if ok else "#b91c1c"
-    return HTMLResponse(
-        f"""<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8" />
-  <title>Instagram bağlantısı</title>
-  <style>
-    body {{
-      margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: #fcfcfc; color: {body_color};
-      display: flex; align-items: center; justify-content: center;
-      height: 100vh; padding: 24px; text-align: center;
-    }}
-    .box {{ max-width: 360px; }}
-    h1 {{ margin: 0 0 8px; font-size: 20px; letter-spacing: -0.022em; font-weight: 600; }}
-    p  {{ margin: 0; font-size: 13px; color: #475569; }}
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>{status}</h1>
-    <p>{message}</p>
-  </div>
-  <script>
-    try {{
-      if (window.opener) {{
-        window.opener.postMessage({{
-          type: 'instagram_oauth_result',
-          ok: {str(ok).lower()},
-          message: '{safe_msg}',
-          username: '{safe_user}'
-        }}, '*');
-      }}
-    }} catch (e) {{}}
-    setTimeout(function() {{ window.close(); }}, 1500);
-  </script>
-</body>
-</html>"""
-    )
+def _oauth_redirect(ok: bool, message: str, username: Optional[str] = None) -> RedirectResponse:
+    """Callback sonrası kullanıcıyı frontend Settings sayfasına yönlendir."""
+    from urllib.parse import urlencode, urlparse, urlunparse, parse_qsl
+
+    base = settings.INSTAGRAM_OAUTH_FRONTEND_RETURN_URL
+    parsed = urlparse(base)
+    qs = dict(parse_qsl(parsed.query))
+    qs["ig"] = "connected" if ok else "error"
+    qs["msg"] = message
+    if username:
+        qs["u"] = username
+    new_url = urlunparse(parsed._replace(query=urlencode(qs)))
+    return RedirectResponse(url=new_url, status_code=302)
 
 
 @router.get("/oauth/callback")
@@ -252,32 +219,32 @@ async def oauth_callback(
 ):
     """Meta'dan dönen authorization code'u işle, business'a kaydet."""
     if error:
-        return _oauth_close_page(False, error_description or error)
+        return _oauth_redirect(False, error_description or error)
 
     if not code or not state:
-        return _oauth_close_page(False, "Eksik parametre (code/state)")
+        return _oauth_redirect(False, "Eksik parametre (code/state)")
 
     parsed = instagram_service.parse_oauth_state(state)
     if not parsed:
-        return _oauth_close_page(False, "State token geçersiz veya süresi doldu")
+        return _oauth_redirect(False, "State token geçersiz veya süresi doldu")
 
     business = await Business.get(parsed["bid"])
     if not business:
-        return _oauth_close_page(False, "İşletme bulunamadı")
+        return _oauth_redirect(False, "İşletme bulunamadı")
 
     # 1) Short-lived token
     try:
         short = await instagram_service.exchange_code_for_token(code)
     except httpx.HTTPStatusError as e:
         logger.warning("IG oauth code exchange failed: %s", e.response.text[:300])
-        return _oauth_close_page(False, "Yetkilendirme kodu doğrulanamadı")
+        return _oauth_redirect(False, "Yetkilendirme kodu doğrulanamadı")
     except Exception as e:
         logger.exception("IG oauth code exchange error: %s", e)
-        return _oauth_close_page(False, "Sunucu hatası (code exchange)")
+        return _oauth_redirect(False, "Sunucu hatası (code exchange)")
 
     short_token = short.get("access_token")
     if not short_token:
-        return _oauth_close_page(False, "Token alınamadı")
+        return _oauth_redirect(False, "Token alınamadı")
 
     # 2) Long-lived token (~60 gün)
     try:
@@ -305,7 +272,7 @@ async def oauth_callback(
     except Exception as e:
         logger.warning("subscribe_app_to_messages failed: %s", e)
 
-    return _oauth_close_page(
+    return _oauth_redirect(
         True,
         f"@{cfg.ig_username or '—'} hesabı bağlandı",
         username=cfg.ig_username,

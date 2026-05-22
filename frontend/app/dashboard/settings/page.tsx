@@ -273,76 +273,49 @@ export default function SettingsPage() {
 
   const [igConnecting, setIgConnecting] = useState(false);
   const connectInstagramOAuth = async () => {
-    // ÖNEMLİ: popup'ı user-gesture içinde (await'ten ÖNCE) aç,
-    // yoksa tarayıcı popup blocker engelliyor.
-    const w = 600,
-      h = 720;
-    const y = window.top!.outerHeight / 2 + window.top!.screenY - h / 2;
-    const x = window.top!.outerWidth / 2 + window.top!.screenX - w / 2;
-    const popup = window.open(
-      "about:blank",
-      "ig_oauth",
-      `width=${w},height=${h},left=${x},top=${y}`,
-    );
-    if (!popup) {
-      toast.error(
-        "Tarayıcı popup'ı engelledi. Adres çubuğundaki popup ikonuna tıklayıp izin verin.",
-      );
-      return;
-    }
-    try {
-      popup.document.write(
-        "<p style='font-family:sans-serif;padding:24px'>Instagram'a yönlendiriliyor…</p>",
-      );
-    } catch {}
-
     setIgConnecting(true);
     try {
       const { authorize_url } = await api.startInstagramOAuth();
-      popup.location.href = authorize_url;
-
-      const onMessage = async (ev: MessageEvent) => {
-        if (!ev?.data || ev.data.type !== "instagram_oauth_result") return;
-        window.removeEventListener("message", onMessage);
-        setIgConnecting(false);
-        if (ev.data.ok) {
-          toast.success(
-            `Instagram bağlandı: @${ev.data.username || ""} ✅`,
-          );
-          try {
-            const fresh = await api.getInstagramStatus();
-            setIgStatus(fresh);
-            setIgForm((f) => ({
-              ...f,
-              enabled: true,
-              ig_user_id: fresh.ig_user_id || f.ig_user_id,
-              ig_username: fresh.ig_username || f.ig_username,
-            }));
-          } catch {}
-        } else {
-          toast.error(ev.data.message || "Bağlantı başarısız");
-        }
-      };
-      window.addEventListener("message", onMessage);
-
-      // Popup kapanırsa state'i temizle (örn. kullanıcı vazgeçti)
-      const interval = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(interval);
-          setTimeout(() => {
-            window.removeEventListener("message", onMessage);
-            setIgConnecting(false);
-          }, 500);
-        }
-      }, 700);
+      // Aynı sekmede tam-sayfa redirect — popup blocker by-pass
+      window.location.href = authorize_url;
     } catch (e: any) {
-      try { popup?.close(); } catch {}
       setIgConnecting(false);
       toast.error(
         e?.response?.data?.detail || "OAuth başlatılamadı",
       );
     }
   };
+
+  // OAuth callback'ten dönüşte ?ig=connected&u=... veya ?ig=error&msg=... oku
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const ig = params.get("ig");
+    if (!ig) return;
+    const msg = params.get("msg") || "";
+    const u = params.get("u") || "";
+    if (ig === "connected") {
+      toast.success(`Instagram bağlandı: @${u} ✅`);
+      // Status'u yenile
+      api.getInstagramStatus().then((fresh) => {
+        setIgStatus(fresh);
+        setIgForm((f) => ({
+          ...f,
+          enabled: true,
+          ig_user_id: fresh.ig_user_id || f.ig_user_id,
+          ig_username: fresh.ig_username || f.ig_username,
+        }));
+      }).catch(() => {});
+    } else if (ig === "error") {
+      toast.error(msg || "Instagram bağlantısı başarısız");
+    }
+    // Query'yi temizle
+    const url = new URL(window.location.href);
+    url.searchParams.delete("ig");
+    url.searchParams.delete("msg");
+    url.searchParams.delete("u");
+    window.history.replaceState({}, "", url.toString());
+  }, []);
 
   if (!profile) {
     return <div className="p-8 text-gray-400">Yükleniyor...</div>;
