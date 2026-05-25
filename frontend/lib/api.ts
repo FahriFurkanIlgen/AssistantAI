@@ -25,8 +25,54 @@ axiosInstance.interceptors.response.use(
   },
 );
 
+// ── Restaurant types ─────────────────────────────────────────────────────────
+export interface RestaurantTable {
+  id: string;
+  number: string;
+  name?: string | null;
+  capacity: number;
+  section: string;
+  shape: string;
+  is_active: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface DiningShift {
+  id: string;
+  name: string;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  days: string[];
+}
+
+export interface Reservation {
+  id: string;
+  business_id: string;
+  table_id: string;
+  table_ids: string[];
+  table_number: string;
+  table_section: string;
+  combined_capacity?: number | null;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string | null;
+  party_size: number;
+  date: string;
+  shift_name: string;
+  shift_start: string;
+  shift_end: string;
+  special_requests?: string | null;
+  notes?: string | null;
+  status: "confirmed" | "seated" | "completed" | "cancelled" | "no_show";
+  channel: string;
+  created_at: string;
+}
+
 export const api = {
-  // Auth
   register: async (data: {
     name: string;
     slug: string;
@@ -375,6 +421,111 @@ export const api = {
 
   resetCustomerMemory: async (id: string) =>
     (await axiosInstance.delete(`/api/customers/${id}/memory`)).data,
+
+  // ── Restaurant: tables & shifts ─────────────────────────────────────────
+  getRestaurantConfig: async () =>
+    (await axiosInstance.get("/api/tables/restaurant-config")).data,
+
+  updateRestaurantConfig: async (data: {
+    enabled?: boolean;
+    reservation_duration?: number;
+    max_party_size?: number;
+    reservation_window_days?: number;
+  }) => (await axiosInstance.patch("/api/tables/restaurant-config", data)).data,
+
+  getTables: async () => (await axiosInstance.get("/api/tables")).data as RestaurantTable[],
+
+  createTable: async (data: Omit<RestaurantTable, "id">) =>
+    (await axiosInstance.post("/api/tables", data)).data as RestaurantTable,
+
+  updateTable: async (id: string, data: Omit<RestaurantTable, "id">) =>
+    (await axiosInstance.patch(`/api/tables/${id}`, data)).data as RestaurantTable,
+
+  deleteTable: async (id: string) =>
+    (await axiosInstance.delete(`/api/tables/${id}`)).data,
+
+  saveTableLayout: async (items: { id: string; x: number; y: number; width: number; height: number }[]) =>
+    (await axiosInstance.post("/api/tables/layout", items)).data,
+
+  getShifts: async () => (await axiosInstance.get("/api/tables/shifts")).data as DiningShift[],
+
+  createShift: async (data: Omit<DiningShift, "id">) =>
+    (await axiosInstance.post("/api/tables/shifts", data)).data as DiningShift,
+
+  updateShift: async (id: string, data: Omit<DiningShift, "id">) =>
+    (await axiosInstance.patch(`/api/tables/shifts/${id}`, data)).data as DiningShift,
+
+  deleteShift: async (id: string) =>
+    (await axiosInstance.delete(`/api/tables/shifts/${id}`)).data,
+
+  // ── Restaurant: reservations ─────────────────────────────────────────────
+  getReservations: async (params?: { date?: string; shift_name?: string; status?: string }) =>
+    (await axiosInstance.get("/api/reservations", { params })).data as Reservation[],
+
+  createReservation: async (data: {
+    table_id: string;
+    customer_name: string;
+    customer_phone: string;
+    customer_email?: string;
+    party_size: number;
+    date: string;
+    shift_name: string;
+    shift_start: string;
+    shift_end: string;
+    special_requests?: string;
+    notes?: string;
+  }) => (await axiosInstance.post("/api/reservations", data)).data as Reservation,
+
+  updateReservation: async (id: string, data: { status?: string; notes?: string; special_requests?: string; table_id?: string; table_number?: string; table_section?: string }) =>
+    (await axiosInstance.patch(`/api/reservations/${id}`, data)).data as Reservation,
+
+  deleteReservation: async (id: string) =>
+    (await axiosInstance.delete(`/api/reservations/${id}`)).data,
+
+  getReservationStats: async (date?: string) =>
+    (await axiosInstance.get("/api/reservations/stats/summary", { params: date ? { date } : undefined })).data,
+};
+
+// ── Public (unauthenticated) reservation API ─────────────────────────────────
+export const publicReservationApi = {
+  getConfig: async (slug: string) =>
+    (await axios.get(`${BASE_URL}/api/reservations/public/${slug}/config`)).data as {
+      business_name: string;
+      logo_url?: string | null;
+      phone?: string | null;
+      address?: string | null;
+      shifts: { id: string; name: string; start_time: string; end_time: string; days: string[] }[];
+      sections: string[];
+      max_party_size: number;
+      reservation_window_days: number;
+    },
+
+  getAvailability: async (slug: string, params: { date: string; shift_name: string; party_size: number; section?: string }) =>
+    (await axios.get(`${BASE_URL}/api/reservations/public/${slug}/availability`, { params })).data as {
+      shift_start: string;
+      shift_end: string;
+      available_tables: { id: string; number: string; capacity: number; section: string; shape: string }[];
+      combinations: {
+        tables: { id: string; number: string; capacity: number; section: string; shape: string }[];
+        combined_capacity: number;
+        table_ids: string[];
+        label: string;
+      }[];
+    },
+
+  createReservation: async (slug: string, data: {
+    table_id?: string;
+    table_ids?: string[];
+    customer_name: string;
+    customer_phone: string;
+    customer_email?: string;
+    party_size: number;
+    date: string;
+    shift_name: string;
+    shift_start: string;
+    shift_end: string;
+    special_requests?: string;
+  }) => (await axios.post(`${BASE_URL}/api/reservations/public/${slug}`, data)).data as Reservation,
 };
 
 export const adminApi = {

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
 import { QRCodeSVG } from "qrcode.react";
+import { SelectField } from "@/components/ui/SelectField";
 
 const SECTORS = [
   { value: "tattoo", label: "🎨 Dövme Stüdyosu" },
@@ -969,21 +970,20 @@ export default function SettingsPage() {
               – sesli yanıtlar bu sesle okunur
             </span>
           </label>
-          <div className="flex flex-wrap items-center gap-2">
-            <select
+          <div className="flex flex-wrap items-end gap-2">
+            <SelectField
               value={form.tts_voice}
-              onChange={(e) =>
-                setForm({ ...form, tts_voice: e.target.value })
-              }
-              className="input-field max-w-xs"
-            >
-              <option value="nova">Nova (kadın, Türkçe öneri)</option>
-              <option value="shimmer">Shimmer (kadın, yumuşak)</option>
-              <option value="alloy">Alloy (nötr)</option>
-              <option value="echo">Echo (erkek, sakin)</option>
-              <option value="fable">Fable (erkek, anlatıcı)</option>
-              <option value="onyx">Onyx (erkek, derin)</option>
-            </select>
+              options={[
+                { value: "nova", label: "Nova (kadın, Türkçe öneri)" },
+                { value: "shimmer", label: "Shimmer (kadın, yumuşak)" },
+                { value: "alloy", label: "Alloy (nötr)" },
+                { value: "echo", label: "Echo (erkek, sakin)" },
+                { value: "fable", label: "Fable (erkek, anlatıcı)" },
+                { value: "onyx", label: "Onyx (erkek, derin)" },
+              ]}
+              onChange={(v) => setForm({ ...form, tts_voice: v })}
+              className="max-w-xs"
+            />
             <button
               type="button"
               onClick={async () => {

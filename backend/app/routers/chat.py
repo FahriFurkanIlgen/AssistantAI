@@ -18,6 +18,7 @@ from app.models.business import Business
 from app.models.conversation import Conversation, Message
 from app.services.ai_service import AIService
 from app.services.appointment_service import AppointmentService
+from app.services.reservation_service import ReservationService
 from app.services.vision_service import is_instagram_url, extract_og_image, fetch_instagram_portfolio
 from app.services import instagram_service
 from app.services import knowledge_service
@@ -76,7 +77,10 @@ async def chat(business_slug: str, request: ChatRequest):
         await conversation.insert()
 
     # Build services
-    appt_service = AppointmentService(business)
+    if business.sector == "restaurant":
+        svc = ReservationService(business)
+    else:
+        svc = AppointmentService(business)
 
     async def tool_executor(fn_name: str, fn_args: dict, conv):
         if fn_name == "search_knowledge_base":
@@ -86,7 +90,7 @@ async def chat(business_slug: str, request: ChatRequest):
                 top_k=fn_args.get("top_k", 4),
             )
             return {"results": results}
-        return await appt_service.execute_tool(fn_name, fn_args, conv)
+        return await svc.execute_tool(fn_name, fn_args, conv)
 
     # Pre-retrieval hook (called once per user turn by AIService); also logs
     # questions the KB could not confidently answer so the owner can fill gaps.

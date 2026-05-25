@@ -4,6 +4,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import { LogoLockup } from "@/components/brand/Logo";
+import { SelectField } from "@/components/ui/SelectField";
 
 const SECTORS = [
   { value: "tattoo", label: "🎨 Dövme Stüdyosu" },
@@ -119,23 +120,12 @@ export default function RequestDemoPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-[13px] font-medium text-relate-ink mb-1.5">
-                  Sektör <span className="text-relate-signal">*</span>
-                </label>
-                <select
-                  name="sector"
-                  value={form.sector}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  {SECTORS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SelectField
+                label="Sektör *"
+                value={form.sector}
+                options={SECTORS.map((s) => ({ value: s.value, label: s.label }))}
+                onChange={(v) => setForm((f) => ({ ...f, sector: v }))}
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

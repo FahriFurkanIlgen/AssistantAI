@@ -15,6 +15,11 @@ const NAV = [
   { href: "/dashboard/settings", label: "Ayarlar" },
 ];
 
+const RESTAURANT_NAV = [
+  { href: "/dashboard/reservations", label: "Rezervasyonlar" },
+  { href: "/dashboard/tables", label: "Masa Yönetimi" },
+];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -24,6 +29,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [businessName, setBusinessName] = useState("");
   const [slug, setSlug] = useState("");
+  const [sector, setSector] = useState("");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -39,6 +45,12 @@ export default function DashboardLayout({
         setSlug(data.slug);
       })
       .catch(() => router.push("/login"));
+    api
+      .getProfile()
+      .then((data) => {
+        setSector(data.sector ?? "");
+      })
+      .catch(() => {});
   }, [router]);
 
   // Sayfa değişince drawer'ı kapat
@@ -66,7 +78,7 @@ export default function DashboardLayout({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {NAV.map((item) => (
+        {[...NAV, ...(sector === "restaurant" ? RESTAURANT_NAV : [])].map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -83,18 +95,28 @@ export default function DashboardLayout({
 
       {/* Chat link */}
       {slug && (
-        <div className="px-6 py-4 border-t border-relate-border">
+        <div className="px-6 py-4 border-t border-relate-border space-y-2">
           <p className="text-[11px] text-relate-graphite mb-1.5">
-            Müşteri linki
+            Müşteri linkleri
           </p>
           <a
             href={`/chat/${slug}`}
             target="_blank"
             rel="noreferrer"
-            className="text-[12px] text-relate-signal hover:underline break-all"
+            className="block text-[12px] text-relate-signal hover:underline break-all"
           >
             /chat/{slug}
           </a>
+          {sector === "restaurant" && (
+            <a
+              href={`/reservations/${slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-[12px] text-relate-signal hover:underline break-all"
+            >
+              /reservations/{slug}
+            </a>
+          )}
         </div>
       )}
 

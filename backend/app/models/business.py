@@ -1,3 +1,4 @@
+import uuid
 from beanie import Document
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict
@@ -85,6 +86,51 @@ class InstagramConfig(BaseModel):
     ig_username: Optional[str] = None
 
 
+# ── Restaurant Reservation Models ────────────────────────────────────────────
+
+class RestaurantTable(BaseModel):
+    """A single table in the restaurant floor plan."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    number: str              # e.g. "1", "A3"
+    name: Optional[str] = None  # optional friendly name e.g. "Pencere Kenarı"
+    capacity: int = 4
+    # section: iç | dış | vip | teras | bar
+    section: str = "iç"
+    # shape for floor plan rendering: square | round | rectangle
+    shape: str = "square"
+    is_active: bool = True
+    # Floor plan position (percentage of canvas width/height, 0–100)
+    x: float = 10.0
+    y: float = 10.0
+    width: float = 8.0   # % of canvas
+    height: float = 8.0  # % of canvas
+
+
+class DiningShift(BaseModel):
+    """A meal period during which reservations can be made."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str           # e.g. "Öğle", "Akşam"
+    start_time: str     # HH:MM
+    end_time: str       # HH:MM
+    is_active: bool = True
+    # Comma-separated day names or ["all"]
+    days: List[str] = Field(default_factory=lambda: [
+        "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+    ])
+
+
+class RestaurantConfig(BaseModel):
+    """Restaurant-specific configuration embedded in Business."""
+    enabled: bool = False
+    tables: List[RestaurantTable] = Field(default_factory=list)
+    shifts: List[DiningShift] = Field(default_factory=list)
+    # How long a reservation holds a table (minutes)
+    reservation_duration: int = 90
+    max_party_size: int = 20
+    # How many days ahead reservations can be made
+    reservation_window_days: int = 30
+
+
 class Business(Document):
     name: str
     slug: str  # URL-friendly unique identifier
@@ -147,6 +193,9 @@ class Business(Document):
 
     # Instagram Graph API + Messenger Platform bridge (per-business)
     instagram: InstagramConfig = InstagramConfig()
+
+    # Restaurant reservation system
+    restaurant: "RestaurantConfig" = Field(default_factory=lambda: RestaurantConfig())
 
     # Status
     is_active: bool = True

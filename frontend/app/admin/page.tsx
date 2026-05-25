@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { adminApi } from "@/lib/api";
+import { SelectField } from "@/components/ui/SelectField";
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface DemoRequest {
@@ -205,7 +206,7 @@ export default function AdminPage() {
             onClick={() => setTab(t)}
             className={`px-4 py-1.5 rounded-lg text-[14px] font-medium transition-colors ${
               tab === t
-                ? "bg-white text-relate-ink shadow-relate-sm"
+                ? "bg-relate-signal/15 text-relate-signal border border-relate-signal/30"
                 : "text-relate-graphite hover:text-relate-ink"
             }`}
           >
@@ -255,23 +256,18 @@ export default function AdminPage() {
                   </div>
 
                   <div className="flex flex-wrap items-end gap-3">
-                    <div>
-                      <label className="block text-[11px] text-relate-graphite mb-1">Durum</label>
-                      <select
-                        value={currentStatus}
-                        onChange={(e) =>
-                          setEditDemo((prev) => ({
-                            ...prev,
-                            [d.id]: { ...(prev[d.id] || {}), status: e.target.value },
-                          }))
-                        }
-                        className="input-field !py-1 !text-[13px] w-44"
-                      >
-                        {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                          <option key={v} value={v}>{l}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <SelectField
+                      label="Durum"
+                      value={currentStatus}
+                      options={Object.entries(STATUS_LABELS).map(([v, l]) => ({ value: v, label: l }))}
+                      onChange={(v) =>
+                        setEditDemo((prev) => ({
+                          ...prev,
+                          [d.id]: { ...(prev[d.id] || {}), status: v },
+                        }))
+                      }
+                      className="w-44"
+                    />
                     <div className="flex-1 min-w-[160px]">
                       <label className="block text-[11px] text-relate-graphite mb-1">Not</label>
                       <input
@@ -368,7 +364,7 @@ export default function AdminPage() {
       {/* ── New Business Modal ── */}
       {showNewBiz && (
         <div className="fixed inset-0 bg-relate-ink/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-feature !p-7 w-full max-w-[440px]">
+          <div className="card-modal !p-7 w-full max-w-[440px]">
             <h3 className="font-semibold text-[18px] text-relate-ink mb-5">Yeni İşletme Ekle</h3>
             <div className="space-y-3">
               {(["name", "slug", "email", "password", "phone", "city"] as const).map((field) => (
@@ -382,19 +378,18 @@ export default function AdminPage() {
                   />
                 </div>
               ))}
-              <div>
-                <label className="block text-[12px] font-medium text-relate-graphite mb-1">Sektör</label>
-                <select
-                  value={newBiz.sector}
-                  onChange={(e) => setNewBiz((p) => ({ ...p, sector: e.target.value }))}
-                  className="input-field !text-[13px]"
-                >
-                  <option value="tattoo">Dövme</option>
-                  <option value="doctor">Klinik</option>
-                  <option value="beauty">Güzellik</option>
-                  <option value="general">Diğer</option>
-                </select>
-              </div>
+              <SelectField
+                label="Sektör"
+                value={newBiz.sector}
+                options={[
+                  { value: "tattoo", label: "Dövme" },
+                  { value: "doctor", label: "Klinik" },
+                  { value: "beauty", label: "Güzellik" },
+                  { value: "restaurant", label: "Restoran" },
+                  { value: "general", label: "Diğer" },
+                ]}
+                onChange={(v) => setNewBiz((p) => ({ ...p, sector: v }))}
+              />
             </div>
             <div className="flex gap-2 mt-5">
               <button onClick={createBusiness} className="btn-primary flex-1">Oluştur</button>
@@ -407,7 +402,7 @@ export default function AdminPage() {
       {/* ── Edit Business Modal ── */}
       {editBiz && (
         <div className="fixed inset-0 bg-relate-ink/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-feature !p-7 w-full max-w-[440px]">
+          <div className="card-modal !p-7 w-full max-w-[440px]">
             <h3 className="font-semibold text-[18px] text-relate-ink mb-1">{editBiz.name}</h3>
             <p className="text-[13px] text-relate-graphite mb-5">Değiştirmek istediğiniz alanları doldurun.</p>
             <div className="space-y-3">

@@ -190,6 +190,14 @@
   }
   .card:hover { border-color: rgba(16, 185, 129, 0.25); }
 
+  /* ── Modal card — solid opaque dark ───────────────── */
+  .card-modal {
+    background-color: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
   /* ── Tinted section card ───────────────────────────── */
   .card-gray {
     background-color: rgba(255, 255, 255, 0.03);
@@ -372,7 +380,7 @@
     font-size: 12px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(235, 235, 235, 0.60);
+    color: var(--cyber-mute);
   }
 
   /* ── Cyber buttons ─────────────────────────────────── */

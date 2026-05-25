@@ -15,6 +15,7 @@ async def init_db(app):
     from app.models.staff_member import StaffMember
     from app.models.demo_request import DemoRequest
     from app.models.knowledge import KnowledgeDocument, KnowledgeGap
+    from app.models.reservation import Reservation
 
     await init_beanie(
         database=client[settings.MONGODB_DB_NAME],
@@ -28,6 +29,7 @@ async def init_db(app):
             DemoRequest,
             KnowledgeDocument,
             KnowledgeGap,
+            Reservation,
         ],
     )
 

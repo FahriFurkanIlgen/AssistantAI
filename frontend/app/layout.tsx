@@ -72,7 +72,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" className={`${inter.variable} ${newsreader.variable} ${spaceGrotesk.variable}`}>
-      <body className={`${inter.className} antialiased bg-cyber-bg text-cyber-ink`}>
+      <body className={`${inter.className} antialiased bg-cyber-bg text-cyber-ink`} suppressHydrationWarning>
         <QueryProvider>
           {children}
           <Toaster

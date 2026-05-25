@@ -162,6 +162,53 @@ SECTOR_PROMPTS = {
             "أولاً اطلب اسم العميل ورقم هاتفه، ثم اسأل عن الخدمة المطلوبة وتفضيلات التاريخ/الوقت."
         ),
     },
+    "restaurant": {
+        "tr": (
+            "Sen {business_name} restoranının yapay zeka rezervasyon asistanısın, adın {persona_name}. "
+            "Misafirleri sıcak ve profesyonel bir şekilde karşıla. "
+            "Görevin: misafirin tercih ettiği tarih, vardiya (öğle/akşam), kişi sayısını alarak "
+            "otomatik olarak uygun bir masa ayarlamak. "
+            "Önce misafirin adını ve telefon numarasını öğren, ardından tarih, vardiya ve kişi sayısını sor. "
+            "Müsaitlik kontrolü yap, masayı belirle ve rezervasyonu onayla. "
+            "Varsa özel istekleri (doğum günü, allerji, sürpriz hazırlığı vb.) sor."
+        ),
+        "en": (
+            "You are the AI reservation assistant of {business_name} restaurant, your name is {persona_name}. "
+            "Welcome guests warmly and professionally. "
+            "Your goal: get the guest's preferred date, dining shift (lunch/dinner), and party size, "
+            "then automatically assign the best available table. "
+            "First get the guest's name and phone number, then ask for date, shift and party size. "
+            "Check availability, assign a table and confirm the reservation. "
+            "Ask about any special requests (birthday, allergies, surprise setup, etc.)."
+        ),
+        "ru": (
+            "Ты — ИИ-ассистент по бронированию ресторана {business_name}, твоё имя {persona_name}. "
+            "Встречай гостей тепло и профессионально. "
+            "Цель: узнать желаемую дату, смену (обед/ужин) и количество гостей, "
+            "затем автоматически подобрать подходящий столик. "
+            "Сначала узнай имя и телефон гостя, затем дату, смену и количество человек. "
+            "Проверь доступность, определи столик и подтверди бронирование. "
+            "Уточни особые пожелания (день рождения, аллергии и т.д.)."
+        ),
+        "de": (
+            "Du bist die KI-Reservierungsassistentin des Restaurants {business_name}, dein Name ist {persona_name}. "
+            "Begrüße Gäste herzlich und professionell. "
+            "Deine Aufgabe: Wunschdatum, Schicht (Mittag/Abend) und Personenanzahl erfragen, "
+            "dann automatisch den besten verfügbaren Tisch zuweisen. "
+            "Frage zuerst nach Name und Telefonnummer, dann nach Datum, Schicht und Personenzahl. "
+            "Prüfe die Verfügbarkeit, weise einen Tisch zu und bestätige die Reservierung. "
+            "Frage nach besonderen Wünschen (Geburtstag, Allergien, Überraschung usw.)."
+        ),
+        "ar": (
+            "أنت مساعد الذكاء الاصطناعي للحجوزات في مطعم {business_name}، اسمك {persona_name}. "
+            "استقبل الضيوف بحفاوة واحترافية. "
+            "مهمتك: معرفة التاريخ المفضل، وجبة الطعام (غداء/عشاء) وعدد الأشخاص، "
+            "ثم تخصيص أفضل طاولة متاحة تلقائياً. "
+            "أولاً اطلب اسم الضيف ورقم هاتفه، ثم اسأل عن التاريخ والوجبة وعدد الأشخاص. "
+            "تحقق من التوفر، خصص طاولة وأكّد الحجز. "
+            "اسأل عن أي طلبات خاصة (عيد ميلاد، حساسية، مفاجأة وما إلى ذلك)."
+        ),
+    },
 }
 
 # ── Tool definitions (function calling) ─────────────────────────────────────
@@ -341,6 +388,87 @@ APPOINTMENT_TOOLS = [
                         "type": "string",
                         "description": "The customer's question rephrased as a concise search query.",
                     },
+                },
+                "required": ["query"],
+            },
+        },
+    },
+]
+
+# ── Reservation tools (restaurant sector) ───────────────────────────────────
+
+RESERVATION_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_shifts",
+            "description": "Get the list of available dining shifts (e.g. Öğle, Akşam) and restaurant reservation settings.",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "check_table_availability",
+            "description": (
+                "Check if a table is available for a given date, shift, and party size. "
+                "Returns the best-fit table if available."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "date": {"type": "string", "description": "Date in YYYY-MM-DD format"},
+                    "shift_name": {"type": "string", "description": "Shift name e.g. 'Öğle' or 'Akşam'"},
+                    "party_size": {"type": "integer", "description": "Number of guests"},
+                },
+                "required": ["date", "shift_name", "party_size"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_reservation",
+            "description": "Create a table reservation after collecting all required information.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "customer_name": {"type": "string", "description": "Full name of the guest"},
+                    "customer_phone": {"type": "string", "description": "Phone number of the guest"},
+                    "customer_email": {"type": "string", "description": "Email (optional)"},
+                    "party_size": {"type": "integer", "description": "Number of guests"},
+                    "date": {"type": "string", "description": "Date in YYYY-MM-DD format"},
+                    "shift_name": {"type": "string", "description": "Shift name e.g. 'Akşam'"},
+                    "special_requests": {"type": "string", "description": "Special requests (optional)"},
+                },
+                "required": ["customer_name", "customer_phone", "party_size", "date", "shift_name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "cancel_reservation",
+            "description": "Cancel an existing reservation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "reservation_id": {"type": "string", "description": "Reservation ID"},
+                    "customer_phone": {"type": "string", "description": "Guest phone for verification"},
+                },
+                "required": ["reservation_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge_base",
+            "description": "Search the restaurant's knowledge base for menu, policies, or other information.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"},
                 },
                 "required": ["query"],
             },
@@ -558,11 +686,12 @@ class AIService:
         messages.append({"role": "user", "content": user_content})
 
         # Agentic loop – keep calling until no more tool calls
+        tools = RESERVATION_TOOLS if self.business.sector == "restaurant" else APPOINTMENT_TOOLS
         while True:
             response = await client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=messages,
-                tools=APPOINTMENT_TOOLS,
+                tools=tools,
                 tool_choice="auto",
                 temperature=0.3,
             )
