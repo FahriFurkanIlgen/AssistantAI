@@ -622,13 +622,13 @@ export default function ChatWidget({
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="max-w-3xl mx-auto px-3 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[14px] font-serif shrink-0 overflow-hidden">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-cyber-emerald text-[14px] font-serif shrink-0 overflow-hidden ${welcomeInfo?.logo_url ? 'bg-white' : 'bg-cyber-emerald/15 border border-cyber-emerald/30'}`}>
             {welcomeInfo?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={welcomeInfo.logo_url}
                 alt={welcomeInfo.persona_name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain p-0.5"
               />
             ) : (
               personaInitial
@@ -797,13 +797,13 @@ export default function ChatWidget({
         {isEmptyState ? (
           <div className="min-h-full flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-2xl text-center flex flex-col items-center">
-              <div className="w-20 h-20 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 flex items-center justify-center text-cyber-emerald text-[28px] font-serif mb-6 overflow-hidden">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center text-cyber-emerald text-[28px] font-serif mb-6 overflow-hidden ${welcomeInfo?.logo_url ? 'bg-white' : 'bg-cyber-emerald/15 border border-cyber-emerald/30'}`}>
                 {welcomeInfo?.logo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={welcomeInfo.logo_url}
                     alt={welcomeInfo.persona_name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1.5"
                   />
                 ) : (
                   personaInitial
@@ -841,13 +841,13 @@ export default function ChatWidget({
                 {/* Avatar */}
                 <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[12px] font-serif border mt-0.5 overflow-hidden">
                   {msg.role === "assistant" ? (
-                    <span className="w-full h-full rounded-full bg-cyber-emerald/15 border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center border overflow-hidden">
+                    <span className={`w-full h-full rounded-full text-cyber-emerald flex items-center justify-center overflow-hidden ${welcomeInfo?.logo_url ? 'bg-white' : 'bg-cyber-emerald/15 border-cyber-emerald/30 border'}`}>
                       {welcomeInfo?.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={welcomeInfo.logo_url}
                           alt={welcomeInfo.persona_name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain p-0.5"
                         />
                       ) : (
                         personaInitial
@@ -958,13 +958,13 @@ export default function ChatWidget({
 
             {loading && (
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 shrink-0 rounded-full bg-cyber-emerald/15 border border-cyber-emerald/30 text-cyber-emerald flex items-center justify-center text-[12px] font-serif mt-0.5 overflow-hidden">
+                <div className={`w-8 h-8 shrink-0 rounded-full text-cyber-emerald flex items-center justify-center text-[12px] font-serif mt-0.5 overflow-hidden ${welcomeInfo?.logo_url ? 'bg-white' : 'bg-cyber-emerald/15 border border-cyber-emerald/30'}`}>
                   {welcomeInfo?.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={welcomeInfo.logo_url}
                       alt={welcomeInfo.persona_name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-0.5"
                     />
                   ) : (
                     personaInitial

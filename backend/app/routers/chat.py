@@ -237,12 +237,21 @@ async def get_welcome(business_slug: str, lang: str = "tr"):
         "ar": business.ai_welcome_message_ar,
     }
     message = welcome_by_lang.get(lang) or business.ai_welcome_message_tr
+
+    # Instagram ikonunu sadece Graph API entegrasyonu aktifse göster.
+    ig_cfg = business.instagram
+    ig_handle = (
+        (ig_cfg.ig_username or business.instagram_handle)
+        if (ig_cfg and ig_cfg.enabled and ig_cfg.access_token and ig_cfg.ig_user_id)
+        else None
+    )
+
     return {
         "business_name": business.name,
         "persona_name": business.ai_persona_name,
         "welcome_message": message,
         "sector": business.sector,
-        "instagram_handle": business.instagram_handle,
+        "instagram_handle": ig_handle,
         "logo_url": business.logo_url,
         "chat_theme": business.chat_theme or "light",
         "suggested_questions": list(business.suggested_questions or []),
